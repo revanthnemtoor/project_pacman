@@ -116,7 +116,7 @@ class PKGBUILDBuilder:
             # that would conflict between packages if installed to
             # the root. We only copy the FHS directories.
             lines.append('    local _stage="$startdir/stage"')
-            lines.append('    local _dest="$pkgdir/usr"')
+            lines.append('    local _dest="$pkgdir"')
             lines.append('    mkdir -p "$_dest"')
             lines.append("")
             lines.append("    local _dirs=(bin sbin lib lib64 include share etc var libexec)")

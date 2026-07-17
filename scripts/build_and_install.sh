@@ -49,28 +49,25 @@ PYTHONPATH="$PROJECT_DIR/converter/src:." python3 main.py $BUILD_ARGS
 echo ""
 
 # -------------------------------------------------------
-# Step 2: Find the package
+# Step 2: Update Repository
 # -------------------------------------------------------
 
-echo ">>> Step 2: Finding built package..."
+echo ">>> Step 2: Updating repository..."
+echo ""
 
-PKG_FILE=$(ls -t "$PROJECT_DIR/output/${FORMULA}-"*.pkg.tar.zst 2>/dev/null | head -1)
+cd "$PROJECT_DIR/builder/src"
+PYTHONPATH="$PROJECT_DIR/converter/src:." python3 main.py repo update
 
-if [ -z "$PKG_FILE" ]; then
-    echo "ERROR: No package found for $FORMULA in output/"
-    exit 1
-fi
-
-echo "  Found: $PKG_FILE"
 echo ""
 
 # -------------------------------------------------------
 # Step 3: Install
 # -------------------------------------------------------
 
-echo ">>> Step 3: Installing with pacman -U..."
+echo ">>> Step 3: Installing with pacman -Sy..."
 
-fakeroot "$PACMAN_BIN" --config "$PACMAN_CONF" -U --noconfirm "$PKG_FILE"
+# Sync and install the package from the local repo
+sudo "$PACMAN_BIN" --config "$PACMAN_CONF" -Sy --noconfirm "$FORMULA"
 
 echo ""
 

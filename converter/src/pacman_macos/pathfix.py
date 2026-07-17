@@ -124,11 +124,11 @@ def rewrite_binary(
 
                 # For lib/ references, use the install root's lib dir
                 if "/lib/" in ref or ref.endswith(".dylib"):
-                    new_ref = f"{install_root}/usr/lib/{lib_name}"
+                    new_ref = f"{install_root}/lib/{lib_name}"
                 elif "/bin/" in ref:
-                    new_ref = f"{install_root}/usr/bin/{lib_name}"
+                    new_ref = f"{install_root}/bin/{lib_name}"
                 else:
-                    new_ref = f"{install_root}/usr/lib/{lib_name}"
+                    new_ref = f"{install_root}/lib/{lib_name}"
 
                 break
 
@@ -158,7 +158,7 @@ def rewrite_binary(
                 for placeholder in HOMEBREW_PLACEHOLDERS:
                     if placeholder in id_ref:
                         lib_name = Path(id_ref).name
-                        new_id = f"{install_root}/usr/lib/{lib_name}"
+                        new_id = f"{install_root}/lib/{lib_name}"
 
                         subprocess.run(
                             [

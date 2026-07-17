@@ -1,0 +1,42 @@
+{
+    "name": "yyjson",
+    "version": "0.12.0",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "High performance JSON library written in ANSI C",
+    "homepage": "https://ibireme.github.io/yyjson/doc/doxygen/html/",
+    "license": [
+        "MIT"
+    ],
+    "architecture": "arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [
+        "cmake"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/yyjson/blobs/sha256:bc385fef24ac80239af24728461f03f80ce8107954a4e11149db0c5fbb64acf9",
+    "bottle_sha256": "bc385fef24ac80239af24728461f03f80ce8107954a4e11149db0c5fbb64acf9",
+    "source_url": "https://github.com/ibireme/yyjson/archive/refs/tags/0.12.0.tar.gz",
+    "source_sha256": "b16246f617b2a136c78d73e5e2647c6f1de1313e46678062985bdcf1f40bb75d",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/y/yyjson.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

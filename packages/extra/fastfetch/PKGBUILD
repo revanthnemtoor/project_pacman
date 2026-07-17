@@ -1,0 +1,41 @@
+pkgname=fastfetch
+pkgver=2.66.0
+pkgrel=1
+pkgdesc="Like neofetch, but much faster because written mostly in C"
+
+url="https://github.com/fastfetch-cli/fastfetch"
+arch=(
+    'arm64'
+)
+license=(
+    'MIT'
+)
+depends=(
+    'yyjson'
+)
+makedepends=(
+    'chafa'
+    'cmake'
+    'glib'
+    'imagemagick'
+    'lua'
+    'pkgconf'
+    'python'
+    'vulkan-loader'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

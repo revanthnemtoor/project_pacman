@@ -31,6 +31,7 @@ from resolver import DependencyResolver
 from database import PackageDatabase
 from makepkg import MakepkgBuilder
 from install import Installer
+from repo_manager import RepoManager
 
 
 class PackageBuilder:
@@ -202,6 +203,17 @@ def cmd_install(args):
     return 0
 
 
+def cmd_repo(args):
+    manager = RepoManager()
+    
+    if args.action == "update":
+        manager.update_repo()
+    elif args.action == "remove":
+        for pkg in args.packages:
+            manager.remove_package(pkg)
+            
+    return 0
+
 def main():
     parser = argparse.ArgumentParser(
         prog="builder",
@@ -253,6 +265,21 @@ def main():
         help="Package archives to install",
     )
     install_parser.set_defaults(func=cmd_install)
+
+    # -- repo --
+
+    repo_parser = subparsers.add_parser(
+        "repo",
+        help="Manage local repository database",
+    )
+    repo_sub = repo_parser.add_subparsers(dest="action", required=True)
+    
+    repo_update = repo_sub.add_parser("update", help="Update the repository with all built packages")
+    
+    repo_remove = repo_sub.add_parser("remove", help="Remove packages from the repository")
+    repo_remove.add_argument("packages", nargs="+", help="Packages to remove")
+    
+    repo_parser.set_defaults(func=cmd_repo)
 
     # -- parse --
 
