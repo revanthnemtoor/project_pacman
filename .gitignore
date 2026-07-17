@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# Logs
+logs/*
+!logs/.gitkeep
+
+# Cache
+cache/*
+!cache/.gitkeep
+
+# Staging
+staging/*
+!staging/.gitkeep
+
+# Output packages
+output/*
+!output/.gitkeep
+
+# Build artifacts
+build/
+dist/
+*.pkg.tar.*
