@@ -1,0 +1,45 @@
+{
+    "name": "yq",
+    "version": "4.53.3",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Process YAML, JSON, XML, CSV and properties documents from the CLI",
+    "homepage": "https://github.com/mikefarah/yq",
+    "license": [
+        "MIT"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [
+        "go",
+        "pandoc"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [
+        "python-yq"
+    ],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/yq/blobs/sha256:c1cb672a0cc915a1ca39f868ea107860fa18550db30d8f29bb5e76c071c14358",
+    "bottle_sha256": "c1cb672a0cc915a1ca39f868ea107860fa18550db30d8f29bb5e76c071c14358",
+    "source_url": "https://github.com/mikefarah/yq/archive/refs/tags/v4.53.3.tar.gz",
+    "source_sha256": "fadf86d0ae3988bb40fa8aad424d0c71658493f6377285e711c7e7e313b3b238",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/y/yq.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

@@ -1,0 +1,55 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "name": "SBOM-SPDX-json-c-0.19",
+  "creationInfo": {
+    "created": "2026-06-27T13:45:25Z",
+    "creators": [
+      "Tool: https://github.com/Homebrew/brew"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://formulae.brew.sh/spdx/json-c-0.19.json",
+  "documentDescribes": [
+    "SPDXRef-Archive-json-c-src"
+  ],
+  "files": [
+    {
+      "SPDXID": "SPDXRef-File-json-c",
+      "fileName": "json-c-0.19.tar.gz",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "37ad0249902e301bd9052bf712e511fcc6acff4ecaad4b5900aad9ce564e26de"
+        }
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Archive-json-c-src",
+      "name": "json-c",
+      "versionInfo": "0.19",
+      "filesAnalyzed": false,
+      "licenseDeclared": "NOASSERTION",
+      "builtDate": "2026-06-27T13:45:25Z",
+      "licenseConcluded": "MIT",
+      "downloadLocation": "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.19.tar.gz",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "37ad0249902e301bd9052bf712e511fcc6acff4ecaad4b5900aad9ce564e26de"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-File-json-c",
+      "relationshipType": "PACKAGE_OF",
+      "relatedSpdxElement": "SPDXRef-Archive-json-c-src"
+    }
+  ]
+}

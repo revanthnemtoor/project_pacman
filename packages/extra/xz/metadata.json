@@ -1,0 +1,40 @@
+{
+    "name": "xz",
+    "version": "5.8.3",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "General-purpose data compression with high compression ratio",
+    "homepage": "https://tukaani.org/xz/",
+    "license": [
+        "0BSD AND GPL-2.0-or-later"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/xz/blobs/sha256:55c891f5d47142fe923c87df0e3343d7ef2bc7d368c67892b4ad2c80e53069d5",
+    "bottle_sha256": "55c891f5d47142fe923c87df0e3343d7ef2bc7d368c67892b4ad2c80e53069d5",
+    "source_url": "https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.gz",
+    "source_sha256": "3d3a1b973af218114f4f889bbaa2f4c037deaae0c8e815eec381c3d546b974a0",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/x/xz.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

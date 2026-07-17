@@ -1,0 +1,44 @@
+{
+    "name": "fd",
+    "version": "10.4.2",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Simple, fast and user-friendly alternative to find",
+    "homepage": "https://github.com/sharkdp/fd",
+    "license": [
+        "Apache-2.0 OR MIT"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [
+        "rust"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [
+        "fdclone"
+    ],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/fd/blobs/sha256:83d0c8ab8a95c83b6feccc78865996a865a6c4dd43b475e6dad4624faca0fbc7",
+    "bottle_sha256": "83d0c8ab8a95c83b6feccc78865996a865a6c4dd43b475e6dad4624faca0fbc7",
+    "source_url": "https://github.com/sharkdp/fd/archive/refs/tags/v10.4.2.tar.gz",
+    "source_sha256": "3a7e027af8c8e91c196ac259c703d78cd55c364706ddafbc66d02c326e57a456",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/f/fd.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

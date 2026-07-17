@@ -1,0 +1,35 @@
+pkgname=zstd
+pkgver=1.5.7
+pkgrel=2
+pkgdesc="Zstandard is a real-time compression algorithm"
+
+url="https://facebook.github.io/zstd/"
+arch=(
+    'darwin_arm64'
+)
+license=(
+    '(BSD-3-Clause OR GPL-2.0-only) AND BSD-2-Clause AND MIT'
+)
+depends=(
+    'lz4'
+    'xz'
+)
+makedepends=(
+    'cmake'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

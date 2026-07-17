@@ -1,0 +1,42 @@
+{
+    "name": "utf8proc",
+    "version": "2.11.3",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Clean C library for processing UTF-8 Unicode data",
+    "homepage": "https://juliastrings.github.io/utf8proc/",
+    "license": [
+        "MIT AND Unicode-DFS-2015"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [
+        "cmake"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/utf8proc/blobs/sha256:f3b03f1fb1f7da91b28d6b7edb0a8ff056378b689e5c904877dfb6d1cb9da5fc",
+    "bottle_sha256": "f3b03f1fb1f7da91b28d6b7edb0a8ff056378b689e5c904877dfb6d1cb9da5fc",
+    "source_url": "https://github.com/JuliaStrings/utf8proc/archive/refs/tags/v2.11.3.tar.gz",
+    "source_sha256": "abfed50b6d4da51345713661370290f4f4747263ee73dc90356299dfc7990c78",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/u/utf8proc.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

@@ -1,0 +1,35 @@
+pkgname=libidn2
+pkgver=2.3.8
+pkgrel=1
+pkgdesc="International domain name library (IDNA2008, Punycode and TR46)"
+
+url="https://www.gnu.org/software/libidn/#libidn2"
+arch=(
+    'darwin_arm64'
+)
+license=(
+    '(GPL-2.0-or-later OR LGPL-3.0-or-later) AND (Unicode-TOU AND Unicode-DFS-2016) AND GPL-3.0-or-later AND LGPL-2.1-or-later AND FSFAP-no-warranty-disclaimer'
+)
+depends=(
+    'gettext'
+    'libunistring'
+)
+makedepends=(
+    'pkgconf'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

@@ -1,0 +1,28 @@
+pkgname=popt
+pkgver=1.19
+pkgrel=1
+pkgdesc="Library like getopt(3) with a number of enhancements"
+
+url="https://github.com/rpm-software-management/popt"
+arch=(
+    'darwin_arm64'
+)
+license=(
+    'MIT'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

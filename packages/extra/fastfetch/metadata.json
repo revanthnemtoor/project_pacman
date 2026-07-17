@@ -9,7 +9,7 @@
     "license": [
         "MIT"
     ],
-    "architecture": "arm64",
+    "architecture": "darwin_arm64",
     "platform": "darwin",
     "repository": "extra",
     "depends": [

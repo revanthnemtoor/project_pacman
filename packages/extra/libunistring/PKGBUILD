@@ -1,0 +1,28 @@
+pkgname=libunistring
+pkgver=1.4.2
+pkgrel=1
+pkgdesc="C string library for manipulating Unicode strings"
+
+url="https://www.gnu.org/software/libunistring/"
+arch=(
+    'darwin_arm64'
+)
+license=(
+    'GPL-2.0-or-later OR LGPL-3.0-or-later'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

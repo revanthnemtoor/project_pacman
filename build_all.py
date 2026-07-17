@@ -51,7 +51,7 @@ subprocess.run(
 print(f"==========================================")
 print(f"Copying packages to new_packages folder...")
 print(f"==========================================")
-for file_path in output_dir.glob("*.pkg.tar.gz"):
+for file_path in output_dir.glob("*.pkg.tar.zst"):
     dest = new_packages_dir / file_path.name
     print(f"Copying {file_path.name}")
     shutil.copy2(file_path, dest)

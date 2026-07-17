@@ -1,0 +1,28 @@
+pkgname=pcre2
+pkgver=10.47
+pkgrel=2
+pkgdesc="Perl compatible regular expressions library with a new API"
+
+url="https://www.pcre.org/"
+arch=(
+    'darwin_arm64'
+)
+license=(
+    'BSD-3-Clause'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

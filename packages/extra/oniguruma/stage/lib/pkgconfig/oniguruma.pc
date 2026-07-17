@@ -1,0 +1,13 @@
+prefix=/opt/pacman/oniguruma/6.9.10
+exec_prefix=/opt/pacman/oniguruma/6.9.10
+libdir=/opt/pacman/oniguruma/6.9.10/lib
+includedir=/opt/pacman/oniguruma/6.9.10/include
+datarootdir=/opt/pacman/oniguruma/6.9.10/share
+datadir=/opt/pacman/oniguruma/6.9.10/share
+
+Name: oniguruma
+Description: Regular expression library
+Version: 6.9.10
+Requires:
+Libs: -L${libdir} -lonig
+Cflags: -I${includedir}

@@ -1,0 +1,28 @@
+pkgname=ca-certificates
+pkgver=2026-07-16
+pkgrel=1
+pkgdesc="Mozilla CA certificate store"
+
+url="https://curl.se/docs/caextract.html"
+arch=(
+    'darwin_arm64'
+)
+license=(
+    'MPL-2.0'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

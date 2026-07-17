@@ -1,0 +1,44 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "name": "SBOM-SPDX-fd-10.4.2",
+  "creationInfo": {
+    "created": "2026-03-10T07:32:25Z",
+    "creators": [
+      "Tool: https://github.com/Homebrew/brew"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://formulae.brew.sh/spdx/fd-10.4.2.json",
+  "documentDescribes": [
+    "SPDXRef-Archive-fd-src"
+  ],
+  "files": [],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Archive-fd-src",
+      "name": "fd",
+      "versionInfo": "10.4.2",
+      "filesAnalyzed": false,
+      "licenseDeclared": "NOASSERTION",
+      "builtDate": "2026-03-10 07:32:25 UTC",
+      "licenseConcluded": "Apache-2.0 OR MIT",
+      "downloadLocation": "https://github.com/sharkdp/fd/archive/refs/tags/v10.4.2.tar.gz",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3a7e027af8c8e91c196ac259c703d78cd55c364706ddafbc66d02c326e57a456"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-File-fd",
+      "relationshipType": "PACKAGE_OF",
+      "relatedSpdxElement": "SPDXRef-Archive-fd-src"
+    }
+  ]
+}

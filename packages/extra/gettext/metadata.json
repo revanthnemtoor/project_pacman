@@ -1,0 +1,56 @@
+{
+    "name": "gettext",
+    "version": "1.0",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "GNU internationalization (i18n) and localization (l10n) library",
+    "homepage": "https://www.gnu.org/software/gettext/",
+    "license": [
+        "GPL-3.0-or-later AND LGPL-2.1-or-later"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "json-c",
+        "libunistring"
+    ],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/gettext/blobs/sha256:2b713227e438f51d025d76df24cfa45a2b813b61718df7bb91a6cedb1091037b",
+    "bottle_sha256": "2b713227e438f51d025d76df24cfa45a2b813b61718df7bb91a6cedb1091037b",
+    "source_url": "https://ftpmirror.gnu.org/gnu/gettext/gettext-1.0.tar.gz",
+    "source_sha256": "85d99b79c981a404874c02e0342176cf75c7698e2b51fe41031cf6526d974f1a",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/g/gettext.rb",
+        "uses_from_macos": [
+            "curl",
+            "libxml2",
+            "ncurses"
+        ],
+        "runtime_dependencies": [
+            {
+                "full_name": "libunistring",
+                "version": "1.4.2",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "1.4.2",
+                "declared_directly": true
+            }
+        ]
+    },
+    "xdata": {}
+}

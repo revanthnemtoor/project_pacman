@@ -70,6 +70,9 @@ class DependencyNormalizer:
 
     @classmethod
     def normalize_package(cls, pkg: Package) -> Package:
+        
+        # Normalize the package's own name (e.g. openssl@3 -> openssl)
+        pkg.name = cls.normalize_name(pkg.name)
 
         pkg.depends = cls.normalize_list(pkg.depends)
         pkg.makedepends = cls.normalize_list(pkg.makedepends)

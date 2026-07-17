@@ -1,0 +1,47 @@
+{
+    "name": "libevent",
+    "version": "2.1.13",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Asynchronous event library",
+    "homepage": "https://libevent.org/",
+    "license": [
+        "BSD-3-Clause"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "openssl"
+    ],
+    "makedepends": [
+        "autoconf",
+        "automake",
+        "libtool",
+        "pkgconf"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/libevent/blobs/sha256:a89bc8b73301ea34ef28dfe355d8ef6a068250184e216a66b98f60435ecfb372",
+    "bottle_sha256": "a89bc8b73301ea34ef28dfe355d8ef6a068250184e216a66b98f60435ecfb372",
+    "source_url": "https://github.com/libevent/libevent/archive/refs/tags/release-2.1.13-stable.tar.gz",
+    "source_sha256": "1a0885e17dc78afbaeddf13cf849f9238bbc24acdc178464a0d1934d7c5ffbd5",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/lib/libevent.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

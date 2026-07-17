@@ -1,0 +1,42 @@
+{
+    "name": "json-c",
+    "version": "0.19",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "JSON parser for C",
+    "homepage": "https://github.com/json-c/json-c/wiki",
+    "license": [
+        "MIT"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [
+        "cmake"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/json-c/blobs/sha256:4095feba36f7d453ae23ddb2656038e0784e857e1c860e70fe26a7c5089c36f5",
+    "bottle_sha256": "4095feba36f7d453ae23ddb2656038e0784e857e1c860e70fe26a7c5089c36f5",
+    "source_url": "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.19.tar.gz",
+    "source_sha256": "37ad0249902e301bd9052bf712e511fcc6acff4ecaad4b5900aad9ce564e26de",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/j/json-c.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

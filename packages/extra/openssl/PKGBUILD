@@ -1,0 +1,31 @@
+pkgname=openssl
+pkgver=3.6.3
+pkgrel=1
+pkgdesc="Cryptography and SSL/TLS Toolkit"
+
+url="https://openssl-library.org"
+arch=(
+    'darwin_arm64'
+)
+license=(
+    'Apache-2.0'
+)
+depends=(
+    'ca-certificates'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

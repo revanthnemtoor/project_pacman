@@ -1,0 +1,44 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "name": "SBOM-SPDX-utf8proc-2.11.3",
+  "creationInfo": {
+    "created": "2025-12-30T16:54:31Z",
+    "creators": [
+      "Tool: https://github.com/Homebrew/brew"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://formulae.brew.sh/spdx/utf8proc-2.11.3.json",
+  "documentDescribes": [
+    "SPDXRef-Archive-utf8proc-src"
+  ],
+  "files": [],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Archive-utf8proc-src",
+      "name": "utf8proc",
+      "versionInfo": "2.11.3",
+      "filesAnalyzed": false,
+      "licenseDeclared": "NOASSERTION",
+      "builtDate": "2025-12-30 16:54:31 UTC",
+      "licenseConcluded": "MIT AND Unicode-DFS-2015",
+      "downloadLocation": "https://github.com/JuliaStrings/utf8proc/archive/refs/tags/v2.11.3.tar.gz",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "abfed50b6d4da51345713661370290f4f4747263ee73dc90356299dfc7990c78"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-File-utf8proc",
+      "relationshipType": "PACKAGE_OF",
+      "relatedSpdxElement": "SPDXRef-Archive-utf8proc-src"
+    }
+  ]
+}

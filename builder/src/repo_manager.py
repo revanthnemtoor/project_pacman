@@ -14,7 +14,7 @@ from pacman_macos.constants import REPO_ADD_BIN, OUTPUT_DIR
 class RepoManager:
     """Manages the local pacman repository database."""
 
-    def __init__(self, db_name: str = "pacman_macos.db.tar.gz"):
+    def __init__(self, db_name: str = "pacman.db.tar.gz"):
         self.db_name = db_name
         self.db_path = OUTPUT_DIR / self.db_name
 

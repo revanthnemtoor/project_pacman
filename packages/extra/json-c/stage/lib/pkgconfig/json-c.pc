@@ -1,0 +1,12 @@
+prefix=/opt/pacman/json-c/0.19
+exec_prefix=/opt/pacman/json-c/0.19
+libdir=/opt/pacman/json-c/0.19/lib
+includedir=/opt/pacman/json-c/0.19/include
+
+Name: json-c
+Description: A JSON implementation in C
+Version: 0.19
+Requires:
+Libs.private: -lm
+Libs: -L${libdir} -ljson-c
+Cflags: -I${includedir} -I${includedir}/json-c

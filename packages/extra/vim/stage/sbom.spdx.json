@@ -1,0 +1,55 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "name": "SBOM-SPDX-vim-9.2.0750",
+  "creationInfo": {
+    "created": "2026-06-28T19:48:02Z",
+    "creators": [
+      "Tool: https://github.com/Homebrew/brew"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://formulae.brew.sh/spdx/vim-9.2.0750.json",
+  "documentDescribes": [
+    "SPDXRef-Archive-vim-src"
+  ],
+  "files": [
+    {
+      "SPDXID": "SPDXRef-File-vim",
+      "fileName": "v9.2.0750.tar.gz",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7d460830e12082b541c34b0b96942ebface1ad9fa0b77245930717c0ccf8b664"
+        }
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Archive-vim-src",
+      "name": "vim",
+      "versionInfo": "9.2.0750",
+      "filesAnalyzed": false,
+      "licenseDeclared": "NOASSERTION",
+      "builtDate": "2026-06-28T19:48:02Z",
+      "licenseConcluded": "Vim",
+      "downloadLocation": "https://github.com/vim/vim/archive/refs/tags/v9.2.0750.tar.gz",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7d460830e12082b541c34b0b96942ebface1ad9fa0b77245930717c0ccf8b664"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-File-vim",
+      "relationshipType": "PACKAGE_OF",
+      "relatedSpdxElement": "SPDXRef-Archive-vim-src"
+    }
+  ]
+}

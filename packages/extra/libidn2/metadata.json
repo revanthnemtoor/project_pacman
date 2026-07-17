@@ -1,0 +1,62 @@
+{
+    "name": "libidn2",
+    "version": "2.3.8",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "International domain name library (IDNA2008, Punycode and TR46)",
+    "homepage": "https://www.gnu.org/software/libidn/#libidn2",
+    "license": [
+        "(GPL-2.0-or-later OR LGPL-3.0-or-later) AND (Unicode-TOU AND Unicode-DFS-2016) AND GPL-3.0-or-later AND LGPL-2.1-or-later AND FSFAP-no-warranty-disclaimer"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "gettext",
+        "libunistring"
+    ],
+    "makedepends": [
+        "pkgconf"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/libidn2/blobs/sha256:f8f1b459f15a4ac11d2dce786a9140509782227b7d499cbdf3a1279dd325d90b",
+    "bottle_sha256": "f8f1b459f15a4ac11d2dce786a9140509782227b7d499cbdf3a1279dd325d90b",
+    "source_url": "https://ftpmirror.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz",
+    "source_sha256": "f557911bf6171621e1f72ff35f5b1825bb35b52ed45325dcdee931e5d3c0787a",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/lib/libidn2.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": [
+            {
+                "full_name": "libunistring",
+                "version": "1.4.2",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "1.4.2",
+                "declared_directly": true
+            },
+            {
+                "full_name": "gettext",
+                "version": "1.0",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "1.0",
+                "declared_directly": true
+            }
+        ]
+    },
+    "xdata": {}
+}

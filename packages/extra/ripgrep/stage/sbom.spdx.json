@@ -1,0 +1,55 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "name": "SBOM-SPDX-ripgrep-15.2.0",
+  "creationInfo": {
+    "created": "2026-07-15T16:00:11Z",
+    "creators": [
+      "Tool: https://github.com/Homebrew/brew"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://formulae.brew.sh/spdx/ripgrep-15.2.0.json",
+  "documentDescribes": [
+    "SPDXRef-Archive-ripgrep-src"
+  ],
+  "files": [
+    {
+      "SPDXID": "SPDXRef-File-ripgrep",
+      "fileName": "15.2.0.tar.gz",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7605249d3eb0d5f170e3414498e3344e26b1e7a147aec518b57090b80036a562"
+        }
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Archive-ripgrep-src",
+      "name": "ripgrep",
+      "versionInfo": "15.2.0",
+      "filesAnalyzed": false,
+      "licenseDeclared": "NOASSERTION",
+      "builtDate": "2026-07-15T16:00:11Z",
+      "licenseConcluded": "Unlicense",
+      "downloadLocation": "https://github.com/BurntSushi/ripgrep/archive/refs/tags/15.2.0.tar.gz",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7605249d3eb0d5f170e3414498e3344e26b1e7a147aec518b57090b80036a562"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-File-ripgrep",
+      "relationshipType": "PACKAGE_OF",
+      "relatedSpdxElement": "SPDXRef-Archive-ripgrep-src"
+    }
+  ]
+}

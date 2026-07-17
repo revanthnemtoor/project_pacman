@@ -1,0 +1,40 @@
+{
+    "name": "libsodium",
+    "version": "1.0.22",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "NaCl networking and cryptography library",
+    "homepage": "https://libsodium.org/",
+    "license": [
+        "ISC"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/libsodium/blobs/sha256:665929906297818edf15955cf4e4faefca7d717271c9fa448291989d2511d266",
+    "bottle_sha256": "665929906297818edf15955cf4e4faefca7d717271c9fa448291989d2511d266",
+    "source_url": "https://download.libsodium.org/libsodium/releases/libsodium-1.0.22.tar.gz",
+    "source_sha256": "adbdd8f16149e81ac6078a03aca6fc03b592b89ef7b5ed83841c086191be3349",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/lib/libsodium.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

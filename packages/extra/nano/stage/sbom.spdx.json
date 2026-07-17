@@ -1,0 +1,55 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "name": "SBOM-SPDX-nano-9.1",
+  "creationInfo": {
+    "created": "2026-06-23T05:32:27Z",
+    "creators": [
+      "Tool: https://github.com/Homebrew/brew"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://formulae.brew.sh/spdx/nano-9.1.json",
+  "documentDescribes": [
+    "SPDXRef-Archive-nano-src"
+  ],
+  "files": [
+    {
+      "SPDXID": "SPDXRef-File-nano",
+      "fileName": "nano-9.1.tar.xz",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5f47764274cb7532349ce0aa20ec10f1e8e851a6e9fa3eb66812c43d196db042"
+        }
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Archive-nano-src",
+      "name": "nano",
+      "versionInfo": "9.1",
+      "filesAnalyzed": false,
+      "licenseDeclared": "NOASSERTION",
+      "builtDate": "2026-06-23T05:32:27Z",
+      "licenseConcluded": "GPL-3.0-or-later",
+      "downloadLocation": "https://www.nano-editor.org/dist/v9/nano-9.1.tar.xz",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5f47764274cb7532349ce0aa20ec10f1e8e851a6e9fa3eb66812c43d196db042"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-File-nano",
+      "relationshipType": "PACKAGE_OF",
+      "relatedSpdxElement": "SPDXRef-Archive-nano-src"
+    }
+  ]
+}

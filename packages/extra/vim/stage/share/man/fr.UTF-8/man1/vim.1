@@ -1,0 +1,589 @@
+.\" Traduction lundi 7 août 2000 par Richard Hitier
+.\" (richard.hitier@dial.oleane.com)
+.\" Mise à jour de la traduction par David Blanchet
+.\" (david.blanchet@free.fr) 2006-06-10
+.\" Mise à jour de la traduction par Dominique Pellé
+.\" (dominique.pelle@gmail.com) 2013-05-10
+.\"
+.TH VIM 1 "22 février 2002"
+.SH NOM
+vim \- Vi IMproved, éditeur de texte pour programmeurs
+.SH SYNOPSIS
+.br
+.B vim
+[options] [fichier ...]
+.br
+.B vim
+[options] \-
+.br
+.B vim
+[options] \-t marqueur
+.br
+.B vim
+[options] \-q [fichiererreurs]
+.PP
+.br
+.B ex
+.br
+.B view
+.br
+.B gvim
+.B gview
+.B evim
+.B eview
+.br
+.B rvim
+.B rview
+.B rgvim
+.B rgview
+.SH DESCRIPTION
+.B Vim
+est un éditeur de texte proposant une compatibilité ascendante
+avec Vi. Il permet d'éditer n'importe quel type de texte brut.
+Il est particulièrement adapté pour l'édition des programmes.
+.PP
+Il comporte de nombreuses améliorations par rapport à Vi : annulation sur
+plusieurs niveaux, fenêtres et tampons multiples, coloration syntaxique,
+édition en ligne de commande, complètement des noms de fichiers, aide en
+ligne, sélection visuelle, etc.
+Voir ":help vi_diff.txt" pour un résumé des différences entre
+.B Vim
+et Vi.
+.PP
+Pendant l'exécution de
+.B Vim
+\, une aide abondante est accessible au travers du système d'aide
+en ligne, grâce à la commande ":help".
+Voir la section AIDE EN LIGNE plus bas.
+.PP
+Le plus souvent
+.B Vim
+est démarré pour éditer un unique fichier avec la commande
+.PP
+	vim fichier
+.PP
+Plus généralement,
+.B Vim
+est lancé avec :
+.PP
+	vim [options] [listefichiers]
+.PP
+Si la listefichiers est omise, l'éditeur démarre avec un tampon vide.
+Autrement, l'une des quatre méthodes suivantes vous permettra de choisir
+un ou plusieurs fichiers à éditer.
+.TP 12
+fichier ...
+Une liste de noms de fichiers.
+Le premier sera le fichier courant et sera lu dans le tampon.
+Le curseur sera placé sur la première ligne du tampon.
+Vous pouvez passer aux autres fichiers avec la commande ":next".
+Pour éditer un fichier débutant par un tiret, faites précéder la
+liste de fichiers par "\-\-".
+.TP
+\-
+Le fichier à éditer est lu sur l'entrée standard (stdin). Les commandes sont
+lues depuis stderr, qui devrait être un terminal.
+.TP
+\-t {marqueur}
+Le fichier à éditer et la position initiale du curseur dépendent
+d'un "marqueur", qui est une sorte d'étiquette.
+{marqueur} est recherché dans le fichier des marqueurs, le fichier correspondant
+devient le fichier courant et la commande associée est exécutée.
+Principalement utile pour les programmes en C ; dans ce cas, {marqueur}
+peut être le nom d'une fonction.
+Au final, le fichier contenant cette fonction devient le fichier
+courant et le curseur est placé au début de la fonction.
+Voir ":help tag\-commands".
+.TP
+\-q [fichiererreurs]
+Démarre en mode Mise-au-point (QuickFix).
+Le fichier [fichiererreurs] est lu et la première erreur est affichée.
+Si [fichiererreurs] est omis, le nom du fichier est lu dans
+l'option 'errorfile' ("AztecC.Err" par défaut sur Amiga, "errors.err" sur les
+autres systèmes).
+La commande ":cn" permet de sauter aux erreurs suivantes.
+Voir ":help quickfix".
+.PP
+.B Vim
+se comporte différemment selon le nom de la commande (l'exécutable peut
+cependant être le même fichier).
+.TP 10
+vim
+La façon "normale", le comportement par défaut.
+.TP
+ex
+Démarre en mode Ex.
+La commande ":vi" permet de passer en mode Normal.
+Ce mode est également accessible avec l'argument "\-e".
+.TP
+view
+Démarre en mode Lecture-Seule. Vous êtes protégé de l'écriture accidentelle
+des fichiers. Ce mode est également accessible avec l'argument "\-R".
+.TP
+gvim gview
+La version graphique.
+Ouvre une nouvelle fenêtre.
+Également accessible avec l'argument "\-g".
+.TP
+evim eview
+La version graphique en mode Débutant (easy).
+Ouvre une nouvelle fenêtre.
+Également accessible avec l'argument "\-y".
+.TP
+rvim rview rgvim rgview
+Comme ci-dessus, mais avec des restrictions. Il vous sera impossible de
+lancer des commandes du shell, ou de suspendre
+.B Vim.
+Également accessible avec l'argument "\-Z".
+.SH OPTIONS
+Les options peuvent être spécifiées dans n'importe quel ordre,
+avant ou après les noms de fichiers. Les options sans arguments
+peuvent être combinées après un unique tiret.
+.TP 12
++[num]
+Place le curseur sur la ligne "num" dans le premier fichier.
+Si "num" est omis, le curseur sera placé sur la dernière ligne.
+.TP
++/{motif}
+Place le curseur sur la première occurrence de {motif} dans le premier fichier.
+Voir ":help search\-pattern" pour connaître les motifs de recherches
+disponibles.
+.TP
++{commande}
+.TP
+\-c {commande}
+Exécute {commande} après la lecture du premier fichier.
+{commande} est interprétée comme une commande Ex.
+Si la {commande} contient des espaces, elle doit être entourée
+de doubles-apostrophes (cela dépend du shell utilisé).
+Exemple : vim "+set si" main.c
+.br
+Note : vous pouvez utiliser jusqu'à 10 commandes "+" ou "\-c".
+.TP
+\-S {fichier}
+Source {fichier} après la lecture du premier fichier.
+C'est équivalent à \-c "source {fichier}".
+{fichier} ne peut pas débuter par un '\-'.
+Si {fichier} est omis, "Session.vim" est utilisé (cela ne fonctionne que si
+\-S est le dernier argument).
+.TP
+\-\-cmd {commande}
+Comme "\-c", mais la commande est exécutée juste avant de traiter les fichiers
+vimrc.
+Vous pouvez utiliser jusqu'à 10 de ces commandes, indépendamment des
+commandes "\-c".
+.TP
+\-A
+Si
+.B Vim
+a été compilé avec le support de la fonctionnalité ARABIC pour l'édition de
+fichiers de droite à gauche et les claviers arabes, cette option lance
+.B Vim
+en mode Arabe, c.-à-d. que l'option 'arabic' est activée.
+Sinon, un message d'erreur est émis et
+.B Vim
+quitte.
+.TP
+\-b
+Mode Binaire.
+Active plusieurs options pour permettre l'édition
+d'un fichier binaire ou exécutable.
+.TP
+\-C
+Compatible. Active l'option 'compatible'.
+.B Vim
+se comportera alors quasiment comme Vi, même s'il existe un fichier .vimrc.
+.TP
+\-d
+Démarre en mode Diff.
+Deux, trois ou quatre noms de fichiers doivent être spécifiés.
+.B Vim
+ouvrira alors tous les fichiers et affichera leurs différences.
+Fonctionne comme vimdiff(1).
+.TP
+\-d {périph}
+Ouvre {périph} pour l'utiliser comme terminal.
+Uniquement sur Amiga.
+Exemple :
+"\-d con:20/30/600/150".
+.TP
+\-D
+Debogage. Passe en mode Débogage lors de l'exécution de la première commande
+d'un script.
+.TP
+\-e
+Démarre
+.B Vim
+en mode Ex, comme si l'exécutable s'appelait "ex".
+.TP
+\-E
+Démarre
+.B Vim
+en mode Ex amélioré, comme si l'exécutable "exim" avait été invoqué.
+.TP
+\-f
+Premier-plan (Foreground). Pour la version graphique,
+.B Vim
+ne forke pas et ne se détache pas du shell dans lequel il a été invoqué.
+Sur Amiga,
+.B Vim
+n'est pas relancé pour ouvrir une nouvelle fenêtre.
+Cette option est utile quand
+.B Vim
+est exécuté par un programme qui attend la fin de la session d'édition
+(par exemple mail).
+Sur Amiga, les commandes ":sh" et ":!" ne fonctionneront pas.
+.TP
+\-\-nofork
+Premier-plan (Foreground). Pour la version graphique,
+.B Vim
+ne forkera pas et ne se détachera pas du shell dans lequel il a été lancé.
+.TP
+\-F
+Si
+.B Vim
+a été compilé avec le support de la fonctionnalité FKMAP pour l'édition de
+fichiers de droite à gauche et les claviers farsi, cette option lance
+.B Vim
+en mode Farsi, c.-à-d. avec les options 'fkmap' et 'rightleft' activées.
+Sinon, un message d'erreur est émis et
+.B Vim
+quitte.
+.TP
+\-g
+Si
+.B Vim
+a été compilé avec le support de l'IHM graphique, cette option active
+l'IHM graphique. Si le support n'a pas été compilé, un message d'erreur
+est émis et
+.B Vim
+quitte.
+.TP
+\-h
+Donne une aide succincte sur les arguments et les options de la ligne de
+commande. Après cela,
+.B Vim
+quitte.
+.TP
+\-H
+Si
+.B Vim
+a été compilé avec le support de la fonctionnalité RIGHTLEFT pour l'édition de
+fichiers de droite à gauche et les claviers hébreux, cette option lance
+.B Vim
+en mode Hébreu, c.-à-d. avec les options 'hkmap' et 'rightleft' activées.
+Sinon, un message d'erreur est émis et
+.B Vim
+quitte.
+.TP
+\-i {viminfo}
+Lorsque l'utilisation d'un fichier viminfo est activée, cette option indique
+le nom de fichier à utiliser à la place de "~/.viminfo" par défaut.
+Il est possible d'empêcher l'utilisation d'un fichier ".viminfo", en
+spécifiant le nom de fichier "NONE".
+.TP
+\-L
+Comme \-r.
+.TP
+\-l
+Mode Lisp.
+Active les options 'lisp' et 'showmatch'.
+.TP
+\-m
+Empêche la modification des fichiers.
+Désactive l'option 'write'.
+Vous pouvez toujours modifier le tampon, mais il vous sera impossible
+d'écrire le fichier.
+.TP
+\-M
+N'autorise aucune modification. les options 'modifiable' et 'write' sont
+désactivées, de sorte que les changements ne sont pas autorisés et que les
+fichiers ne peuvent pas être écrits. Note : ces options peuvent être activées
+pour autoriser les modifications.
+.TP
+\-N
+Mode Non-compatible. Désactive l'option 'compatible'.
+Cela améliorera le comportement de
+.B Vim
+\, mais il sera moins conforme à celui de Vi, même s'il n'existe aucun
+fichier ".vimrc".
+.TP
+\-n
+N'utilise pas de fichier d'échange (swapfile).
+Le recouvrement après un plantage sera impossible.
+Utile pour éditer un fichier sur un support très lent (disquette par ex.).
+Également activable avec ":set uc=0".
+Il est possible de l'annuler avec ":set uc=200".
+.TP
+\-nb
+Devient un serveur d'édition pour NetBeans. Consulter la documentation à ce
+sujet pour davantage de détails.
+.TP
+\-o[N]
+Ouvre N fenêtres les unes au-dessus des autres.
+Quand N est omis, ouvre une fenêtre pour chaque fichier.
+.TP
+\-O[N]
+Ouvre N fenêtres côte à côte.
+Quand N est omis, ouvre une fenêtre pour chaque fichier fichier.
+.TP
+\-p[N]
+Ouvre N onglets.
+Quand N est omis, ouvre un onglet pour chaque fichier fichier.
+.TP
+\-R
+Mode Lecture-Seule.
+Active l'option 'readonly'.
+Vous pouvez toujours éditer le tampon, mais il vous sera impossible de
+d'écraser accidentellement un fichier.
+Si vous voulez écraser un fichier, ajoutez un point d'exclamation à la commande
+Ex, comme dans ":w!".
+L'option \-R impose l'option \-n (voir ci-dessus).
+L'option 'readonly' peut être désactivée avec ":set noro".
+Voir ":help 'readonly'".
+.TP
+\-r
+Donne la liste des fichiers d'échange, avec des informations pour les utiliser
+à des fins de recouvrement.
+.TP
+\-r {file}
+Mode Recouvrement.
+Utilise le fichier d'échange pour récouvrer d'une session d'édition plantée.
+Le fichier d'échange est un fichier avec le même nom que le fichier texte,
+suivi du suffixe ".swp".
+Voir ":help recovery".
+.TP
+\-s
+Mode Silencieux. Disponible uniquement quand
+.B Vim
+est lancé en tant que "ex" ou quand l'option "\-e" a été spécifiée avant
+l'option "\-s".
+.TP
+\-s {scriptEntrée}
+Lit le fichier de script {scriptEntrée}.
+Les caractères du fichier sont interprétés comme si vous les tapiez.
+La commande ":source! {scriptEntrée}" donne le même résultat.
+Si la fin du fichier est atteinte avant que l'éditeur quitte, les caractères
+suivants sont lus depuis le clavier.
+.TP
+\-T {terminal}
+Indique à
+.B Vim
+le nom du terminal utilisé.
+Cela n'est requis que lorsque la détection automatique échoue.
+Le {terminal} devrait être connu de
+.B Vim
+(intégré) ou défini dans le fichier termcap ou terminfo.
+.TP
+\-u {vimrc}
+Utilise les commandes du fichier {vimrc} pour les initialisations.
+Toutes les autres initialisations sont omises.
+À utiliser pour éditer un type de fichiers particulier.
+Cela permet aussi d'omettre toute initialisation en spécifiant le nom de
+fichier "NONE".
+Voir ":help initialization" dans Vim pour davantage de détails.
+.TP
+\-U {gvimrc}
+Utilise les commandes du fichier {gvimrc} pour l'initialisation de l'IHM
+graphique.
+Toutes les autres initialisations graphiques sont omises.
+Cela permet aussi d'omettre toute initialisation graphique en spécifiant le nom
+de fichier "NONE".
+Voir ":help gui\-init" dans Vim pour davantage de détails.
+.TP
+\-V[N]
+Mode Verbeux.
+Donne des messages à propos des fichiers sourcés, ainsi que sur la lecture
+et les écritures dans le fichier viminfo. le nombre optionnel N précise la
+valeur de l'option 'verbose' (10 par défaut).
+.TP
+\-v
+Démarre
+.B Vim
+en mode Vi, comme si l'exécutable s'appelait "vi". Cela n'a d'effet que si
+l'exécutable invoqué est "ex".
+.TP
+\-w {scriptSortie}
+Tous les caractères que vous tapez sont enregistrés dans le fichier
+{scriptSortie}, jusqu'à ce que vous quittiez
+.B Vim.
+C'est utile quand vous voulez créer un fichier de script à utiliser avec
+"vim \-s" ou ":source!".
+Si le fichier {scriptSortie} existe, les caractères sont ajoutés à la fin.
+.TP
+\-W {scriptSortie}
+Comme \-w, mais un fichier existant sera écrasé.
+.TP
+\-x
+Chiffre les fichiers lors de l'écriture. Une clé de chiffrement sera demandée.
+.TP
+\-X
+Ne se connecte pas au serveur X. Accélère le temps de démarrage dans un
+terminal, mais le titre de la fenêtre et le presse-papier seront inaccessibles.
+.TP
+\-y
+Démarre
+.B Vim
+en mode Débutant (easy), comme si l'exécutable s'appelait "evim" ou "eview".
+Donne à
+.B Vim
+un comportement plus proche des éditeurs « cliquez-tapez ».
+.TP
+\-Z
+Mode restreint. Fonctionne comme si l'exécutable commençait par la lettre 'r'.
+.TP
+\-\-
+Délimite la fin des options.
+Les arguments qui suivent seront considérés comme des noms de fichiers.
+Cela permet d'éditer des fichiers débutant par un '\-'.
+.TP
+\-\-echo\-wid
+IHM graphique GTK uniquement : retourne la Window ID sur stdout.
+.TP
+\-\-help
+Donne un message d'aide et quitte, comme "\-h".
+.TP
+\-\-literal
+Prend les arguments de noms de fichiers littéralement, sans étendre les
+jokers. N'a aucun effet sur Unix, où le shell étend les jokers.
+.TP
+\-\-noplugin
+Ne charge pas les greffons. Implicite avec \-u NONE.
+.TP
+\-\-remote
+Se connecte à un serveur Vim et lui fait éditer les fichiers spécifiés dans
+le reste des arguments. Si aucun serveur n'est trouvé, un avertissement est
+émis et les fichiers sont édités dans le Vim courant.
+.TP
+\-\-remote\-expr {expr}
+Se connecte à un serveur Vim, y évalue {expr} et affiche le résultat sur la
+sortie standard (stdout).
+.TP
+\-\-remote\-send {touches}
+Se connecte à un serveur Vim et y envoie {touches}.
+.TP
+\-\-remote\-silent
+Comme \-\-remote, mais sans émettre d'avertissement si aucun serveur n'est
+trouvé.
+.TP
+\-\-remote\-wait
+Comme \-\-remote, mais Vim ne quitte pas tant que le fichier est en cours
+d'édition.
+.TP
+\-\-remote\-wait\-silent
+Comme \-\-remote\-wait, mais sans émettre d'avertissement si aucun serveur n'est
+trouvé.
+.TP
+\-\-serverlist
+Donne la liste des noms de tous les serveurs Vim disponibles.
+.TP
+\-\-servername {nom}
+Utilise {nom} pour le nom de serveur. Ce nom est donné au Vim courant, à moins
+qu'il ne soit utilisé avec un argument \-\-remote. Dans ce cas, il s'agit du nom
+du serveur auquel se connecter.
+.TP
+\-\-socketid {id}
+IHM graphique GTK+ uniquement : utilise le mécanisme GtkPlug pour faire
+fonctionner gvim dans une autre fenêtre.
+.TP
+\-\-version
+Affiche les informations sur la version puis quitte.
+.SH AIDE EN LIGNE
+Taper ":help" dans
+.B Vim
+pour commencer.
+Taper ":help sujet" pour obtenir de l'aide sur un sujet précis.
+Par exemple : ":help ZZ" pour consulter l'aide sur la commande "ZZ".
+Utiliser <Tab> et CTRL\-D pour compléter les sujets (":help
+cmdline\-completion").
+Des marqueurs sont inclus dans l'aide et vous permettent de sauter d'un endroit
+à un autre (comme des liens hypertextes, voir ":help").
+L'ensemble des fichiers de la documentation peut être consulté de cette
+façon, par exemple ":help syntax.txt".
+.SH FICHIERS
+.TP 15
+@@HOMEBREW_CELLAR@@/vim/9.2.0750/share/vim/vim92/doc/*.txt
+Les fichiers de la documentation de
+.B Vim.
+Utiliser ":help doc\-file\-list" pour obtenir la liste complète.
+.TP
+@@HOMEBREW_CELLAR@@/vim/9.2.0750/share/vim/vim92/doc/tags
+Le fichier des marqueurs utilisé pour trouver les informations dans les
+fichiers de la documentation.
+.TP
+@@HOMEBREW_CELLAR@@/vim/9.2.0750/share/vim/vim92/syntax/syntax.vim
+Initialisation de la syntaxe pour l'ensemble du système.
+.TP
+@@HOMEBREW_CELLAR@@/vim/9.2.0750/share/vim/vim92/syntax/*.vim
+Fichiers de syntaxe pour différents langages.
+.TP
+@@HOMEBREW_CELLAR@@/vim/9.2.0750/share/vim/vimrc
+Initialisation de
+.B Vim
+pour l'ensemble du système.
+.TP
+~/.vimrc
+Initialisation de
+.B Vim
+de votre compte utilisateur.
+.TP
+@@HOMEBREW_CELLAR@@/vim/9.2.0750/share/vim/gvimrc
+Initialisation de gvim pour l'ensemble du système.
+.TP
+~/.gvimrc
+Initialisation de gvim pour votre compte utilisateur.
+.TP
+@@HOMEBREW_CELLAR@@/vim/9.2.0750/share/vim/vim92/optwin.vim
+Script utilisé pour la commande ":options", une manière pratique de consulter
+et de modifier les options.
+.TP
+@@HOMEBREW_CELLAR@@/vim/9.2.0750/share/vim/vim92/menu.vim
+Initialisation des menus de gvim pour l'ensemble du système.
+.TP
+@@HOMEBREW_CELLAR@@/vim/9.2.0750/share/vim/vim92/bugreport.vim
+Script pour générer un rapport de bogue. Voir ":help bugs".
+.TP
+@@HOMEBREW_CELLAR@@/vim/9.2.0750/share/vim/vim92/filetype.vim
+Script pour détecter le type d'un fichier d'après son nom.
+Voir ":help 'filetype'".
+.TP
+@@HOMEBREW_CELLAR@@/vim/9.2.0750/share/vim/vim92/scripts.vim
+Script pour détecter le type d'un fichier d'après son contenu.
+Voir ":help 'filetype'".
+.TP
+@@HOMEBREW_CELLAR@@/vim/9.2.0750/share/vim/vim92/print/*.ps
+Fichiers utilisés pour l'impression PostScript.
+.PP
+Pour disposer d'informations récentes, consulter le site Internet de VIM :
+.br
+<URL:http://www.vim.org/>
+.SH VOIR AUSSI
+vimtutor(1)
+.SH AUTEUR
+La majeure partie de
+.B Vim
+a été écrite par Bram Moolenaar, avec l'aide de nombreux autres contributeurs.
+Voir ":help credits" dans
+.B Vim.
+.br
+.B Vim
+est basé sur Stevie, réalisé par Tim Thompson,
+Tony Andrews et G.R. (Fred) Walter.
+Toutefois, pratiquement rien du code original ne subsiste.
+.SH BOGUES
+Probablement.
+Voir ":help todo" pour consulter la liste des problèmes connus.
+.PP
+NOTE : Remarquez que bon nombre de points, qui pourraient être considérés comme
+des bugs par certains, sont en fait dus à une reproduction trop fidèle
+du comportement de Vi. Et si vous pensez que d'autres points sont des
+bugs "parce que Vi le fait différemment", vous devriez jeter un oeil
+attentif au fichier vi_diff.txt (ou taper ":help vi_diff.txt" dans Vim).
+Regardez aussi les options 'compatible' et 'coptions'.
+.SH TRADUCTION
+Cette page de manuel a été traduite par Richard Hitier.
+<richard.hitier@dial.oleane.com> 2000-08-07.
+.br
+Cette page de manuel a été mise à jour par David Blanchet.
+<david.blanchet@free.fr> 2006-04-10.
+Mise à jour 2013-05-10, Dominique Pellé <dominique.pelle@gmail.com>

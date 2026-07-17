@@ -1,0 +1,55 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "name": "SBOM-SPDX-rsync-3.4.4",
+  "creationInfo": {
+    "created": "2026-06-08T03:42:13Z",
+    "creators": [
+      "Tool: https://github.com/Homebrew/brew"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://formulae.brew.sh/spdx/rsync-3.4.4.json",
+  "documentDescribes": [
+    "SPDXRef-Archive-rsync-src"
+  ],
+  "files": [
+    {
+      "SPDXID": "SPDXRef-File-rsync",
+      "fileName": "rsync-3.4.4.tar.gz",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "bd88cf82fa653da32314fb229136407c5c90f80d1758d8f4b091767877d8fa96"
+        }
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Archive-rsync-src",
+      "name": "rsync",
+      "versionInfo": "3.4.4",
+      "filesAnalyzed": false,
+      "licenseDeclared": "NOASSERTION",
+      "builtDate": "2026-06-08T03:42:13Z",
+      "licenseConcluded": "GPL-3.0-or-later",
+      "downloadLocation": "https://rsync.samba.org/ftp/rsync/rsync-3.4.4.tar.gz",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "bd88cf82fa653da32314fb229136407c5c90f80d1758d8f4b091767877d8fa96"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-File-rsync",
+      "relationshipType": "PACKAGE_OF",
+      "relatedSpdxElement": "SPDXRef-Archive-rsync-src"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+    "name": "rsync",
+    "version": "3.4.4",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Utility that provides fast incremental file transfer",
+    "homepage": "https://rsync.samba.org/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "lz4",
+        "openssl",
+        "popt",
+        "xxhash",
+        "zstd"
+    ],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/rsync/blobs/sha256:47a6219946891014eeaa93105f1c2716e1260f068f7d9b9dab43d47e13b04ad2",
+    "bottle_sha256": "47a6219946891014eeaa93105f1c2716e1260f068f7d9b9dab43d47e13b04ad2",
+    "source_url": "https://rsync.samba.org/ftp/rsync/rsync-3.4.4.tar.gz",
+    "source_sha256": "bd88cf82fa653da32314fb229136407c5c90f80d1758d8f4b091767877d8fa96",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/r/rsync.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

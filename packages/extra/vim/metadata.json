@@ -1,0 +1,63 @@
+{
+    "name": "vim",
+    "version": "9.2.0750",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Vi 'workalike' with many additional features",
+    "homepage": "https://www.vim.org/",
+    "license": [
+        "Vim"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "gettext",
+        "libsodium"
+    ],
+    "makedepends": [
+        "gettext",
+        "lua",
+        "python",
+        "ruby"
+    ],
+    "checkdepends": [
+        "lua",
+        "python",
+        "ruby"
+    ],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [
+        "ex-vi",
+        "macvim",
+        "vim-classic"
+    ],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/vim/blobs/sha256:4dc76cbdcea2bccd95ece66af3560df5860e8070b693dd4b52cdd16d86fa41c6",
+    "bottle_sha256": "4dc76cbdcea2bccd95ece66af3560df5860e8070b693dd4b52cdd16d86fa41c6",
+    "source_url": "https://github.com/vim/vim/archive/refs/tags/v9.2.0750.tar.gz",
+    "source_sha256": "7d460830e12082b541c34b0b96942ebface1ad9fa0b77245930717c0ccf8b664",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/v/vim.rb",
+        "uses_from_macos": [
+            {
+                "perl": [
+                    "build",
+                    "test"
+                ]
+            }
+        ],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

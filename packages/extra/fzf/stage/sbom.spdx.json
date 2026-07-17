@@ -1,0 +1,55 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "name": "SBOM-SPDX-fzf-0.74.0",
+  "creationInfo": {
+    "created": "2026-07-06T13:21:21Z",
+    "creators": [
+      "Tool: https://github.com/Homebrew/brew"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://formulae.brew.sh/spdx/fzf-0.74.0.json",
+  "documentDescribes": [
+    "SPDXRef-Archive-fzf-src"
+  ],
+  "files": [
+    {
+      "SPDXID": "SPDXRef-File-fzf",
+      "fileName": "v0.74.0.tar.gz",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "55ab5f2256edd8890f81d407b63d3a3e81cffe10e318cd196031dc85efdeb079"
+        }
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Archive-fzf-src",
+      "name": "fzf",
+      "versionInfo": "0.74.0",
+      "filesAnalyzed": false,
+      "licenseDeclared": "NOASSERTION",
+      "builtDate": "2026-07-06T13:21:21Z",
+      "licenseConcluded": "MIT",
+      "downloadLocation": "https://github.com/junegunn/fzf/archive/refs/tags/v0.74.0.tar.gz",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "55ab5f2256edd8890f81d407b63d3a3e81cffe10e318cd196031dc85efdeb079"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-File-fzf",
+      "relationshipType": "PACKAGE_OF",
+      "relatedSpdxElement": "SPDXRef-Archive-fzf-src"
+    }
+  ]
+}

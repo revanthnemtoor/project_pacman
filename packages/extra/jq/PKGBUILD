@@ -1,0 +1,31 @@
+pkgname=jq
+pkgver=1.8.2
+pkgrel=1
+pkgdesc="Lightweight and flexible command-line JSON processor"
+
+url="https://jqlang.github.io/jq/"
+arch=(
+    'darwin_arm64'
+)
+license=(
+    'MIT'
+)
+depends=(
+    'oniguruma'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

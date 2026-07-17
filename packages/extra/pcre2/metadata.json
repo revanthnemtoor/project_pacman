@@ -1,0 +1,42 @@
+{
+    "name": "pcre2",
+    "version": "10.47",
+    "release": 2,
+    "epoch": 0,
+    "base": null,
+    "description": "Perl compatible regular expressions library with a new API",
+    "homepage": "https://www.pcre.org/",
+    "license": [
+        "BSD-3-Clause"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/pcre2/blobs/sha256:948b00bdaf75a842341f08a949ca3d414ae5333df2c305a7e371be31a2c30963",
+    "bottle_sha256": "948b00bdaf75a842341f08a949ca3d414ae5333df2c305a7e371be31a2c30963",
+    "source_url": "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.47/pcre2-10.47.tar.bz2",
+    "source_sha256": "47fe8c99461250d42f89e6e8fdaeba9da057855d06eb7fc08d9ca03fd08d7bc7",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/p/pcre2.rb",
+        "uses_from_macos": [
+            "bzip2"
+        ],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

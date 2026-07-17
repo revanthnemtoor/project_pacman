@@ -5,7 +5,7 @@ pkgdesc="High performance JSON library written in ANSI C"
 
 url="https://ibireme.github.io/yyjson/doc/doxygen/html/"
 arch=(
-    'arm64'
+    'darwin_arm64'
 )
 license=(
     'MIT'

@@ -1,0 +1,44 @@
+{
+    "name": "nano",
+    "version": "9.1",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Free (GNU) replacement for the Pico text editor",
+    "homepage": "https://www.nano-editor.org/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "gettext"
+    ],
+    "makedepends": [
+        "pkgconf"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/nano/blobs/sha256:ac1489518781e6ae908c84b8dd8695dc5be2fb070b25b3a6d1e475f40327d723",
+    "bottle_sha256": "ac1489518781e6ae908c84b8dd8695dc5be2fb070b25b3a6d1e475f40327d723",
+    "source_url": "https://www.nano-editor.org/dist/v9/nano-9.1.tar.xz",
+    "source_sha256": "5f47764274cb7532349ce0aa20ec10f1e8e851a6e9fa3eb66812c43d196db042",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/n/nano.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

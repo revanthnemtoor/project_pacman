@@ -1,0 +1,51 @@
+{
+    "name": "openssl",
+    "version": "3.6.3",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Cryptography and SSL/TLS Toolkit",
+    "homepage": "https://openssl-library.org",
+    "license": [
+        "Apache-2.0"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "ca-certificates"
+    ],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/openssl/3/blobs/sha256:2d995a1bbbd8e6ee6a9042990dde87e7321d1ddd5716ffee53b140d23cb9f92f",
+    "bottle_sha256": "2d995a1bbbd8e6ee6a9042990dde87e7321d1ddd5716ffee53b140d23cb9f92f",
+    "source_url": "https://github.com/openssl/openssl/releases/download/openssl-3.6.3/openssl-3.6.3.tar.gz",
+    "source_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/o/openssl@3.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": [
+            {
+                "full_name": "ca-certificates",
+                "version": "2026-07-16",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "2026-07-16",
+                "declared_directly": true
+            }
+        ]
+    },
+    "xdata": {}
+}

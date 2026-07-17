@@ -1,0 +1,40 @@
+{
+    "name": "popt",
+    "version": "1.19",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Library like getopt(3) with a number of enhancements",
+    "homepage": "https://github.com/rpm-software-management/popt",
+    "license": [
+        "MIT"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/popt/blobs/sha256:365d143d0d38003c60c1d6fb6d399ab4361690a64467d46a8f27c2f50d2dcfb6",
+    "bottle_sha256": "365d143d0d38003c60c1d6fb6d399ab4361690a64467d46a8f27c2f50d2dcfb6",
+    "source_url": "https://ftp.osuosl.org/pub/rpm/popt/releases/popt-1.x/popt-1.19.tar.gz",
+    "source_sha256": "c25a4838fc8e4c1c8aacb8bd620edb3084a3d63bf8987fdad3ca2758c63240f9",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/p/popt.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

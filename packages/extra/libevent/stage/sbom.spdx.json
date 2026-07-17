@@ -1,0 +1,55 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "name": "SBOM-SPDX-libevent-2.1.13",
+  "creationInfo": {
+    "created": "2026-07-01T11:30:17Z",
+    "creators": [
+      "Tool: https://github.com/Homebrew/brew"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://formulae.brew.sh/spdx/libevent-2.1.13.json",
+  "documentDescribes": [
+    "SPDXRef-Archive-libevent-src"
+  ],
+  "files": [
+    {
+      "SPDXID": "SPDXRef-File-libevent",
+      "fileName": "release-2.1.13-stable.tar.gz",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1a0885e17dc78afbaeddf13cf849f9238bbc24acdc178464a0d1934d7c5ffbd5"
+        }
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Archive-libevent-src",
+      "name": "libevent",
+      "versionInfo": "2.1.13",
+      "filesAnalyzed": false,
+      "licenseDeclared": "NOASSERTION",
+      "builtDate": "2026-07-01T11:30:17Z",
+      "licenseConcluded": "BSD-3-Clause",
+      "downloadLocation": "https://github.com/libevent/libevent/archive/refs/tags/release-2.1.13-stable.tar.gz",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1a0885e17dc78afbaeddf13cf849f9238bbc24acdc178464a0d1934d7c5ffbd5"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-File-libevent",
+      "relationshipType": "PACKAGE_OF",
+      "relatedSpdxElement": "SPDXRef-Archive-libevent-src"
+    }
+  ]
+}

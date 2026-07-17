@@ -1,7 +1,7 @@
-prefix=/opt/homebrew/Cellar/yyjson/0.12.0
-exec_prefix=/opt/homebrew/Cellar/yyjson/0.12.0
-libdir=/opt/homebrew/Cellar/yyjson/0.12.0/lib
-includedir=/opt/homebrew/Cellar/yyjson/0.12.0/include
+prefix=/opt/pacman/yyjson/0.12.0
+exec_prefix=/opt/pacman/yyjson/0.12.0
+libdir=/opt/pacman/yyjson/0.12.0/lib
+includedir=/opt/pacman/yyjson/0.12.0/include
 
 Name: yyjson
 Description: Fastest JSON library in C

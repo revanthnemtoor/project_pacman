@@ -3,17 +3,15 @@
   "spdxVersion": "SPDX-2.3",
   "name": "SBOM-SPDX-yyjson-0.12.0",
   "creationInfo": {
-    "created": "2026-05-10T10:43:24Z",
+    "created": "2025-08-18T18:44:14Z",
     "creators": [
-      "Tool: https://github.com/Homebrew/brew@5.1.10"
+      "Tool: https://github.com/Homebrew/brew"
     ]
   },
   "dataLicense": "CC0-1.0",
   "documentNamespace": "https://formulae.brew.sh/spdx/yyjson-0.12.0.json",
   "documentDescribes": [
-    "SPDXRef-Archive-yyjson-src",
-    "SPDXRef-Compiler",
-    "SPDXRef-Bottle-yyjson"
+    "SPDXRef-Archive-yyjson-src"
   ],
   "files": [],
   "packages": [
@@ -23,7 +21,7 @@
       "versionInfo": "0.12.0",
       "filesAnalyzed": false,
       "licenseDeclared": "NOASSERTION",
-      "builtDate": "2025-08-18T18:44:14Z",
+      "builtDate": "2025-08-18 18:44:14 UTC",
       "licenseConcluded": "MIT",
       "downloadLocation": "https://github.com/ibireme/yyjson/archive/refs/tags/0.12.0.tar.gz",
       "copyrightText": "NOASSERTION",
@@ -34,42 +32,6 @@
           "checksumValue": "b16246f617b2a136c78d73e5e2647c6f1de1313e46678062985bdcf1f40bb75d"
         }
       ]
-    },
-    {
-      "SPDXID": "SPDXRef-Compiler",
-      "name": "clang",
-      "versionInfo": "26.3",
-      "filesAnalyzed": false,
-      "licenseDeclared": "NOASSERTION",
-      "licenseConcluded": "NOASSERTION",
-      "copyrightText": "NOASSERTION",
-      "downloadLocation": "NOASSERTION",
-      "checksums": [],
-      "externalRefs": []
-    },
-    {
-      "SPDXID": "SPDXRef-Bottle-yyjson",
-      "name": "yyjson",
-      "versionInfo": "0.12.0",
-      "filesAnalyzed": false,
-      "licenseDeclared": "NOASSERTION",
-      "builtDate": "2025-08-18T18:44:14Z",
-      "licenseConcluded": "MIT",
-      "downloadLocation": "https://ghcr.io/v2/homebrew/core/yyjson/blobs/sha256:bc385fef24ac80239af24728461f03f80ce8107954a4e11149db0c5fbb64acf9",
-      "copyrightText": "NOASSERTION",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:brew/homebrew/core/yyjson@0.12.0",
-          "referenceType": "purl"
-        }
-      ],
-      "checksums": [
-        {
-          "algorithm": "SHA256",
-          "checksumValue": "bc385fef24ac80239af24728461f03f80ce8107954a4e11149db0c5fbb64acf9"
-        }
-      ]
     }
   ],
   "relationships": [
@@ -77,11 +39,6 @@
       "spdxElementId": "SPDXRef-File-yyjson",
       "relationshipType": "PACKAGE_OF",
       "relatedSpdxElement": "SPDXRef-Archive-yyjson-src"
-    },
-    {
-      "spdxElementId": "SPDXRef-Compiler",
-      "relationshipType": "BUILD_TOOL_OF",
-      "relatedSpdxElement": "SPDXRef-Package-yyjson-src"
     }
   ]
 }

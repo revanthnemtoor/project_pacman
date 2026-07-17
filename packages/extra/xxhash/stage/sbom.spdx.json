@@ -1,0 +1,44 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "name": "SBOM-SPDX-xxhash-0.8.3",
+  "creationInfo": {
+    "created": "2024-12-29T20:58:19Z",
+    "creators": [
+      "Tool: https://github.com/Homebrew/brew"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://formulae.brew.sh/spdx/xxhash-0.8.3.json",
+  "documentDescribes": [
+    "SPDXRef-Archive-xxhash-src"
+  ],
+  "files": [],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Archive-xxhash-src",
+      "name": "xxhash",
+      "versionInfo": "0.8.3",
+      "filesAnalyzed": false,
+      "licenseDeclared": "NOASSERTION",
+      "builtDate": "2024-12-29 20:58:19 UTC",
+      "licenseConcluded": "BSD-2-Clause AND GPL-2.0-or-later",
+      "downloadLocation": "https://github.com/Cyan4973/xxHash/archive/refs/tags/v0.8.3.tar.gz",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "aae608dfe8213dfd05d909a57718ef82f30722c392344583d3f39050c7f29a80"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-File-xxhash",
+      "relationshipType": "PACKAGE_OF",
+      "relatedSpdxElement": "SPDXRef-Archive-xxhash-src"
+    }
+  ]
+}

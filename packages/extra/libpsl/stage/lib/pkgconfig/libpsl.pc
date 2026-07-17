@@ -1,0 +1,15 @@
+prefix=/opt/pacman/libpsl/0.22.0
+exec_prefix=${prefix}
+libdir=/opt/pacman/libpsl/0.22.0/lib
+includedir=${prefix}/include
+
+Name: libpsl
+Description: Public Suffix List C library.
+Version: 0.22.0
+URL: https://github.com/rockdaboot/libpsl
+Requires: 
+Requires.private: 
+Libs: -L${libdir} -lpsl 
+Libs.private: -licucore -liconv 
+Cflags: -I${includedir} 
+

@@ -1,0 +1,28 @@
+pkgname=tree
+pkgver=2.3.2
+pkgrel=1
+pkgdesc="Display directories as trees (with optional color/HTML output)"
+
+url="https://oldmanprogrammer.net/source.php?dir=projects/tree"
+arch=(
+    'darwin_arm64'
+)
+license=(
+    'GPL-2.0-or-later'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

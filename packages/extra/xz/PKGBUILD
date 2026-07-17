@@ -1,0 +1,28 @@
+pkgname=xz
+pkgver=5.8.3
+pkgrel=1
+pkgdesc="General-purpose data compression with high compression ratio"
+
+url="https://tukaani.org/xz/"
+arch=(
+    'darwin_arm64'
+)
+license=(
+    '0BSD AND GPL-2.0-or-later'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

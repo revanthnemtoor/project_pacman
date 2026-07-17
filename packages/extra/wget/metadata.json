@@ -1,0 +1,89 @@
+{
+    "name": "wget",
+    "version": "1.25.0",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Internet file retriever",
+    "homepage": "https://www.gnu.org/software/wget/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "gettext",
+        "libidn2",
+        "libpsl",
+        "libunistring",
+        "openssl"
+    ],
+    "makedepends": [
+        "pkgconf"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/wget/blobs/sha256:27e15ca14afaaa7c2016bba7a098452cf66d1d8a74330ed6195a0b6ae7a4dada",
+    "bottle_sha256": "27e15ca14afaaa7c2016bba7a098452cf66d1d8a74330ed6195a0b6ae7a4dada",
+    "source_url": "https://ftpmirror.gnu.org/gnu/wget/wget-1.25.0.tar.gz",
+    "source_sha256": "766e48423e79359ea31e41db9e5c289675947a7fcf2efdcedb726ac9d0da3784",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/w/wget.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": [
+            {
+                "full_name": "libunistring",
+                "version": "1.4.2",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "1.4.2",
+                "declared_directly": true
+            },
+            {
+                "full_name": "gettext",
+                "version": "1.0",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "1.0",
+                "declared_directly": true
+            },
+            {
+                "full_name": "libidn2",
+                "version": "2.3.8",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "2.3.8",
+                "declared_directly": true
+            },
+            {
+                "full_name": "ca-certificates",
+                "version": "2026-05-14",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "2026-05-14",
+                "declared_directly": false
+            },
+            {
+                "full_name": "openssl@3",
+                "version": "3.6.2",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "3.6.2",
+                "declared_directly": true
+            }
+        ]
+    },
+    "xdata": {}
+}

@@ -23,7 +23,7 @@ class Parser:
             release=f.get("revision", 0) + 1,
             description=f.get("desc", ""),
             homepage=f.get("homepage", ""),
-            architecture="arm64",
+            architecture="darwin_arm64",
             platform="darwin",
             repository="extra",
             depends=list(f.get("dependencies", [])),

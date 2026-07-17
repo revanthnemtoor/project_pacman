@@ -1,0 +1,44 @@
+{
+    "name": "xxhash",
+    "version": "0.8.3",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Extremely fast non-cryptographic hash algorithm",
+    "homepage": "https://xxhash.com",
+    "license": [
+        "BSD-2-Clause AND GPL-2.0-or-later"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [
+        "cmake"
+    ],
+    "checkdepends": [
+        "cmake"
+    ],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/xxhash/blobs/sha256:60aa4eca9aa378cbaa79fb2ffc0d1b4a142fd32c0aaf7371b09c291530fb85d2",
+    "bottle_sha256": "60aa4eca9aa378cbaa79fb2ffc0d1b4a142fd32c0aaf7371b09c291530fb85d2",
+    "source_url": "https://github.com/Cyan4973/xxHash/archive/refs/tags/v0.8.3.tar.gz",
+    "source_sha256": "aae608dfe8213dfd05d909a57718ef82f30722c392344583d3f39050c7f29a80",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/x/xxhash.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

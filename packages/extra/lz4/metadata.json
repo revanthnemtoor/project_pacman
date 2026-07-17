@@ -1,0 +1,40 @@
+{
+    "name": "lz4",
+    "version": "1.10.0",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Extremely Fast Compression algorithm",
+    "homepage": "https://lz4.github.io/lz4/",
+    "license": [
+        "BSD-2-Clause"
+    ],
+    "architecture": "darwin_arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/lz4/blobs/sha256:caf14ac1b6c922611db94615341ed6dc97f5601664280bc1d397e10f62e37222",
+    "bottle_sha256": "caf14ac1b6c922611db94615341ed6dc97f5601664280bc1d397e10f62e37222",
+    "source_url": "https://github.com/lz4/lz4/archive/refs/tags/v1.10.0.tar.gz",
+    "source_sha256": "537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/l/lz4.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

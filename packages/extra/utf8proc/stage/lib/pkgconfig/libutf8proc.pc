@@ -1,0 +1,10 @@
+prefix=/opt/pacman/utf8proc/2.11.3
+exec_prefix=/opt/pacman/utf8proc/2.11.3/bin
+libdir=/opt/pacman/utf8proc/2.11.3/lib
+includedir=/opt/pacman/utf8proc/2.11.3/include
+
+Name: libutf8proc
+Description: UTF8 processing
+Version: 2.11.3
+Libs: -L${libdir} -lutf8proc
+Cflags: -I${includedir} -DUTF8PROC_EXPORTS
