@@ -29,4 +29,8 @@ build() {
 package() {
   cd "$srcdir/nano"
   make DESTDIR="$pkgdir" install
+  mv "$pkgdir"/opt/pacman/* "$pkgdir"/
+  rm -rf "$pkgdir"/opt
+
+  find "$pkgdir" -type f -exec sh -c 'file "$1" | grep -q "Mach-O" && codesign --sign - --force "$1"' _ {} \;
 }

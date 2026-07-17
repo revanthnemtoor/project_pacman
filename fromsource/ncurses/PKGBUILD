@@ -29,4 +29,12 @@ build() {
 package() {
   cd "$srcdir/ncurses"
   make DESTDIR="$pkgdir" install
+
+  mv "$pkgdir"/opt/pacman/* "$pkgdir"/
+  rm -rf "$pkgdir"/opt
+
+  find "$pkgdir" -type f -exec sh -c 'file "$1" | grep -q "Mach-O" && codesign --sign - --force "$1"' _ {} \;
+
+  # Create symlink for legacy compatibility
+  ln -s libncursesw.6.dylib "$pkgdir/lib/libncursesw.dylib"
 }

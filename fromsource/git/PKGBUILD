@@ -15,10 +15,14 @@ prepare() {
 
 build() {
   cd "$srcdir/git"
-  make prefix=/opt/pacman
+  make prefix=/opt/pacman INSTALL_SYMLINKS=1
 }
 
 package() {
   cd "$srcdir/git"
-  make prefix=/opt/pacman DESTDIR="$pkgdir" install
+  make prefix=/opt/pacman DESTDIR="$pkgdir" INSTALL_SYMLINKS=1 install
+  mv "$pkgdir"/opt/pacman/* "$pkgdir"/
+  rm -rf "$pkgdir"/opt
+
+  find "$pkgdir" -type f -exec sh -c 'file "$1" | grep -q "Mach-O" && codesign --sign - --force "$1"' _ {} \;
 }
