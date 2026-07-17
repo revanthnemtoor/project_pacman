@@ -259,6 +259,17 @@ def rewrite_stage(
             n = rewrite_binary(path, install_root, formula_name)
             if n > 0:
                 binary_changes += n
+            
+            # Ad-hoc sign the binary to prevent macOS Gatekeeper SIGKILL
+            subprocess.run(
+                [
+                    "codesign",
+                    "--sign", "-",
+                    "--force",
+                    str(path)
+                ],
+                capture_output=True
+            )
 
     # Rewrite text config files
     text_changes = rewrite_text_files(stage_dir, install_root)

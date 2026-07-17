@@ -1,0 +1,32 @@
+# Maintainer: Revanth Reddy Nemtoor
+pkgname=ncurses
+pkgver=6.4
+pkgrel=1
+pkgdesc="System V Release 4.0 curses emulation library"
+arch=('darwin_arm64' 'aarch64' 'arm64')
+url="https://invisible-island.net/ncurses/"
+license=('MIT')
+depends=()
+source=()
+
+prepare() {
+  cp -a "$startdir/../ncurses-src" "$srcdir/ncurses"
+}
+
+build() {
+  cd "$srcdir/ncurses"
+
+  export CFLAGS="${CFLAGS:--g -O2} -I/opt/pacman/include"
+  export LDFLAGS="${LDFLAGS} -L/opt/pacman/lib"
+  export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig"
+
+  ./configure --prefix=/opt/pacman \
+    --sysconfdir=/opt/pacman/etc
+
+  make
+}
+
+package() {
+  cd "$srcdir/ncurses"
+  make DESTDIR="$pkgdir" install
+}

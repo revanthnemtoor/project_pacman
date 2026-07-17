@@ -12,6 +12,7 @@ license=(
 )
 depends=(
     'libevent'
+    'ncurses'
     'utf8proc'
 )
 makedepends=(

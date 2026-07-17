@@ -14,7 +14,8 @@
     "repository": "extra",
     "depends": [
         "gettext",
-        "libsodium"
+        "libsodium",
+        "ncurses"
     ],
     "makedepends": [
         "gettext",

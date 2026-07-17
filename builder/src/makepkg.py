@@ -40,7 +40,7 @@ class MakepkgBuilder:
         cmd = [
             self.makepkg,
             "--config", self.config,
-            "--nosign",
+            "--sign",
             "--skipchecksums",
             "--skipinteg",
             "--nodeps",

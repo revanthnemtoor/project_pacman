@@ -1,5 +1,5 @@
 pkgname=libpsl
-pkgver=0.22.0
+pkgver=0.23.0
 pkgrel=1
 pkgdesc="C library for the Public Suffix List"
 

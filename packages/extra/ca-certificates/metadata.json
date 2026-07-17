@@ -1,6 +1,6 @@
 {
     "name": "ca-certificates",
-    "version": "2026-07-16",
+    "version": "2026.07.16",
     "release": 1,
     "epoch": 0,
     "base": null,

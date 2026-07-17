@@ -20,9 +20,13 @@ cache/*
 staging/*
 !staging/.gitkeep
 
-# Output packages
-output/*
-!output/.gitkeep
+# Build Engine Exclusions (fromsource/)
+fromsource/*-src/
+fromsource/*-release/
+fromsource/*/src/
+fromsource/*/pkg/
+fromsource/*.tar.gz
+fromsource/*.tar.xz
 
 # Package directories
 packages/*
@@ -39,9 +43,8 @@ repo/*
 build/
 dist/
 *.pkg.tar.*
-*.pkg.tar.zst
-*.pkg.tar.xz
-*.pkg.tar.gz
+*.src.tar.gz
+!output/*.pkg.tar.zst
 *.src.tar.gz
 
 # Temporary files

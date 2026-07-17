@@ -13,7 +13,8 @@
     "platform": "darwin",
     "repository": "extra",
     "depends": [
-        "gettext"
+        "gettext",
+        "ncurses"
     ],
     "makedepends": [
         "pkgconf"

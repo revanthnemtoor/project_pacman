@@ -12,6 +12,7 @@ license=(
 )
 depends=(
     'gettext'
+    'ncurses'
 )
 makedepends=(
     'pkgconf'

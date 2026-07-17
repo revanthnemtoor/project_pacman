@@ -36,7 +36,6 @@ class DependencyNormalizer:
         "expat",
         "zlib",
         "libiconv",
-        "ncurses",
     }
 
     @classmethod

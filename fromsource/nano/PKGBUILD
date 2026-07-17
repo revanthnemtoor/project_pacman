@@ -1,0 +1,32 @@
+# Maintainer: Revanth Reddy Nemtoor
+pkgname=nano
+pkgver=9.1
+pkgrel=1
+pkgdesc="Pico editor clone with enhancements"
+arch=('darwin_arm64' 'aarch64' 'arm64')
+url="https://www.nano-editor.org/"
+license=('GPL3')
+depends=('ncurses')
+source=()
+
+prepare() {
+  cp -a "$startdir/../nano-release" "$srcdir/nano"
+}
+
+build() {
+  cd "$srcdir/nano"
+
+  export CFLAGS="${CFLAGS:--g -O2} -I/opt/pacman/include"
+  export LDFLAGS="${LDFLAGS} -L/opt/pacman/lib"
+  export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig"
+
+  ./configure --prefix=/opt/pacman \
+    --sysconfdir=/opt/pacman/etc
+
+  make
+}
+
+package() {
+  cd "$srcdir/nano"
+  make DESTDIR="$pkgdir" install
+}

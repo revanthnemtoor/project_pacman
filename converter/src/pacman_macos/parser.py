@@ -19,7 +19,7 @@ class Parser:
 
         pkg = Package(
             name=f["name"],
-            version=f["versions"]["stable"],
+            version=f["versions"]["stable"].replace("-", "."),
             release=f.get("revision", 0) + 1,
             description=f.get("desc", ""),
             homepage=f.get("homepage", ""),

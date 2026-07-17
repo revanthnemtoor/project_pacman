@@ -29,7 +29,7 @@ class RepoManager:
 
         if package_paths is None:
             # Find all packages in OUTPUT_DIR
-            package_paths = list(OUTPUT_DIR.glob("*.pkg.tar.*"))
+            package_paths = [p for p in OUTPUT_DIR.glob("*.pkg.tar.*") if not p.name.endswith(".sig")]
 
         if not package_paths:
             print("No packages found to add to repository.")
@@ -38,7 +38,7 @@ class RepoManager:
         # Ensure output directory exists
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-        cmd = [str(REPO_ADD_BIN), str(self.db_path)] + [str(p) for p in package_paths]
+        cmd = [str(REPO_ADD_BIN), "--sign", str(self.db_path)] + [str(p) for p in package_paths]
 
         print(f"==> Updating repository database: {self.db_name}")
         
