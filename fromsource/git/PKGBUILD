@@ -1,0 +1,24 @@
+# Maintainer: Revanth Reddy Nemtoor
+pkgname=git
+pkgver=2.55.0
+pkgrel=1
+pkgdesc="The fast distributed version control system"
+arch=('darwin_arm64' 'aarch64' 'arm64')
+url="https://git-scm.com/"
+license=('GPL2')
+depends=()
+source=()
+
+prepare() {
+  cp -a "$startdir/../git-src" "$srcdir/git"
+}
+
+build() {
+  cd "$srcdir/git"
+  make prefix=/opt/pacman
+}
+
+package() {
+  cd "$srcdir/git"
+  make prefix=/opt/pacman DESTDIR="$pkgdir" install
+}
