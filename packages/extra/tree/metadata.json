@@ -1,0 +1,40 @@
+{
+    "name": "tree",
+    "version": "2.3.2",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Display directories as trees (with optional color/HTML output)",
+    "homepage": "https://oldmanprogrammer.net/source.php?dir=projects/tree",
+    "license": [
+        "GPL-2.0-or-later"
+    ],
+    "architecture": "arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/tree/blobs/sha256:d1967d2ed08717f963addb249ea6b8ca11c26ecb59efba34f2860853a06bedc7",
+    "bottle_sha256": "d1967d2ed08717f963addb249ea6b8ca11c26ecb59efba34f2860853a06bedc7",
+    "source_url": "https://github.com/Old-Man-Programmer/tree/archive/refs/tags/2.3.2.tar.gz",
+    "source_sha256": "22cf32e84e3eb508d97a9e991c2c3cc006b9dcf4afed201d96311c5c57d08fcf",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/t/tree.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

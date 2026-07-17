@@ -1,0 +1,51 @@
+{
+    "name": "jq",
+    "version": "1.8.2",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Lightweight and flexible command-line JSON processor",
+    "homepage": "https://jqlang.github.io/jq/",
+    "license": [
+        "MIT"
+    ],
+    "architecture": "arm64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "oniguruma"
+    ],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/jq/blobs/sha256:f6ec821177b4c55fefb4c58f8e6f5d8386a5fce0a3c5d8811c4d6a0cc818dead",
+    "bottle_sha256": "f6ec821177b4c55fefb4c58f8e6f5d8386a5fce0a3c5d8811c4d6a0cc818dead",
+    "source_url": "https://github.com/jqlang/jq/releases/download/jq-1.8.2/jq-1.8.2.tar.gz",
+    "source_sha256": "71b8d6e8f5fe81f6c6d0d110e3892251f6ce76ed095abd315e26e6e1193af3af",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/j/jq.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": [
+            {
+                "full_name": "oniguruma",
+                "version": "6.9.10",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "6.9.10",
+                "declared_directly": true
+            }
+        ]
+    },
+    "xdata": {}
+}
