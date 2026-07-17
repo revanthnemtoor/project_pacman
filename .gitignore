@@ -24,7 +24,39 @@ staging/*
 output/*
 !output/.gitkeep
 
+# Package directories
+packages/*
+!packages/.gitkeep
+
+new_packages/*
+!new_packages/.gitkeep
+
+# Repository data
+repo/*
+!repo/.gitkeep
+
 # Build artifacts
 build/
 dist/
 *.pkg.tar.*
+*.pkg.tar.zst
+*.pkg.tar.xz
+*.pkg.tar.gz
+*.src.tar.gz
+
+# Temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# Python cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.vscode/
+.idea/
