@@ -18,13 +18,19 @@ makedepends=(
     'gettext'
     'pkgconf'
 )
-source=(
-    'https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.55.0.tar.xz'
-)
-sha256sums=(
-    '457fdb04dc8728e007d4688695e6912e6f680727920f2a40bf11eacc17505357'
-)
+options=('!strip')
+source=()
+sha256sums=()
 
 package() {
-    cp -a "$srcdir/stage/"* "$pkgdir/usr/"
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir/usr"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
 }
