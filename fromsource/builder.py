@@ -31,7 +31,7 @@ from fromsource.verifier import PackageVerifier, VerificationResult
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 FROMSOURCE_DIR = PROJECT_ROOT / "fromsource"
-OUTPUT_DIR = PROJECT_ROOT / "output"
+OUTPUT_DIR = PROJECT_ROOT / "core"
 REPO_DIR = PROJECT_ROOT / "repo"
 
 PACMAN_ROOT = Path("/opt/pacman")
@@ -39,7 +39,7 @@ MAKEPKG_BIN = PACMAN_ROOT / "bin" / "makepkg"
 MAKEPKG_CONF = PACMAN_ROOT / "etc" / "makepkg.conf"
 REPO_ADD_BIN = PACMAN_ROOT / "bin" / "repo-add"
 
-REPO_DB = OUTPUT_DIR / "pacman.db.tar.gz"
+REPO_DB = OUTPUT_DIR / "core.db.tar.gz"
 
 
 class SourceBuilder:
@@ -143,6 +143,13 @@ class SourceBuilder:
 
         env = os.environ.copy()
         env["PKGDEST"] = str(OUTPUT_DIR)
+        
+        # Ensure brew keg-only tools like bison and libtool are in PATH
+        gnubin = "/opt/homebrew/opt/libtool/libexec/gnubin:/opt/homebrew/opt/bison/bin"
+        if "PATH" in env:
+            env["PATH"] = f"{gnubin}:{env['PATH']}"
+        else:
+            env["PATH"] = gnubin
 
         cmd = [
             str(MAKEPKG_BIN),
@@ -152,6 +159,7 @@ class SourceBuilder:
             "--skipinteg",
             "--nodeps",
             "-f",
+            "-C",
         ]
 
         print(f"  -> Command: {' '.join(cmd)}")

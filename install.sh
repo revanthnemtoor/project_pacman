@@ -1,53 +1,69 @@
-#!/bin/bash
-# Pacman for macOS - Bootstrap Installer
-# Run this script to install and configure Pacman on a new macOS system!
+#!/usr/bin/env bash
+# macOS Pacman Installer
+# curl -fsSL https://.../install.sh | bash
 
 set -e
 
-PACMAN_ROOT="/opt/pacman"
-PACMAN_DB_URL="https://revanthnemtoor.github.io/project_pacman/output"
+PACMAN_PREFIX="/opt/pacman"
+REPO_URL="file:///Users/revanthnemtoo/project_pacman/core"
+BOOTSTRAP_URL="file:///Users/revanthnemtoo/project_pacman/pacman-bootstrap.tar.gz"
 
-echo "============================================================"
-echo "  Pacman for macOS (ARM64) Installer"
-echo "============================================================"
-echo ""
+echo "========================================="
+echo "  Installing Pacman for macOS (ARM64)  "
+echo "========================================="
 
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run this script with sudo:"
-  echo "sudo bash install.sh"
-  exit 1
-fi
-
-echo "==> Configuring Pacman..."
-if [ ! -f "${PACMAN_ROOT}/etc/pacman.conf" ]; then
-    echo "Error: /opt/pacman not found. Please install the base bootstrap tarball first."
+if [ "$(uname -s)" != "Darwin" ]; then
+    echo "Error: This installer is only for macOS."
     exit 1
 fi
 
-# Enable Color and ILoveCandy easter egg
-sed -i '' 's/#Color/Color\nILoveCandy/' "${PACMAN_ROOT}/etc/pacman.conf"
+if [ "$(uname -m)" != "arm64" ]; then
+    echo "Error: This installer currently requires Apple Silicon (arm64)."
+    exit 1
+fi
 
-# Set ParallelDownloads to 10
-sed -i '' 's/#ParallelDownloads = 5/ParallelDownloads = 10/' "${PACMAN_ROOT}/etc/pacman.conf"
-sed -i '' 's/ParallelDownloads = 5/ParallelDownloads = 10/' "${PACMAN_ROOT}/etc/pacman.conf"
+echo "-> Requesting sudo privileges for installation..."
+sudo -v
 
-# Disable SigLevel for LocalFiles and TrustAll
-sed -i '' 's/SigLevel = Required DatabaseOptional/SigLevel = Optional TrustAll/' "${PACMAN_ROOT}/etc/pacman.conf"
+echo "-> Setting up $PACMAN_PREFIX directory..."
+sudo mkdir -p "$PACMAN_PREFIX"
+sudo chown -R $(whoami) "$PACMAN_PREFIX"
 
-# Set Server URL to GitHub Pages
-sed -i '' "s|Server = file:///.*|Server = ${PACMAN_DB_URL}|" "${PACMAN_ROOT}/etc/pacman.conf"
+echo "-> Downloading bootstrap environment..."
+# In production, this would be a real URL
+curl -fsSL "$BOOTSTRAP_URL" -o /tmp/pacman-bootstrap.tar.gz || {
+    echo "For local testing, assuming /opt/pacman is already populated or bootstrap tarball is available."
+}
 
-echo "==> Setting up system PATH..."
-echo "${PACMAN_ROOT}/bin" > /etc/paths.d/pacman
+if [ -f /tmp/pacman-bootstrap.tar.gz ]; then
+    echo "-> Extracting bootstrap to $PACMAN_PREFIX..."
+    tar -xzf /tmp/pacman-bootstrap.tar.gz -C /
+    rm /tmp/pacman-bootstrap.tar.gz
+fi
 
-echo "==> Synchronizing package databases..."
-${PACMAN_ROOT}/bin/pacman -Sy
+echo "-> Configuring pacman.conf..."
+cat << EOF > "$PACMAN_PREFIX/etc/pacman.conf"
+[options]
+HoldPkg     = pacman glibc
+Architecture = auto
+CheckSpace
+SigLevel    = Required DatabaseOptional
+LocalFileSigLevel = Optional
+NoExtract   = opt/pacman/share/info/dir
 
-echo ""
-echo "============================================================"
+[core]
+Server = $REPO_URL
+EOF
+
+echo "-> Initializing Pacman keyring..."
+sudo "$PACMAN_PREFIX/bin/pacman-key" --init
+sudo "$PACMAN_PREFIX/bin/pacman-key" --populate archlinux || true
+
+echo "-> Synchronizing package databases..."
+sudo "$PACMAN_PREFIX/bin/pacman" -Sy
+
+echo "========================================="
 echo "  Installation Complete!"
-echo "============================================================"
-echo "You can now install packages using:"
-echo "  sudo pacman -S <package_name>"
-echo ""
-echo "Please restart your terminal to update your PATH!"
+echo "  Please add $PACMAN_PREFIX/bin to your PATH:"
+echo "  echo 'export PATH=\"$PACMAN_PREFIX/bin:\$PATH\"' >> ~/.zshrc"
+echo "========================================="

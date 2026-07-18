@@ -112,11 +112,19 @@ class PKGBUILDGenerator:
               cd "$srcdir/{self.name}"
 
               export CFLAGS="${{CFLAGS:--g -O2}} -I{INSTALL_PREFIX}/include"
-              export LDFLAGS="${{LDFLAGS}} -L{INSTALL_PREFIX}/lib"
+              export LDFLAGS="${{LDFLAGS}} -L{INSTALL_PREFIX}/lib -liconv"
               export PKG_CONFIG_PATH="{INSTALL_PREFIX}/lib/pkgconfig"
 
-            {autogen_block}  ./configure --prefix={INSTALL_PREFIX} \\
-                --sysconfdir={INSTALL_PREFIX}/etc
+            {autogen_block}              if [ "{self.name}" = "openssl" ]; then
+                chmod +x ./config || true
+                ./config --prefix={INSTALL_PREFIX} --openssldir={INSTALL_PREFIX}/etc/ssl
+              elif [ -f ./configure ]; then
+                chmod +x ./configure || true
+                ./configure --prefix={INSTALL_PREFIX} --sysconfdir={INSTALL_PREFIX}/etc --disable-nls
+              elif [ -f ./config ]; then
+                chmod +x ./config || true
+                ./config --prefix={INSTALL_PREFIX}
+              fi
 
               make
             }}
@@ -232,12 +240,12 @@ class PKGBUILDGenerator:
         return dedent(f"""\
             build() {{
               cd "$srcdir/{self.name}"
-              make prefix={INSTALL_PREFIX}
+              make prefix={INSTALL_PREFIX} PREFIX={INSTALL_PREFIX}
             }}
 
             package() {{
               cd "$srcdir/{self.name}"
-              make prefix={INSTALL_PREFIX} DESTDIR="$pkgdir" install
+              make prefix={INSTALL_PREFIX} PREFIX={INSTALL_PREFIX} DESTDIR="$pkgdir" install
             }}
         """)
 

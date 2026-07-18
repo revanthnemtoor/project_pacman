@@ -1,0 +1,69 @@
+Pacman for macOS - Installation & Uninstallation Guide
+======================================================
+
+This guide explains how to properly wipe an old installation, perform a fresh installation from source, and completely uninstall the custom Pacman environment from your macOS system.
+
+------------------------------------------------------
+1. FRESH INSTALLATION (Wipe & Rebuild)
+------------------------------------------------------
+
+Run the following commands to completely wipe the existing stale pacman configuration and database, and recompile it properly for Apple Silicon (ARM64):
+
+# 1. Wipe the existing pacman installation (requires sudo)
+sudo rm -rf /opt/pacman/*
+
+# 2. Recompile pacman from source using your Homebrew dependencies
+cd /Users/revanthnemtoo/pacman
+export PKG_CONFIG_PATH="/opt/homebrew/opt/libarchive/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/opt/homebrew/opt/openssl@3/lib/pkgconfig"
+export CFLAGS="-I/opt/homebrew/opt/libarchive/include -I/opt/homebrew/opt/gettext/include"
+export LDFLAGS="-L/opt/homebrew/opt/libarchive/lib -L/opt/homebrew/opt/curl/lib -L/opt/homebrew/opt/openssl@3/lib -L/opt/homebrew/opt/gettext/lib -liconv -lintl"
+rm -rf build
+meson setup build --prefix=/opt/pacman --sysconfdir=/opt/pacman/etc --localstatedir=/opt/pacman/var -D crypto=openssl
+ninja -C build install
+
+# 3. Add Homebrew libraries to the compiled dynamic binaries
+install_name_tool -add_rpath /opt/homebrew/opt/curl/lib /opt/pacman/lib/libalpm.16.dylib
+install_name_tool -add_rpath /opt/homebrew/opt/openssl@3/lib /opt/pacman/lib/libalpm.16.dylib
+
+# 4. Configure pacman.conf and makepkg.conf
+cat << 'EOF' > /opt/pacman/etc/pacman.conf
+[options]
+HoldPkg     = pacman glibc
+Architecture = darwin_arm64
+CheckSpace
+ParallelDownloads = 5
+SigLevel = Required DatabaseOptional
+
+[core]
+Server = https://revanthnemtoor.github.io/project_pacman/core
+EOF
+
+mkdir -p /opt/pacman/etc
+cat << 'EOF' > /opt/pacman/etc/makepkg.conf
+PACKAGER="Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"
+GPGKEY="276C37EC8DB2DCF235B3EAC02C3E87EC7EC39843"
+EOF
+
+# 5. Patch repo-add and pacman-key
+sed -i '' 's/bsdtar -tqf/bsdtar -tf/g' /opt/pacman/bin/repo-add
+# Note: Manually edit /opt/pacman/bin/pacman-key and remove lines containing `EUID != 0` checks.
+
+# 6. Initialize GPG Keyring and trust the repo key
+export PATH="/opt/pacman/bin:$PATH"
+pacman-key --init
+pacman-key --add /Users/revanthnemtoo/project_pacman/keys/repo.pub
+pacman-key --lsign-key 276C37EC8DB2DCF235B3EAC02C3E87EC7EC39843
+
+# 7. Sync Databases and Install All Packages
+pacman -Sy
+pacman -S $(pacman -Slq) --noconfirm --overwrite "*"
+
+
+------------------------------------------------------
+2. COMPLETE UNINSTALLATION
+------------------------------------------------------
+
+If you wish to remove pacman and all installed packages entirely from your system, execute:
+
+sudo rm -rf /opt/pacman
+rm -rf /Users/revanthnemtoo/.gnupg/pacman  # (If you stored any keys here locally)

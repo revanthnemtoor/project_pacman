@@ -1,0 +1,64 @@
+# Pacman for macOS - Installation and Uninstallation Guide
+
+This guide outlines the commands necessary to perform a fresh installation or complete uninstallation of the native macOS Pacman package manager and its managed environment.
+
+## 1. Fresh Installation
+
+To install Pacman from source and set up the pristine root environment on macOS:
+
+```bash
+# 1. Ensure you have the Apple Command Line Tools installed
+xcode-select --install
+
+# 2. Clone the Pacman source (if not already downloaded)
+git clone https://gitlab.archlinux.org/pacman/pacman.git
+cd pacman
+
+# 3. Configure the build for macOS native compilation
+# We prefix to /opt/pacman to isolate the environment from Homebrew or macOS system files
+meson setup builddir --prefix=/opt/pacman -Dbuildtype=release
+
+# 4. Compile and install
+ninja -C builddir
+sudo ninja -C builddir install
+
+# 5. Initialize the pacman keyring
+sudo /opt/pacman/bin/pacman-key --init
+sudo /opt/pacman/bin/pacman-key --populate
+
+# 6. Configure pacman.conf
+# Ensure /opt/pacman/etc/pacman.conf points to your local macOS native repositories.
+# Add the following at the end of the file:
+# [core]
+# SigLevel = Optional TrustAll
+# Server = file:///Users/revanthnemtoo/project_pacman/core
+```
+
+## 2. Uninstallation
+
+If you need to completely remove the Pacman environment and all its managed packages from your macOS system:
+
+```bash
+# 1. Remove all pacman managed packages (optional, but good for cleanup)
+sudo /opt/pacman/bin/pacman -Rsc $(/opt/pacman/bin/pacman -Qq)
+
+# 2. Remove the isolated pacman root directory
+sudo rm -rf /opt/pacman
+
+# 3. Remove global cache and state directories (if they exist outside prefix)
+sudo rm -rf /var/cache/pacman
+sudo rm -rf /var/lib/pacman
+
+# 4. Remove any environment variables
+# Open your ~/.zshrc or ~/.bash_profile and remove any paths pointing to /opt/pacman/bin
+```
+
+## 3. Package Management Commands
+
+Once installed, you can use the standard pacman commands to interact with your native macOS repository:
+
+*   **Install a package:** `sudo /opt/pacman/bin/pacman -S <package_name>`
+*   **Remove a package:** `sudo /opt/pacman/bin/pacman -Rs <package_name>`
+*   **Update database:** `sudo /opt/pacman/bin/pacman -Sy`
+*   **Search for a package:** `/opt/pacman/bin/pacman -Ss <search_term>`
+*   **List installed packages:** `/opt/pacman/bin/pacman -Q`
