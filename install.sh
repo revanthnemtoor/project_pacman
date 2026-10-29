@@ -268,9 +268,9 @@ fi
 ninja -C build install
 
 # -----------------------------------------------------------------------------
-# 6. Filter Architecture Packages & Rebuild Local Repo Databases
+# 6. Activate Pre-Built Architecture Repo Databases (No repo-add Needed)
 # -----------------------------------------------------------------------------
-echo "-> Configuring repositories for $HW_MODEL ($DARWIN_ARCH)..."
+echo "-> Activating pre-built $DARWIN_ARCH databases in core/ and output/..."
 # Remove incompatible packages from pacman cache and sync state
 rm -f "$PACMAN_PREFIX/var/cache/pacman/pkg/"*-"${OTHER_ARCH}".pkg.tar.zst* 2>/dev/null || true
 rm -f "$PACMAN_PREFIX/var/lib/pacman/sync/"*.db* 2>/dev/null || true
@@ -282,39 +282,30 @@ if [ -z "$SCRIPT_DIR" ] || [ "${CLEAN_OTHER_ARCH:-0}" = "1" ]; then
     rm -f "$PROJECT_DIR/output/"*-"${OTHER_ARCH}".pkg.tar.zst* 2>/dev/null || true
 fi
 
-rebuild_repo_db() {
+activate_prebuilt_db() {
     local repo_dir="$1"
     local repo_name="$2"
     mkdir -p "$repo_dir"
-    rm -f "$repo_dir/${repo_name}.db"* "$repo_dir/${repo_name}.files"* 2>/dev/null || true
 
-    shopt -s nullglob
-    local arch_pkgs=("$repo_dir/"*-"${DARWIN_ARCH}".pkg.tar.zst "$repo_dir/"*-any.pkg.tar.zst)
-    shopt -u nullglob
-
-    if [ ${#arch_pkgs[@]} -gt 0 ]; then
-        echo "   Indexing ${#arch_pkgs[@]} $DARWIN_ARCH package(s) in [$repo_name]..."
-        "$PACMAN_PREFIX/bin/repo-add" "$repo_dir/${repo_name}.db.tar.gz" "${arch_pkgs[@]}"
-    else
-        echo "   Initializing empty $DARWIN_ARCH database for [$repo_name]..."
-        tar -czf "$repo_dir/${repo_name}.db.tar.gz" -T /dev/null
-        ln -sf "${repo_name}.db.tar.gz" "$repo_dir/${repo_name}.db"
+    if [ -f "$repo_dir/${repo_name}-${DARWIN_ARCH}.db.tar.gz" ]; then
+        rm -f "$repo_dir/${repo_name}.db" "$repo_dir/${repo_name}.db.tar.gz"
+        cp "$repo_dir/${repo_name}-${DARWIN_ARCH}.db.tar.gz" "$repo_dir/${repo_name}.db.tar.gz"
+        cp "$repo_dir/${repo_name}-${DARWIN_ARCH}.db.tar.gz" "$repo_dir/${repo_name}.db"
+    fi
+    if [ -f "$repo_dir/${repo_name}-${DARWIN_ARCH}.files.tar.gz" ]; then
+        rm -f "$repo_dir/${repo_name}.files" "$repo_dir/${repo_name}.files.tar.gz"
+        cp "$repo_dir/${repo_name}-${DARWIN_ARCH}.files.tar.gz" "$repo_dir/${repo_name}.files.tar.gz"
+        cp "$repo_dir/${repo_name}-${DARWIN_ARCH}.files.tar.gz" "$repo_dir/${repo_name}.files"
     fi
 }
 
-rebuild_repo_db "$PROJECT_DIR/core" "core"
-rebuild_repo_db "$PROJECT_DIR/output" "pacman"
+activate_prebuilt_db "$PROJECT_DIR/core" "core"
+activate_prebuilt_db "$PROJECT_DIR/output" "pacman"
 
 # -----------------------------------------------------------------------------
 # 7. Configure pacman.conf & makepkg.conf Exclusively for Current Architecture
 # -----------------------------------------------------------------------------
 echo "-> Writing $PACMAN_PREFIX/etc/pacman.conf (Architecture = $DARWIN_ARCH $HOST_ARCH any)..."
-if [ "$DARWIN_ARCH" = "darwin_arm64" ]; then
-    CORE_REMOTE_LINE="Server = https://revanthnemtoor.github.io/project_pacman/core"
-else
-    CORE_REMOTE_LINE="# Remote arm64 mirror disabled on $DARWIN_ARCH to prevent cross-arch crashes"
-fi
-
 cat << EOF > "$PACMAN_PREFIX/etc/pacman.conf"
 #
 # $PACMAN_PREFIX/etc/pacman.conf
@@ -340,14 +331,15 @@ LocalFileSigLevel = Optional
 RemoteFileSigLevel = Optional
 NoExtract   = opt/pacman/share/info/dir
 
-[core]
-SigLevel = Optional TrustAll
-Server = file://$PROJECT_DIR/core
-$CORE_REMOTE_LINE
-
 [pacman]
 SigLevel = Optional TrustAll
 Server = file://$PROJECT_DIR/output
+Server = https://revanthnemtoor.github.io/project_pacman/output
+
+[core]
+SigLevel = Optional TrustAll
+Server = file://$PROJECT_DIR/core
+Server = https://revanthnemtoor.github.io/project_pacman/core
 EOF
 
 cp "$PACMAN_PREFIX/etc/pacman.conf" "$PROJECT_DIR/configs/pacman.conf" 2>/dev/null || true

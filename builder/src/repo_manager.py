@@ -67,6 +67,24 @@ class RepoManager:
             print(f"Error updating repository: {result.stderr}")
             return False
 
+        # Save arch-specific pre-built DB and convert symlinks to real files for GitHub Pages
+        base_prefix = self.db_name.split(".db")[0]
+        db_link = OUTPUT_DIR / f"{base_prefix}.db"
+        files_tar = OUTPUT_DIR / f"{base_prefix}.files.tar.gz"
+        files_link = OUTPUT_DIR / f"{base_prefix}.files"
+
+        if self.db_path.exists():
+            shutil.copy2(self.db_path, OUTPUT_DIR / f"{base_prefix}-{DARWIN_ARCH}.db.tar.gz")
+            if db_link.is_symlink() or db_link.exists():
+                db_link.unlink()
+            shutil.copy2(self.db_path, db_link)
+
+        if files_tar.exists():
+            shutil.copy2(files_tar, OUTPUT_DIR / f"{base_prefix}-{DARWIN_ARCH}.files.tar.gz")
+            if files_link.is_symlink() or files_link.exists():
+                files_link.unlink()
+            shutil.copy2(files_tar, files_link)
+
         print(f"  -> Added {len(package_paths)} packages to {self.db_name}")
         return True
 

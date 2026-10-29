@@ -152,10 +152,24 @@ def main():
             shutil.copy2(match, dest)
             core_archives.append(str(dest))
         if core_archives:
+            db_tar = core_dir / "core.db.tar.gz"
+            files_tar = core_dir / "core.files.tar.gz"
             subprocess.run(
-                ["/opt/pacman/bin/repo-add", str(core_dir / "core.db.tar.gz"), *core_archives],
+                ["/opt/pacman/bin/repo-add", str(db_tar), *core_archives],
                 cwd=project_dir,
             )
+            if db_tar.exists():
+                shutil.copy2(db_tar, core_dir / f"core-{darwin_arch}.db.tar.gz")
+                db_link = core_dir / "core.db"
+                if db_link.is_symlink() or db_link.exists():
+                    db_link.unlink()
+                shutil.copy2(db_tar, db_link)
+            if files_tar.exists():
+                shutil.copy2(files_tar, core_dir / f"core-{darwin_arch}.files.tar.gz")
+                files_link = core_dir / "core.files"
+                if files_link.is_symlink() or files_link.exists():
+                    files_link.unlink()
+                shutil.copy2(files_tar, files_link)
 
     # Copy to new_packages
     for file_path in output_dir.glob("*.pkg.tar.zst"):
