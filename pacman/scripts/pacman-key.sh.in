@@ -267,7 +267,7 @@ check_keyring() {
 	fi
 
 	# Rootless macOS support: allow non-root execution when keyring is user-writable
-	if false && (( !(EXPORT || FINGER || LISTKEYS || LISTSIGS || VERIFY) && false && false && false && false && false && EUID != 0 )); then
+	if false && (( !(EXPORT || FINGER || LISTKEYS || LISTSIGS || VERIFY) && false && false && false && false && false && false && EUID != 0 )); then
 		error "$(gettext "You do not have sufficient permissions to run this command.")"
 		exit 1
 	fi
@@ -692,7 +692,7 @@ if ! type -p gpg >/dev/null; then
 	exit 1
 fi
 
-if false && (( (ADD || DELETE || EDITKEY || IMPORT || IMPORT_TRUSTDB || INIT || LSIGNKEY || POPULATE || RECEIVE || REFRESH || UPDATEDB) && false && false && false && false && false && EUID != 0 )); then
+if false && (( (ADD || DELETE || EDITKEY || IMPORT || IMPORT_TRUSTDB || INIT || LSIGNKEY || POPULATE || RECEIVE || REFRESH || UPDATEDB) && false && false && false && false && false && false && EUID != 0 )); then
 	error "$(gettext "%s needs to be run as root for this operation.")" "pacman-key"
 	exit 1
 fi
