@@ -5,10 +5,11 @@ Wraps pacman's repo-add and repo-remove commands.
 
 from __future__ import annotations
 
+import shutil
 import subprocess
 from pathlib import Path
 
-from pacman_macos.constants import REPO_ADD_BIN, OUTPUT_DIR
+from pacman_macos.constants import REPO_ADD_BIN, OUTPUT_DIR, DARWIN_ARCH
 
 
 class RepoManager:
@@ -21,15 +22,20 @@ class RepoManager:
     def update_repo(self, package_paths: list[Path | str] | None = None) -> bool:
         """
         Add packages to the repository database.
-        If package_paths is None, adds all .pkg.tar.zst files in OUTPUT_DIR.
+        If package_paths is None, adds all .pkg.tar.zst files in OUTPUT_DIR
+        matching the current DARWIN_ARCH (or 'any').
         """
         if not REPO_ADD_BIN.exists():
             print(f"Error: repo-add not found at {REPO_ADD_BIN}")
             return False
 
         if package_paths is None:
-            # Find all packages in OUTPUT_DIR
-            package_paths = [p for p in OUTPUT_DIR.glob("*.pkg.tar.*") if not p.name.endswith(".sig")]
+            # Find all packages in OUTPUT_DIR matching current DARWIN_ARCH or 'any'
+            package_paths = [
+                p for p in OUTPUT_DIR.glob("*.pkg.tar.*")
+                if not p.name.endswith(".sig")
+                and (f"-{DARWIN_ARCH}.pkg.tar." in p.name or "-any.pkg.tar." in p.name)
+            ]
 
         if not package_paths:
             print("No packages found to add to repository.")
@@ -38,7 +44,16 @@ class RepoManager:
         # Ensure output directory exists
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-        cmd = [str(REPO_ADD_BIN), "--sign", str(self.db_path)] + [str(p) for p in package_paths]
+        cmd = [str(REPO_ADD_BIN)]
+        if shutil.which("gpg"):
+            gpg_check = subprocess.run(
+                ["gpg", "--list-secret-keys"],
+                capture_output=True,
+                text=True,
+            )
+            if gpg_check.returncode == 0 and gpg_check.stdout.strip():
+                cmd.append("--sign")
+        cmd.extend([str(self.db_path)] + [str(p) for p in package_paths])
 
         print(f"==> Updating repository database: {self.db_name}")
         

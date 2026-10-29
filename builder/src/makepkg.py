@@ -6,6 +6,7 @@ Runs makepkg to build a .pkg.tar.zst archive from a PKGBUILD.
 
 from __future__ import annotations
 
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -40,23 +41,34 @@ class MakepkgBuilder:
         cmd = [
             self.makepkg,
             "--config", self.config,
-            "--sign",
             "--skipchecksums",
             "--skipinteg",
             "--nodeps",
         ]
 
+        if shutil.which("gpg"):
+            gpg_check = subprocess.run(
+                ["gpg", "--list-secret-keys"],
+                capture_output=True,
+                text=True,
+            )
+            if gpg_check.returncode == 0 and gpg_check.stdout.strip():
+                cmd.append("--sign")
+
         if force:
             cmd.append("-f")
+
+        base_path = subprocess.check_output(
+            ["bash", "-c", "echo $PATH"],
+            text=True,
+        ).strip()
+        extra_paths = "/opt/pacman/bin:/opt/local/bin:/usr/local/bin:/opt/homebrew/bin"
 
         env = {
             "PKGDEST": str(self.output_dir),
             "SRCDEST": str(package_dir / "src"),
             "BUILDDIR": str(package_dir / "build"),
-            "PATH": subprocess.check_output(
-                ["bash", "-c", "echo $PATH"],
-                text=True,
-            ).strip(),
+            "PATH": f"{extra_paths}:{base_path}",
             "HOME": str(Path.home()),
         }
 

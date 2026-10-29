@@ -62,9 +62,9 @@ class PackageVerifier:
             if self._is_macho(path):
                 result.binary_count += 1
 
-                # Check architecture
-                if not self._check_arm64(path):
-                    result.add_error(f"Binary is not ARM64: {path.name}")
+                # Check architecture (supports ARM64 Apple Silicon and x86_64 Intel)
+                if not self._check_arch(path):
+                    result.add_error(f"Binary is not ARM64 or x86_64: {path.name}")
 
                 # Check code signature
                 if self._check_codesign(path):
@@ -141,10 +141,10 @@ class PackageVerifier:
                         f"Packager is not Revanth Reddy Nemtoor: {line}"
                     )
 
-                # Verify arch
+                # Verify arch (support both Apple Silicon and Intel Mac)
                 if key == "arch":
                     val = line.split("=", 1)[1].strip()
-                    if val not in ("aarch64", "arm64", "darwin_arm64"):
+                    if val not in ("aarch64", "arm64", "darwin_arm64", "x86_64", "darwin_x86_64", "any"):
                         result.add_warning(f"Unexpected arch: {val}")
 
         missing = required - found
@@ -173,6 +173,15 @@ class PackageVerifier:
             capture_output=True, text=True,
         )
         return "arm64" in proc.stdout.lower()
+
+    @staticmethod
+    def _check_arch(path: Path) -> bool:
+        proc = subprocess.run(
+            ["file", str(path)],
+            capture_output=True, text=True,
+        )
+        out = proc.stdout.lower()
+        return "arm64" in out or "x86_64" in out or "universal" in out
 
     @staticmethod
     def _check_codesign(path: Path) -> bool:

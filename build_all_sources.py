@@ -4,13 +4,15 @@ import tempfile
 import shutil
 from pathlib import Path
 
-FROMSOURCE_DIR = Path("/Users/revanthnemtoo/project_pacman/fromsource")
-CORE_DIR = Path("/Users/revanthnemtoo/project_pacman/core")
+PROJECT_DIR = Path(__file__).resolve().parent
+FROMSOURCE_DIR = PROJECT_DIR / "fromsource"
+CORE_DIR = PROJECT_DIR / "core"
 PACMAN_BIN = Path("/opt/pacman/bin/pacman")
 MAKEPKG_BIN = Path("/opt/pacman/bin/makepkg")
 MAKEPKG_CONF = Path("/opt/pacman/etc/makepkg.conf")
 REPO_ADD_BIN = Path("/opt/pacman/bin/repo-add")
 REPO_DB = CORE_DIR / "core.db.tar.gz"
+ZSTD_BIN = shutil.which("zstd") or "/opt/homebrew/bin/zstd"
 
 def codesign_and_repack(pkg_file: Path) -> None:
     """Extract, codesign Mach-O binaries, and repack."""
@@ -37,7 +39,7 @@ def codesign_and_repack(pkg_file: Path) -> None:
             pack_cmd = (
                 f"cd {tmpdir} && "
                 f"tar -cf - .PKGINFO .BUILDINFO opt/ 2>/dev/null | "
-                f"/opt/homebrew/bin/zstd -c -T0 -19 -z > {pkg_file.absolute()}"
+                f"{ZSTD_BIN} -c -T0 -19 -z > {pkg_file.absolute()}"
             )
             subprocess.run(pack_cmd, shell=True, check=True)
             print(f"  -> Signed {signed} binaries")
@@ -56,8 +58,11 @@ def build_package(pkgbuild_dir: Path):
     env = os.environ.copy()
     env["PKGDEST"] = str(CORE_DIR)
     
-    # Path for gnubin (make, grep, etc during compilation)
-    gnubin = "/opt/homebrew/opt/libtool/libexec/gnubin:/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/make/libexec/gnubin:/opt/homebrew/opt/gettext/bin"
+    # Path for gnubin (make, grep, etc during compilation) - supports Apple Silicon (/opt/homebrew) and Intel (/usr/local)
+    gnubin = (
+        "/opt/homebrew/opt/libtool/libexec/gnubin:/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/make/libexec/gnubin:/opt/homebrew/opt/gettext/bin:"
+        "/usr/local/opt/libtool/libexec/gnubin:/usr/local/opt/bison/bin:/usr/local/opt/make/libexec/gnubin:/usr/local/opt/gettext/bin"
+    )
     if "PATH" in env:
         env["PATH"] = f"{gnubin}:{env['PATH']}"
     else:
@@ -66,7 +71,6 @@ def build_package(pkgbuild_dir: Path):
     cmd = [
         str(MAKEPKG_BIN),
         "--config", str(MAKEPKG_CONF),
-        "--sign",
         "--skipchecksums",
         "--skipinteg",
         "--nodeps",
@@ -99,12 +103,15 @@ def build_package(pkgbuild_dir: Path):
     # Codesign
     codesign_and_repack(pkg_file)
     
-    # Re-sign the package for pacman
-    print(f"  -> Signing package...")
+    # Optionally sign the package with GPG if a secret key is available
     sig_file = pkg_file.with_name(pkg_file.name + ".sig")
     if sig_file.exists():
         sig_file.unlink()
-    subprocess.run(["gpg", "--detach-sign", "--local-user", "276C37EC8DB2DCF235B3EAC02C3E87EC7EC39843", "--no-armor", str(pkg_file)], check=True)
+    if shutil.which("gpg"):
+        gpg_keys = subprocess.run(["gpg", "--list-secret-keys"], capture_output=True, text=True)
+        if gpg_keys.returncode == 0 and gpg_keys.stdout.strip():
+            print(f"  -> Signing package with GPG...")
+            subprocess.run(["gpg", "--detach-sign", "--no-armor", str(pkg_file)], check=False)
     
     return pkg_file
 
@@ -141,7 +148,7 @@ def main():
     print(f"\n==> Updating repository database")
     for pkg in built_pkgs:
         try:
-            subprocess.run([str(REPO_ADD_BIN), "--sign", str(REPO_DB), str(pkg)], check=True, capture_output=True)
+            subprocess.run([str(REPO_ADD_BIN), str(REPO_DB), str(pkg)], check=True, capture_output=True)
             print(f"  -> Added {pkg.name}")
         except subprocess.CalledProcessError as e:
             print(f"  -> ERROR: Failed to add {pkg.name} to database: {e}")

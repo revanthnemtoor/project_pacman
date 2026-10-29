@@ -24,14 +24,20 @@ class RepositoryBuilder:
     # ------------------------------------------------------
 
     def create(self, package: Package) -> Path:
+        import shutil
 
         root = self.package_dir(package)
 
         root.mkdir(parents=True, exist_ok=True)
 
-        (root / "stage").mkdir(exist_ok=True)
+        # Clean previous stage/pkg directories to avoid mixing architectures
+        for subdir in ("stage", "pkg"):
+            subpath = root / subdir
+            if subpath.exists():
+                shutil.rmtree(subpath)
+            subpath.mkdir(exist_ok=True)
+
         (root / "src").mkdir(exist_ok=True)
-        (root / "pkg").mkdir(exist_ok=True)
         (root / "logs").mkdir(exist_ok=True)
 
         PKGBUILDBuilder(package).write(root / "PKGBUILD")

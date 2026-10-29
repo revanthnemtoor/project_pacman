@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from pacman_macos.formula import Formula
 from pacman_macos.package import Package
+from pacman_macos.constants import DARWIN_ARCH
 
 
 class Parser:
@@ -23,7 +24,7 @@ class Parser:
             release=f.get("revision", 0) + 1,
             description=f.get("desc", ""),
             homepage=f.get("homepage", ""),
-            architecture="darwin_arm64",
+            architecture=DARWIN_ARCH,
             platform="darwin",
             repository="extra",
             depends=list(f.get("dependencies", [])),

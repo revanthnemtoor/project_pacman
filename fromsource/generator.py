@@ -73,7 +73,7 @@ class PKGBUILDGenerator:
             pkgver={self.version}
             pkgrel=1
             pkgdesc="{self.description}"
-            arch=('darwin_arm64' 'aarch64' 'arm64')
+            arch=('darwin_arm64' 'aarch64' 'arm64' 'darwin_x86_64' 'x86_64')
             url="{self.url}"
             license=('{self.license}')
             depends=({deps_str})

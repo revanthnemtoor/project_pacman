@@ -45,6 +45,8 @@ dist/
 *.pkg.tar.*
 *.src.tar.gz
 !output/*.pkg.tar.zst
+!core/*.pkg.tar.zst
+pacman/build/
 *.src.tar.gz
 
 # Temporary files

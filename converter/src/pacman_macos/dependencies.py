@@ -22,6 +22,8 @@ class DependencyNormalizer:
     # Exact package mappings
     PACKAGE_MAP = {
         "openssl@3": "openssl",
+        "gnu-sed": "sed",
+        "gnu-tar": "tar",
         "python@3.13": "python",
         "python@3.14": "python",
         "llvm@20": "llvm",

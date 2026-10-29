@@ -6,8 +6,9 @@ import tarfile
 from pathlib import Path
 import textwrap
 
-SOURCES_FILE = Path("/Users/revanthnemtoo/project_pacman/fromsource/sources.json")
-FROMSOURCE_DIR = Path("/Users/revanthnemtoo/project_pacman/fromsource")
+PROJECT_DIR = Path(__file__).resolve().parent
+SOURCES_FILE = PROJECT_DIR / "fromsource" / "sources.json"
+FROMSOURCE_DIR = PROJECT_DIR / "fromsource"
 
 def generate_pkgbuild(pkg_name, data):
     pkg_version = data.get("version", "1.0")
@@ -65,7 +66,7 @@ def generate_pkgbuild(pkg_name, data):
         pkgver={pkg_version}
         pkgrel=1
         pkgdesc="{pkg_desc}"
-        arch=('darwin_arm64')
+        arch=('darwin_arm64' 'darwin_x86_64')
         url="{url}"
         license=('GPL')
         {depends_line}

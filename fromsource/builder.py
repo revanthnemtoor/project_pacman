@@ -144,8 +144,11 @@ class SourceBuilder:
         env = os.environ.copy()
         env["PKGDEST"] = str(OUTPUT_DIR)
         
-        # Ensure brew keg-only tools like bison and libtool are in PATH
-        gnubin = "/opt/homebrew/opt/libtool/libexec/gnubin:/opt/homebrew/opt/bison/bin"
+        # Ensure brew keg-only tools like bison and libtool are in PATH (Apple Silicon & Intel)
+        gnubin = (
+            "/opt/homebrew/opt/libtool/libexec/gnubin:/opt/homebrew/opt/bison/bin:"
+            "/usr/local/opt/libtool/libexec/gnubin:/usr/local/opt/bison/bin"
+        )
         if "PATH" in env:
             env["PATH"] = f"{gnubin}:{env['PATH']}"
         else:
@@ -293,10 +296,11 @@ class SourceBuilder:
             if signed > 0:
                 # Repack the archive correctly (no ./ prefix) and compress with zstd
                 # Use sh -c to expand the glob properly in the tmpdir
+                zstd_bin = shutil.which("zstd") or "/opt/pacman/bin/zstd"
                 pack_cmd = (
                     f"cd {tmpdir} && "
                     f"tar -cf - .PKGINFO .BUILDINFO .MTREE * 2>/dev/null | "
-                    f"/opt/pacman/bin/zstd -c -T0 -19 -z > {pkg_file.absolute()}"
+                    f"{zstd_bin} -c -T0 -19 -z > {pkg_file.absolute()}"
                 )
                 subprocess.run(pack_cmd, shell=True, check=True)
                 print(f"  -> Signed {signed} binaries")

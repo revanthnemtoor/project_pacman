@@ -4,8 +4,10 @@ Dependency resolver.
 
 from __future__ import annotations
 
+import json
 from collections import deque
 
+from pacman_macos.constants import PACKAGES_DIR
 from pacman_macos.parser import Parser
 from pacman_macos.dependencies import DependencyNormalizer
 
@@ -23,10 +25,21 @@ class DependencyResolver:
 
         self._visited.add(name)
 
-        pkg = Parser(name).parse()
-        DependencyNormalizer.normalize_package(pkg)
+        meta_file = PACKAGES_DIR / "extra" / name / "metadata.json"
+        if meta_file.exists():
+            try:
+                data = json.loads(meta_file.read_text())
+                deps = DependencyNormalizer.normalize_list(data.get("depends", []))
+            except Exception:
+                pkg = Parser(name).parse()
+                DependencyNormalizer.normalize_package(pkg)
+                deps = pkg.depends
+        else:
+            pkg = Parser(name).parse()
+            DependencyNormalizer.normalize_package(pkg)
+            deps = pkg.depends
 
-        for dep in pkg.depends:
+        for dep in deps:
             self._visit(dep)
 
         self._order.append(name)

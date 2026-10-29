@@ -1,11 +1,12 @@
 pkgname=git
-pkgver=2.55.0
-pkgrel=1
+pkgver=2.56.0
+pkgrel=3
 pkgdesc="Distributed revision control system"
 
 url="https://git-scm.com"
 arch=(
-    'arm64'
+    'darwin_arm64'
+    'darwin_x86_64'
 )
 license=(
     'GPL-2.0-only AND GPL-2.0-or-later AND LGPL-2.1-or-later AND BSD-3-Clause AND MIT'
@@ -24,7 +25,7 @@ sha256sums=()
 
 package() {
     local _stage="$startdir/stage"
-    local _dest="$pkgdir/usr"
+    local _dest="$pkgdir"
     mkdir -p "$_dest"
 
     local _dirs=(bin sbin lib lib64 include share etc var libexec)

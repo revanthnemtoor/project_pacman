@@ -18,11 +18,11 @@ prepare() {
     content = content.replace("    build() {", prepare_block + "\n    build() {")
     content = content.replace("build() {", prepare_block + "\nbuild() {")
 
-    # Inject CFLAGS, LDFLAGS, PKG_CONFIG_PATH into build()
+    # Inject CFLAGS, LDFLAGS, PKG_CONFIG_PATH into build() (supports both Apple Silicon /opt/homebrew and Intel /usr/local)
     env_block = """
-        export CFLAGS="${CFLAGS:--g -O2} -I/opt/homebrew/include -I/opt/pacman/include"
-        export LDFLAGS="${LDFLAGS} -L/opt/homebrew/lib -L/opt/pacman/lib"
-        export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:/opt/pacman/lib/pkgconfig"
+        export CFLAGS="${CFLAGS:--g -O2} -I/opt/homebrew/include -I/usr/local/include -I/opt/pacman/include"
+        export LDFLAGS="${LDFLAGS} -L/opt/homebrew/lib -L/usr/local/lib -L/opt/pacman/lib"
+        export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:/usr/local/lib/pkgconfig:/opt/pacman/lib/pkgconfig"
 """
     content = content.replace('        cd "$srcdir"\n', f'        cd "$srcdir"\n{env_block}')
     content = content.replace('    cd "$srcdir"\n', f'    cd "$srcdir"\n{env_block}')
@@ -31,7 +31,7 @@ prepare() {
         f.write(content)
 
 def main():
-    fromsource = Path("/Users/revanthnemtoo/project_pacman/fromsource")
+    fromsource = Path(__file__).resolve().parent / "fromsource"
     count = 0
     for pkgdir in fromsource.glob("*-src"):
         if pkgdir.is_dir():

@@ -16,7 +16,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
-PACMAN_BIN="$HOME/pacman/bin/pacman"
+PACMAN_BIN="${PACMAN_BIN:-$HOME/pacman/bin/pacman}"
+if [ ! -x "$PACMAN_BIN" ] && [ -x "/opt/pacman/bin/pacman" ]; then
+    PACMAN_BIN="/opt/pacman/bin/pacman"
+fi
 PACMAN_CONF="$PROJECT_DIR/configs/pacman.conf"
 
 FORMULA="${1:?Usage: $0 <formula_name> [--skip-deps]}"
@@ -66,8 +69,8 @@ echo ""
 
 echo ">>> Step 3: Installing with pacman -Sy..."
 
-# Sync and install the package from the local repo
-sudo "$PACMAN_BIN" --config "$PACMAN_CONF" -Sy --noconfirm "$FORMULA"
+# Sync and install the package from the local repo (rootless / no sudo needed)
+"$PACMAN_BIN" --config "$PACMAN_CONF" -Sy --noconfirm "$FORMULA"
 
 echo ""
 

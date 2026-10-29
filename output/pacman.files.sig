@@ -1,1 +1,0 @@
-pacman.files.tar.gz.sig

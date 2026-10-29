@@ -39,12 +39,25 @@ PROJECT_PACMAN_CONF = PACMAN_ROOT / "etc" / "pacman.conf"
 
 INSTALL_PREFIX = Path("/opt/pacman")
 
+import os
+import platform
+
 # ---------------------------------------------------------------
 # Architecture
 # ---------------------------------------------------------------
 
-ARCH = "arm64"
+# Detect host architecture (arm64 or x86_64)
+_host_arch = platform.machine().lower()
+if _host_arch in ("aarch64", "arm64"):
+    HOST_ARCH = "arm64"
+else:
+    HOST_ARCH = "x86_64"
+
+# Allow PACMAN_ARCH override, default to host architecture (or arm64)
+ARCH = os.environ.get("PACMAN_ARCH", HOST_ARCH)
 PLATFORM = "darwin"
+DARWIN_ARCH = f"darwin_{ARCH}"
+SUPPORTED_ARCHES = ["arm64", "darwin_arm64", "x86_64", "darwin_x86_64"]
 
 # ---------------------------------------------------------------
 # GHCR (GitHub Container Registry) for Homebrew bottles

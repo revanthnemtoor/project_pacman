@@ -53,14 +53,18 @@ def get_brew_info(pkg_name):
     return None
 
 def main():
-    arch_pkgs_file = Path("/Users/revanthnemtoo/project_pacman/arch_core_packages.txt")
-    sources_file = Path("/Users/revanthnemtoo/project_pacman/fromsource/sources.json")
+    project_dir = Path(__file__).resolve().parent
+    arch_pkgs_file = project_dir / "arch_core_packages.txt"
+    sources_file = project_dir / "fromsource" / "sources.json"
     
     with open(arch_pkgs_file, "r") as f:
         arch_pkgs = [line.strip() for line in f if line.strip()]
         
-    with open(sources_file, "r") as f:
-        sources_data = json.load(f)
+    if sources_file.exists():
+        with open(sources_file, "r") as f:
+            sources_data = json.load(f)
+    else:
+        sources_data = {}
         
     existing_pkgs = set(sources_data.keys())
     

@@ -319,6 +319,12 @@ Extra packages include:
 * fd
 * fzf
 * tmux
+* fish
+
+Supported Architectures:
+
+* `darwin_arm64` (Apple Silicon M-series)
+* `darwin_x86_64` (Intel Mac)
 
 Additional packages can be added after the build pipeline is stable.
 

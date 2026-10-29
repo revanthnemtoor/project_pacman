@@ -48,8 +48,15 @@ class PKGBUILDBuilder:
 
         lines.append(f'url="{p.homepage}"')
 
+        # Preserve Apple Silicon capability and append Intel Mac support
+        arches = ['darwin_arm64', 'darwin_x86_64']
+        if p.architecture == "any":
+            arches = ['any']
+        elif p.architecture and p.architecture not in arches:
+            arches.append(p.architecture)
+
         lines.append(
-            f"arch={self._array([p.architecture])}"
+            f"arch={self._array(arches)}"
         )
 
         lines.append(
@@ -116,7 +123,7 @@ class PKGBUILDBuilder:
             # that would conflict between packages if installed to
             # the root. We only copy the FHS directories.
             lines.append('    local _stage="$startdir/stage"')
-            lines.append('    local _dest="$pkgdir"')
+            lines.append('    local _dest="$pkgdir/opt/pacman"')
             lines.append('    mkdir -p "$_dest"')
             lines.append("")
             lines.append("    local _dirs=(bin sbin lib lib64 include share etc var libexec)")

@@ -29,6 +29,7 @@ import tempfile
 from pathlib import Path
 
 from pacman_macos.constants import (
+    ARCH,
     CACHE_DIR,
     GHCR_DOMAIN,
     GHCR_TOKEN_URL,
@@ -78,9 +79,9 @@ class BottleDownloader:
         print(f"  -> Bottle URL: {url}")
         print(f"  -> Expected SHA256: {sha256[:16]}...")
 
-        archive = self.download(formula_name, url, sha256)
+        archive = self.download(formula.name, url, sha256)
 
-        self.extract(archive, stage_dir, formula_name)
+        self.extract(archive, stage_dir, formula.name)
 
         return stage_dir
 
@@ -109,8 +110,11 @@ class BottleDownloader:
                 print("  -> Cache invalid, re-downloading")
                 cache_file.unlink()
 
-        # Get GHCR auth token
-        token = self._get_ghcr_token(formula_name)
+        # Get GHCR auth token (extract repo path from bottle URL if present)
+        ghcr_repo = formula_name.replace("@", "/")
+        if "/v2/homebrew/core/" in url and "/blobs/" in url:
+            ghcr_repo = url.split("/v2/homebrew/core/", 1)[1].split("/blobs/", 1)[0]
+        token = self._get_ghcr_token(ghcr_repo)
 
         # Download the blob
         print(f"  -> Downloading bottle for {formula_name}...")
@@ -202,6 +206,24 @@ class BottleDownloader:
             if _.is_file()
         )
         print(f"  -> Staged {file_count} files")
+
+        # Verify Mach-O CPU architecture matches target ARCH
+        import struct
+        forbidden_cputype = 0x0100000c if ARCH == "x86_64" else 0x01000007
+        for f in dest_dir.rglob("*"):
+            if f.is_file() and not f.is_symlink():
+                try:
+                    hdr = f.read_bytes()[:8]
+                    if len(hdr) == 8:
+                        magic, cputype = struct.unpack("<II", hdr)
+                        if magic == 0xfeedfacf and cputype == forbidden_cputype:
+                            raise BottleError(
+                                f"Bottle for '{formula_name}' contains incompatible Mach-O CPU type for {ARCH}: {f.name}"
+                            )
+                except BottleError:
+                    raise
+                except Exception:
+                    pass
 
         return dest_dir
 

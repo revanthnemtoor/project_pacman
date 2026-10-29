@@ -126,7 +126,9 @@ class Package:
         if self.architecture not in (
             "arm64",
             "darwin_arm64",
+            "aarch64",
             "x86_64",
+            "darwin_x86_64",
             "any",
         ):
             raise ValueError(
