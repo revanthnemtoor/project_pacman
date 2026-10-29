@@ -219,6 +219,41 @@ if dsize.exists():
     if "tr -d" not in txt:
         txt = txt.replace("} | wc -c", "} | wc -c | tr -d '[:space:]'")
         dsize.write_text(txt)
+
+# 8. lib/libalpm/be_sync.c: request <repo>-darwin_<arch>.db.tar.gz from remote servers
+besync = src / "lib/libalpm/be_sync.c"
+if besync.exists():
+    txt = besync.read_text()
+    if "sys/utsname.h" not in txt:
+        txt = txt.replace("#include <sys/stat.h>\n", "#include <sys/stat.h>\n#include <sys/utsname.h>\n", 1)
+    old_sync = """\t\tlen = strlen(db->treename) + strlen(dbext) + 1;
+\t\tMALLOC(payload->filepath, len,
+\t\t\tFREE(payload); GOTO_ERR(handle, ALPM_ERR_MEMORY, cleanup));
+\t\tsnprintf(payload->filepath, len, "%s%s", db->treename, dbext);
+
+\t\tSTRDUP(payload->remote_name, payload->filepath,
+\t\t\t_alpm_dload_payload_reset(payload); FREE(payload);
+\t\t\tGOTO_ERR(handle, ALPM_ERR_MEMORY, cleanup));"""
+    new_sync = """#ifdef __APPLE__
+\t\tstruct utsname un;
+\t\tuname(&un);
+\t\tconst char *mac_arch = (strcmp(un.machine, "arm64") == 0 || strcmp(un.machine, "aarch64") == 0) ? "darwin_arm64" : "darwin_x86_64";
+\t\tconst char *ext_arch = (strcmp(dbext, ".files") == 0) ? ".files.tar.gz" : ".db.tar.gz";
+\t\tlen = strlen(db->treename) + 1 + strlen(mac_arch) + strlen(ext_arch) + 1;
+\t\tMALLOC(payload->filepath, len,
+\t\t\tFREE(payload); GOTO_ERR(handle, ALPM_ERR_MEMORY, cleanup));
+\t\tsnprintf(payload->filepath, len, "%s-%s%s", db->treename, mac_arch, ext_arch);
+
+\t\tsize_t rlen = strlen(db->treename) + strlen(dbext) + 1;
+\t\tMALLOC(payload->remote_name, rlen,
+\t\t\t_alpm_dload_payload_reset(payload); FREE(payload);
+\t\t\tGOTO_ERR(handle, ALPM_ERR_MEMORY, cleanup));
+\t\tsnprintf(payload->remote_name, rlen, "%s%s", db->treename, dbext);
+#else
+""" + old_sync + "\n#endif"
+    if "#ifdef __APPLE__" not in txt and old_sync in txt:
+        txt = txt.replace(old_sync, new_sync, 1)
+    besync.write_text(txt)
 PYEOF
 
 # -----------------------------------------------------------------------------
@@ -333,12 +368,12 @@ NoExtract   = opt/pacman/share/info/dir
 
 [pacman]
 SigLevel = Optional TrustAll
-Server = file://$PROJECT_DIR/output
+Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/output
 Server = https://revanthnemtoor.github.io/project_pacman/output
 
 [core]
 SigLevel = Optional TrustAll
-Server = file://$PROJECT_DIR/core
+Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/core
 Server = https://revanthnemtoor.github.io/project_pacman/core
 EOF
 

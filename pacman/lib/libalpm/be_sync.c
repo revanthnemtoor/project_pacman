@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/utsname.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <unistd.h>
@@ -188,6 +189,22 @@ int SYMEXPORT alpm_db_update(alpm_handle_t *handle, alpm_list_t *dbs, int force)
 		CALLOC(payload, 1, sizeof(*payload), GOTO_ERR(handle, ALPM_ERR_MEMORY, cleanup));
 		payload->servers = db->servers;
 		/* print server + filename into a buffer */
+#ifdef __APPLE__
+		struct utsname un;
+		uname(&un);
+		const char *mac_arch = (strcmp(un.machine, "arm64") == 0 || strcmp(un.machine, "aarch64") == 0) ? "darwin_arm64" : "darwin_x86_64";
+		const char *ext_arch = (strcmp(dbext, ".files") == 0) ? ".files.tar.gz" : ".db.tar.gz";
+		len = strlen(db->treename) + 1 + strlen(mac_arch) + strlen(ext_arch) + 1;
+		MALLOC(payload->filepath, len,
+			FREE(payload); GOTO_ERR(handle, ALPM_ERR_MEMORY, cleanup));
+		snprintf(payload->filepath, len, "%s-%s%s", db->treename, mac_arch, ext_arch);
+
+		size_t rlen = strlen(db->treename) + strlen(dbext) + 1;
+		MALLOC(payload->remote_name, rlen,
+			_alpm_dload_payload_reset(payload); FREE(payload);
+			GOTO_ERR(handle, ALPM_ERR_MEMORY, cleanup));
+		snprintf(payload->remote_name, rlen, "%s%s", db->treename, dbext);
+#else
 		len = strlen(db->treename) + strlen(dbext) + 1;
 		MALLOC(payload->filepath, len,
 			FREE(payload); GOTO_ERR(handle, ALPM_ERR_MEMORY, cleanup));
@@ -196,6 +213,7 @@ int SYMEXPORT alpm_db_update(alpm_handle_t *handle, alpm_list_t *dbs, int force)
 		STRDUP(payload->remote_name, payload->filepath,
 			_alpm_dload_payload_reset(payload); FREE(payload);
 			GOTO_ERR(handle, ALPM_ERR_MEMORY, cleanup));
+#endif
 		payload->destfile_name = _alpm_get_fullpath(temporary_syncpath, payload->remote_name, "");
 		payload->tempfile_name = _alpm_get_fullpath(temporary_syncpath, payload->remote_name, ".part");
 		if(!payload->destfile_name || !payload->tempfile_name) {
