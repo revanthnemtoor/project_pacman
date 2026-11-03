@@ -27,6 +27,7 @@ fromsource/*/src/
 fromsource/*/pkg/
 fromsource/*.tar.gz
 fromsource/*.tar.xz
+fromsource/*/*.tar.*
 
 # Package directories
 packages/*

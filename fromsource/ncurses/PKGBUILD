@@ -1,40 +1,84 @@
-# Maintainer: Revanth Reddy Nemtoor
+# Maintainer: Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>
 pkgname=ncurses
-pkgver=6.4
+pkgver=6.6
 pkgrel=1
-pkgdesc="System V Release 4.0 curses emulation library"
-arch=('darwin_arm64' 'aarch64' 'arm64')
+pkgdesc="System V Release 4.0 curses emulation library (built from source for macOS)"
+arch=('darwin_x86_64' 'darwin_arm64' 'x86_64' 'arm64')
 url="https://invisible-island.net/ncurses/"
-license=('MIT')
+license=('MIT' 'X11-distribute-modifications-variant')
 depends=()
-source=()
-
-prepare() {
-  cp -a "$startdir/../ncurses-src" "$srcdir/ncurses"
-}
+source=("https://ftp.gnu.org/pub/gnu/ncurses/ncurses-${pkgver}.tar.gz")
+sha256sums=('355b4cbbed880b0381a04c46617b7656e362585d52e9cf84a67e2009b749ff11')
+options=('!strip')
 
 build() {
-  cd "$srcdir/ncurses"
+  cd "$srcdir/ncurses-$pkgver"
 
-  export CFLAGS="${CFLAGS:--g -O2} -I/opt/pacman/include"
-  export LDFLAGS="${LDFLAGS} -L/opt/pacman/lib"
-  export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig"
+  # Build universal binaries for macOS (x86_64 and arm64)
+  export CFLAGS="-arch x86_64 -arch arm64 -O2"
+  export CXXFLAGS="-arch x86_64 -arch arm64 -O2"
+  export LDFLAGS="-arch x86_64 -arch arm64"
 
-  ./configure --prefix=/opt/pacman \
-    --sysconfdir=/opt/pacman/etc
+  ./configure \
+    --prefix=/opt/pacman \
+    --mandir=/opt/pacman/share/man \
+    --with-shared \
+    --with-cxx-shared \
+    --enable-widec \
+    --enable-pc-files \
+    --with-pkg-config-libdir=/opt/pacman/lib/pkgconfig \
+    --without-debug \
+    --without-ada \
+    --with-default-terminfo-dir=/opt/pacman/share/terminfo \
+    --with-terminfo-dirs=/opt/pacman/share/terminfo:/opt/pacman/lib/terminfo:/usr/share/terminfo \
+    --enable-sigwinch
 
-  make
+  make -j$(sysctl -n hw.ncpu)
 }
 
 package() {
-  cd "$srcdir/ncurses"
+  cd "$srcdir/ncurses-$pkgver"
   make DESTDIR="$pkgdir" install
 
-  mv "$pkgdir"/opt/pacman/* "$pkgdir"/
-  rm -rf "$pkgdir"/opt
+  # Ensure compatibility symlinks for non-wide ncurses (-lncurses, curses.h, etc.)
+  local _libdir="$pkgdir/opt/pacman/lib"
+  local _incdir="$pkgdir/opt/pacman/include"
+  local _pcdir="$pkgdir/opt/pacman/lib/pkgconfig"
+  local _bindir="$pkgdir/opt/pacman/bin"
 
-  find "$pkgdir" -type f -exec sh -c 'file "$1" | grep -q "Mach-O" && codesign --sign - --force "$1"' _ {} \;
+  # Library symlinks
+  for mod in curses form menu panel ncurses++; do
+    ln -sf "lib${mod}w.dylib" "$_libdir/lib${mod}.dylib"
+    ln -sf "lib${mod}w.6.dylib" "$_libdir/lib${mod}.6.dylib"
+    ln -sf "lib${mod}w.a" "$_libdir/lib${mod}.a"
+  done
 
-  # Create symlink for legacy compatibility
-  ln -s libncursesw.6.dylib "$pkgdir/lib/libncursesw.dylib"
+  # Pkg-config symlinks
+  for mod in ncurses form menu panel ncurses++; do
+    if [ -f "$_pcdir/${mod}w.pc" ]; then
+      ln -sf "${mod}w.pc" "$_pcdir/${mod}.pc"
+    fi
+  done
+
+  # Header symlinks
+  ln -sf ncursesw "$_incdir/ncurses"
+  for hdr in curses.h ncurses.h form.h menu.h panel.h term.h termcap.h unctrl.h; do
+    if [ -f "$_incdir/ncursesw/$hdr" ]; then
+      ln -sf "ncursesw/$hdr" "$_incdir/$hdr"
+    fi
+  done
+
+  # Config binary symlink
+  if [ -f "$_bindir/ncursesw6-config" ]; then
+    ln -sf ncursesw6-config "$_bindir/ncurses6-config"
+  fi
+
+  # Ad-hoc codesign all Mach-O binaries and dylibs
+  find "$pkgdir/opt/pacman" -type f -perm +111 -exec sh -c '
+    for f; do
+      if file "$f" | grep -q "Mach-O"; then
+        codesign --sign - --force "$f" 2>/dev/null || true
+      fi
+    done
+  ' sh {} +
 }
