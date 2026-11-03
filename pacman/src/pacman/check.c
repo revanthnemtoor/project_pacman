@@ -69,16 +69,15 @@ static int check_file_type(const char *pkgname, const char *filepath,
 	return 0;
 }
 
-static int check_file_permissions(const char *pkgname, const char *filepath,
+static int check_file_ownership(const char *pkgname, const char *filepath,
 		struct stat *st, struct archive_entry *entry)
 {
-	int errors = 0;
-	mode_t fsmode;
+	int diff = 0;
 
 	/* uid */
 	if(st->st_uid != archive_entry_uid(entry)) {
-		errors++;
-		if(!config->quiet) {
+		diff = 1;
+		if(!config->quiet && (geteuid() == 0 || config->verbose > 0)) {
 			pm_printf(ALPM_LOG_WARNING, _("%s: %s (UID mismatch)\n"),
 					pkgname, filepath);
 		}
@@ -86,24 +85,29 @@ static int check_file_permissions(const char *pkgname, const char *filepath,
 
 	/* gid */
 	if(st->st_gid != archive_entry_gid(entry)) {
-		errors++;
-		if(!config->quiet) {
+		diff = 1;
+		if(!config->quiet && (geteuid() == 0 || config->verbose > 0)) {
 			pm_printf(ALPM_LOG_WARNING, _("%s: %s (GID mismatch)\n"),
 					pkgname, filepath);
 		}
 	}
 
-	/* mode */
-	fsmode = st->st_mode & (S_ISUID | S_ISGID | S_ISVTX | S_IRWXU | S_IRWXG | S_IRWXO);
+	return diff;
+}
+
+static int check_file_permissions(const char *pkgname, const char *filepath,
+		struct stat *st, struct archive_entry *entry)
+{
+	mode_t fsmode = st->st_mode & (S_ISUID | S_ISGID | S_ISVTX | S_IRWXU | S_IRWXG | S_IRWXO);
 	if(fsmode != (~AE_IFMT & archive_entry_mode(entry))) {
-		errors++;
 		if(!config->quiet) {
 			pm_printf(ALPM_LOG_WARNING, _("%s: %s (Permissions mismatch)\n"),
 					pkgname, filepath);
 		}
+		return 1;
 	}
 
-	return (errors != 0 ? 1 : 0);
+	return 0;
 }
 
 static int check_file_time(const char *pkgname, const char *filepath,
@@ -295,7 +299,10 @@ int check_pkg_fast(alpm_pkg_t *pkg)
 int check_pkg_full(alpm_pkg_t *pkg)
 {
 	const char *root, *pkgname;
-	size_t errors = 0;
+	size_t missing_count = 0;
+	size_t content_err_count = 0;
+	size_t perm_err_count = 0;
+	size_t owner_diff_count = 0;
 	size_t rootlen;
 	struct archive *mtree;
 	struct archive_entry *entry = NULL;
@@ -326,9 +333,11 @@ int check_pkg_full(alpm_pkg_t *pkg)
 		char filepath[PATH_MAX];
 		int filepath_len;
 		mode_t type;
-		size_t file_errors = 0;
 		int backup = 0;
 		int exists;
+		int file_has_content_err = 0;
+		int file_has_perm_err = 0;
+		int file_has_owner_diff = 0;
 
 		/* strip leading "./" from path entries */
 		if(path[0] == '.' && path[1] == '/') {
@@ -369,7 +378,10 @@ int check_pkg_full(alpm_pkg_t *pkg)
 
 		exists = check_file_exists(pkgname, filepath, rootlen, &st);
 		if(exists == 1) {
-			errors++;
+			missing_count++;
+			if(config->quiet) {
+				printf("%s %s\n", pkgname, filepath);
+			}
 			continue;
 		} else if(exists == -1) {
 			/* NoExtract */
@@ -384,14 +396,25 @@ int check_pkg_full(alpm_pkg_t *pkg)
 		}
 
 		if(check_file_type(pkgname, filepath, &st, entry) == 1) {
-			errors++;
+			content_err_count++;
+			if(config->quiet) {
+				printf("%s %s\n", pkgname, filepath);
+			}
 			continue;
 		}
 
-		file_errors += check_file_permissions(pkgname, filepath, &st, entry);
+		if(check_file_permissions(pkgname, filepath, &st, entry)) {
+			file_has_perm_err = 1;
+		}
+
+		if(check_file_ownership(pkgname, filepath, &st, entry)) {
+			file_has_owner_diff = 1;
+		}
 
 		if(type == AE_IFLNK) {
-			file_errors += check_file_link(pkgname, filepath, &st, entry);
+			if(check_file_link(pkgname, filepath, &st, entry)) {
+				file_has_content_err = 1;
+			}
 		}
 
 		/* the following checks are expected to fail if a backup file has been
@@ -407,19 +430,33 @@ int check_pkg_full(alpm_pkg_t *pkg)
 
 		if(type != AE_IFDIR) {
 			/* file or symbolic link */
-			file_errors += check_file_time(pkgname, filepath, &st, entry, backup);
+			if(check_file_time(pkgname, filepath, &st, entry, backup)) {
+				file_has_content_err = 1;
+			}
 		}
 
 		if(type == AE_IFREG) {
-			file_errors += check_file_size(pkgname, filepath, &st, entry, backup);
-			file_errors += check_file_sha256sum(pkgname, filepath, entry, backup);
+			if(check_file_size(pkgname, filepath, &st, entry, backup)) {
+				file_has_content_err = 1;
+			}
+			if(check_file_sha256sum(pkgname, filepath, entry, backup)) {
+				file_has_content_err = 1;
+			}
 		}
 
-		if(config->quiet && file_errors) {
+		if(file_has_perm_err) {
+			perm_err_count++;
+		}
+		if(file_has_owner_diff) {
+			owner_diff_count++;
+		}
+		if(file_has_content_err) {
+			content_err_count++;
+		}
+
+		if(config->quiet && (file_has_content_err || file_has_perm_err || (geteuid() == 0 && file_has_owner_diff))) {
 			printf("%s %s\n", pkgname, filepath);
 		}
-
-		errors += (file_errors != 0 ? 1 : 0);
 	}
 
 	alpm_pkg_mtree_close(pkg, mtree);
@@ -427,9 +464,27 @@ int check_pkg_full(alpm_pkg_t *pkg)
 	if(!config->quiet) {
 		printf(_n("%s: %jd total file, ", "%s: %jd total files, ",
 					(unsigned long)file_count), pkgname, (intmax_t)file_count);
-		printf(_n("%jd altered file\n", "%jd altered files\n",
-					(unsigned long)errors), (intmax_t)errors);
+		printf(_n("%jd missing file\n", "%jd missing files\n",
+					(unsigned long)missing_count), (intmax_t)missing_count);
+		printf(_n("%s: %jd content mismatch\n", "%s: %jd content mismatches\n",
+					(unsigned long)content_err_count), pkgname, (intmax_t)content_err_count);
+		printf(_n("%s: %jd permission mismatch\n", "%s: %jd permission mismatches\n",
+					(unsigned long)perm_err_count), pkgname, (intmax_t)perm_err_count);
+		if(owner_diff_count > 0 && geteuid() != 0) {
+			printf(_n("%s: %jd ownership difference (rootless)\n", "%s: %jd ownership differences (rootless)\n",
+						(unsigned long)owner_diff_count), pkgname, (intmax_t)owner_diff_count);
+		} else if(owner_diff_count > 0) {
+			printf(_n("%s: %jd ownership mismatch\n", "%s: %jd ownership mismatches\n",
+						(unsigned long)owner_diff_count), pkgname, (intmax_t)owner_diff_count);
+		} else {
+			printf(_("%s: 0 ownership differences\n"), pkgname);
+		}
 	}
 
-	return (errors != 0 ? 1 : 0);
+	size_t fatal_errors = missing_count + content_err_count + perm_err_count;
+	if(geteuid() == 0) {
+		fatal_errors += owner_diff_count;
+	}
+
+	return (fatal_errors != 0 ? 1 : 0);
 }
