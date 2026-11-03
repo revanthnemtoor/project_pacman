@@ -384,6 +384,7 @@ if [ -f "$PACMAN_PREFIX/etc/makepkg.conf" ]; then
     sed -i '' "s/^CARCH=.*/CARCH=\"$DARWIN_ARCH\"/" "$PACMAN_PREFIX/etc/makepkg.conf" || true
     sed -i '' "s/^CHOST=.*/CHOST=\"$CHOST\"/" "$PACMAN_PREFIX/etc/makepkg.conf" || true
     sed -i '' "s/^OPTIONS=(strip /OPTIONS=(!strip /" "$PACMAN_PREFIX/etc/makepkg.conf" || true
+    sed -i '' "s/^#*PACKAGER=.*/PACKAGER=\"Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>\"/" "$PACMAN_PREFIX/etc/makepkg.conf" || true
 fi
 
 # -----------------------------------------------------------------------------

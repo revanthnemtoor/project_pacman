@@ -125,7 +125,7 @@ def main():
         subprocess.run(
             cmd,
             cwd=project_dir,
-            env={**os.environ, "PYTHONPATH": "converter/src:."}
+            env={**os.environ, "PYTHONPATH": "converter/src:.", "PACKAGER": "Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"}
         )
 
     # Update the [pacman] repo in output/

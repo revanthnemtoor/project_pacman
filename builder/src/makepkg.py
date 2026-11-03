@@ -10,7 +10,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from pacman_macos.constants import MAKEPKG_BIN, MAKEPKG_CONF, OUTPUT_DIR
+from pacman_macos.constants import MAKEPKG_BIN, MAKEPKG_CONF, OUTPUT_DIR, DEFAULT_PACKAGER
 
 
 class MakepkgBuilder:
@@ -70,6 +70,7 @@ class MakepkgBuilder:
             "BUILDDIR": str(package_dir / "build"),
             "PATH": f"{extra_paths}:{base_path}",
             "HOME": str(Path.home()),
+            "PACKAGER": DEFAULT_PACKAGER,
         }
 
         print(f"  -> Running: {' '.join(cmd)}")

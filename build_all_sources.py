@@ -67,6 +67,7 @@ def build_package(pkgbuild_dir: Path):
         env["PATH"] = f"{gnubin}:{env['PATH']}"
     else:
         env["PATH"] = gnubin
+    env["PACKAGER"] = "Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"
         
     cmd = [
         str(MAKEPKG_BIN),

@@ -39,6 +39,9 @@ PROJECT_PACMAN_CONF = PACMAN_ROOT / "etc" / "pacman.conf"
 
 INSTALL_PREFIX = Path("/opt/pacman")
 
+# Default packager / maintainer
+DEFAULT_PACKAGER = "Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"
+
 import os
 import platform
 
