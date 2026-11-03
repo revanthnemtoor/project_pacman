@@ -3,8 +3,9 @@ import shutil
 import subprocess
 from pathlib import Path
 
-CORE_DIR = Path("/Users/revanthnemtoo/project_pacman/core")
-TMP_DIR = Path("/Users/revanthnemtoo/project_pacman/tmp_core")
+PROJECT_DIR = Path(__file__).resolve().parent
+CORE_DIR = PROJECT_DIR / "core"
+TMP_DIR = PROJECT_DIR / "tmp_core"
 KEY_ID = "276C37EC8DB2DCF235B3EAC02C3E87EC7EC39843"
 
 def main():

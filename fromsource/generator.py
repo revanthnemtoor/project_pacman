@@ -10,6 +10,7 @@ macOS-compatible flags (clang, dylib, etc.).
 
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 from textwrap import dedent
@@ -66,9 +67,17 @@ class PKGBUILDGenerator:
     # -----------------------------------------------------------------
 
     def _gen_header(self) -> str:
+        packager = os.environ.get("PACKAGER")
+        if not packager:
+            try:
+                from pacman_macos.constants import DEFAULT_PACKAGER
+                packager = DEFAULT_PACKAGER
+            except Exception:
+                packager = "Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"
+        maintainer = packager.split("<")[0].strip() if "<" in packager else packager
         deps_str = " ".join(f"'{d}'" for d in self.depends)
         return dedent(f"""\
-            # Maintainer: Revanth Reddy Nemtoor
+            # Maintainer: {maintainer}
             pkgname={self.name}
             pkgver={self.version}
             pkgrel=1

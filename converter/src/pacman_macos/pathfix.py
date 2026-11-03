@@ -18,6 +18,8 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
+from pacman_macos.constants import INSTALL_PREFIX
+
 
 # Homebrew placeholders found in bottle binaries
 HOMEBREW_PLACEHOLDERS = [
@@ -239,7 +241,7 @@ def rewrite_text_files(
 
 def rewrite_stage(
     stage_dir: Path,
-    install_root: str = "/Users/revanthnemtoo/pacman/root",
+    install_root: str = str(INSTALL_PREFIX),
     formula_name: str = "",
 ) -> dict:
     """

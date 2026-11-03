@@ -6,6 +6,7 @@ Runs makepkg to build a .pkg.tar.zst archive from a PKGBUILD.
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -70,7 +71,7 @@ class MakepkgBuilder:
             "BUILDDIR": str(package_dir / "build"),
             "PATH": f"{extra_paths}:{base_path}",
             "HOME": str(Path.home()),
-            "PACKAGER": DEFAULT_PACKAGER,
+            "PACKAGER": os.environ.get("PACKAGER", DEFAULT_PACKAGER),
         }
 
         print(f"  -> Running: {' '.join(cmd)}")

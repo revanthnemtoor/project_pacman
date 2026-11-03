@@ -4,7 +4,8 @@ import tempfile
 from pathlib import Path
 import shutil
 
-CORE_DIR = Path("/Users/revanthnemtoo/project_pacman/core")
+PROJECT_DIR = Path(__file__).resolve().parent
+CORE_DIR = PROJECT_DIR / "core"
 PACMAN_ROOT = Path("/opt/pacman")
 REPO_DB = CORE_DIR / "core.db.tar.gz"
 

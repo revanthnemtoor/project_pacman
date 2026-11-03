@@ -1,10 +1,16 @@
 import os
 import subprocess
+import sys
 import tempfile
 import shutil
 from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(PROJECT_DIR / "converter" / "src"))
+try:
+    from pacman_macos.constants import DEFAULT_PACKAGER
+except ImportError:
+    DEFAULT_PACKAGER = "Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"
 FROMSOURCE_DIR = PROJECT_DIR / "fromsource"
 CORE_DIR = PROJECT_DIR / "core"
 PACMAN_BIN = Path("/opt/pacman/bin/pacman")
@@ -67,7 +73,7 @@ def build_package(pkgbuild_dir: Path):
         env["PATH"] = f"{gnubin}:{env['PATH']}"
     else:
         env["PATH"] = gnubin
-    env["PACKAGER"] = "Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"
+    env["PACKAGER"] = os.environ.get("PACKAGER", DEFAULT_PACKAGER)
         
     cmd = [
         str(MAKEPKG_BIN),

@@ -4,6 +4,9 @@ Shared constants for project_pacman.
 
 from __future__ import annotations
 
+import os
+import platform
+import subprocess
 from pathlib import Path
 
 
@@ -39,11 +42,33 @@ PROJECT_PACMAN_CONF = PACMAN_ROOT / "etc" / "pacman.conf"
 
 INSTALL_PREFIX = Path("/opt/pacman")
 
-# Default packager / maintainer
-DEFAULT_PACKAGER = "Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"
+# Default packager / maintainer resolution:
+# 1. $PACKAGER environment variable
+# 2. git config (user.name <user.email>)
+# 3. Fallback author default
+def get_default_packager() -> str:
+    if os.environ.get("PACKAGER"):
+        return os.environ["PACKAGER"].strip()
+    try:
+        name = subprocess.check_output(
+            ["git", "config", "user.name"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+        email = subprocess.check_output(
+            ["git", "config", "user.email"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+        if name and email:
+            return f"{name} <{email}>"
+        elif name:
+            return name
+    except Exception:
+        pass
+    return "Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"
 
-import os
-import platform
+DEFAULT_PACKAGER = get_default_packager()
 
 # ---------------------------------------------------------------
 # Architecture

@@ -384,7 +384,17 @@ if [ -f "$PACMAN_PREFIX/etc/makepkg.conf" ]; then
     sed -i '' "s/^CARCH=.*/CARCH=\"$DARWIN_ARCH\"/" "$PACMAN_PREFIX/etc/makepkg.conf" || true
     sed -i '' "s/^CHOST=.*/CHOST=\"$CHOST\"/" "$PACMAN_PREFIX/etc/makepkg.conf" || true
     sed -i '' "s/^OPTIONS=(strip /OPTIONS=(!strip /" "$PACMAN_PREFIX/etc/makepkg.conf" || true
-    sed -i '' "s/^#*PACKAGER=.*/PACKAGER=\"Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>\"/" "$PACMAN_PREFIX/etc/makepkg.conf" || true
+    GIT_USER_NAME="$(git config user.name 2>/dev/null || true)"
+    GIT_USER_EMAIL="$(git config user.email 2>/dev/null || true)"
+    if [ -n "$GIT_USER_NAME" ] && [ -n "$GIT_USER_EMAIL" ]; then
+        RESOLVED_PACKAGER="$GIT_USER_NAME <$GIT_USER_EMAIL>"
+    elif [ -n "$GIT_USER_NAME" ]; then
+        RESOLVED_PACKAGER="$GIT_USER_NAME"
+    else
+        RESOLVED_PACKAGER="Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"
+    fi
+    PACKAGER_VAL="${PACKAGER:-$RESOLVED_PACKAGER}"
+    sed -i '' "s/^#*PACKAGER=.*/PACKAGER=\"$PACKAGER_VAL\"/" "$PACMAN_PREFIX/etc/makepkg.conf" || true
 fi
 
 # -----------------------------------------------------------------------------

@@ -136,10 +136,12 @@ class PackageVerifier:
                 found.add(key)
 
                 # Verify packager
-                if key == "packager" and "Revanth" not in line:
-                    result.add_warning(
-                        f"Packager is not Revanth Reddy Nemtoor: {line}"
-                    )
+                if key == "packager":
+                    val = line.split("=", 1)[1].strip()
+                    if not val or "Unknown" in val:
+                        result.add_warning(
+                            f"Packager is unknown or empty: {line}"
+                        )
 
                 # Verify arch (support both Apple Silicon and Intel Mac)
                 if key == "arch":

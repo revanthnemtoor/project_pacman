@@ -3,7 +3,14 @@ import argparse
 import subprocess
 import shutil
 import os
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "converter" / "src"))
+try:
+    from pacman_macos.constants import DEFAULT_PACKAGER
+except ImportError:
+    DEFAULT_PACKAGER = "Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"
 
 EXTRA_PACKAGES = [
     "git",
@@ -122,10 +129,11 @@ def main():
         cmd = ["python3", "builder/src/main.py", "build", pkg]
         if args.skip_deps:
             cmd.append("--skip-deps")
+        packager_val = os.environ.get("PACKAGER", DEFAULT_PACKAGER)
         subprocess.run(
             cmd,
             cwd=project_dir,
-            env={**os.environ, "PYTHONPATH": "converter/src:.", "PACKAGER": "Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"}
+            env={**os.environ, "PYTHONPATH": "converter/src:.", "PACKAGER": packager_val}
         )
 
     # Update the [pacman] repo in output/
