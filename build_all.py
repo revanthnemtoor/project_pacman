@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "converter" / "src"))
 try:
     from pacman_macos.constants import DEFAULT_PACKAGER
 except ImportError:
-    DEFAULT_PACKAGER = "Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"
+    DEFAULT_PACKAGER = "Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"
 
 EXTRA_PACKAGES = [
     "git",

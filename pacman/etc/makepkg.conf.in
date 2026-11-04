@@ -129,7 +129,7 @@ LIB_DIRS=('lib:usr/lib' 'lib32:usr/lib32')
 #-- Log files: specify a fixed directory where all log files will be placed
 #LOGDEST=/home/makepkglogs
 #-- Packager: name/email of the person or organization building packages
-PACKAGER="Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"
+PACKAGER="Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"
 #-- Specify a key to use for package signing
 #GPGKEY=""
 

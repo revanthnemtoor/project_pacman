@@ -68,7 +68,7 @@ def get_default_packager() -> str:
             return name
     except Exception:
         pass
-    return "Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"
+    return "Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"
 
 DEFAULT_PACKAGER = get_default_packager()
 

@@ -391,7 +391,7 @@ if [ -f "$PACMAN_PREFIX/etc/makepkg.conf" ]; then
     elif [ -n "$GIT_USER_NAME" ]; then
         RESOLVED_PACKAGER="$GIT_USER_NAME"
     else
-        RESOLVED_PACKAGER="Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>"
+        RESOLVED_PACKAGER="Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"
     fi
     PACKAGER_VAL="${PACKAGER:-$RESOLVED_PACKAGER}"
     sed -i '' "s/^#*PACKAGER=.*/PACKAGER=\"$PACKAGER_VAL\"/" "$PACMAN_PREFIX/etc/makepkg.conf" || true
