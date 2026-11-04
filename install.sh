@@ -444,10 +444,16 @@ for RC_FILE in "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.bashrc" "$HOME/.bash_pro
 done
 
 # -----------------------------------------------------------------------------
-# 8. Sync Package Databases
+# 9. Sync Package Databases & Register Pacman Package
 # -----------------------------------------------------------------------------
 echo "-> Synchronizing package databases..."
 "$PACMAN_PREFIX/bin/pacman" -Sy
+
+PACMAN_PKG="$(ls "$PROJECT_DIR/core/pacman-"*"-$DARWIN_ARCH.pkg.tar.zst" 2>/dev/null | head -n1 || true)"
+if [ -n "$PACMAN_PKG" ] && [ -f "$PACMAN_PKG" ]; then
+    echo "-> Registering pacman package into local ALPM database via pacman -U..."
+    "$PACMAN_PREFIX/bin/pacman" -U "$PACMAN_PKG" --overwrite "*" --noconfirm 2>/dev/null || true
+fi
 
 echo ""
 echo "========================================================"
