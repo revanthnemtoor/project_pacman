@@ -28,7 +28,9 @@ REPO_ADD_BIN = PACMAN_ROOT / "bin" / "repo-add"
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 PACKAGES_DIR = PROJECT_ROOT / "packages"
-OUTPUT_DIR = PROJECT_ROOT / "output"
+CORE_DIR = PROJECT_ROOT / "core"
+EXTRA_DIR = PROJECT_ROOT / "extra"
+OUTPUT_DIR = PROJECT_ROOT / "extra"
 CACHE_DIR = PROJECT_ROOT / "cache"
 STAGING_DIR = PROJECT_ROOT / "staging"
 LOGS_DIR = PROJECT_ROOT / "logs"

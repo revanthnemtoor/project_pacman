@@ -1,0 +1,48 @@
+# Maintainer: Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>
+pkgname=pacman
+pkgver=7.1.0
+pkgrel=1
+pkgdesc="A library-based package manager with dependency support (Darwin native port)"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://gitlab.archlinux.org/pacman/pacman"
+license=('GPL-2.0-or-later')
+depends=('openssl' 'zstd')
+optdepends=('bash: for makepkg and pacman-key scripts')
+options=('!strip')
+
+build() {
+  local _arch
+  case "$(uname -m)" in
+    x86_64) _arch="darwin_x86_64" ;;
+    arm64)  _arch="darwin_arm64" ;;
+    *)      _arch="$(uname -m)" ;;
+  esac
+
+  meson setup "build_${_arch}" "${startdir}/../../../pacman" \
+    --prefix=/opt/pacman \
+    --sysconfdir=/opt/pacman/etc \
+    --localstatedir=/opt/pacman/var \
+    -Dpkg-ext=.pkg.tar.zst \
+    -Dcrypto=openssl \
+    -Ddoc=disabled \
+    -Dgpgme=disabled
+
+  ninja -C "build_${_arch}"
+}
+
+package() {
+  local _arch
+  case "$(uname -m)" in
+    x86_64) _arch="darwin_x86_64" ;;
+    arm64)  _arch="darwin_arm64" ;;
+    *)      _arch="$(uname -m)" ;;
+  esac
+
+  DESTDIR="${pkgdir}" ninja -C "build_${_arch}" install
+
+  rm -rf "${pkgdir}/opt/pacman/var"
+
+  find "${pkgdir}" -type f -exec sh -c '
+    file "$1" | grep -qE "Mach-O.*(executable|dynamically linked shared library)" && codesign --sign - --force "$1" 2>/dev/null || true
+  ' _ {} \;
+}

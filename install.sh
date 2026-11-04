@@ -305,7 +305,7 @@ ninja -C build install
 # -----------------------------------------------------------------------------
 # 6. Activate Pre-Built Architecture Repo Databases (No repo-add Needed)
 # -----------------------------------------------------------------------------
-echo "-> Activating pre-built $DARWIN_ARCH databases in core/ and output/..."
+echo "-> Activating pre-built $DARWIN_ARCH databases in core/ and extra/..."
 # Remove incompatible packages from pacman cache and sync state
 rm -f "$PACMAN_PREFIX/var/cache/pacman/pkg/"*-"${OTHER_ARCH}".pkg.tar.zst* 2>/dev/null || true
 rm -f "$PACMAN_PREFIX/var/lib/pacman/sync/"*.db* 2>/dev/null || true
@@ -314,7 +314,7 @@ rm -f "$PACMAN_PREFIX/var/lib/pacman/sync/"*.db* 2>/dev/null || true
 if [ -z "$SCRIPT_DIR" ] || [ "${CLEAN_OTHER_ARCH:-0}" = "1" ]; then
     echo "   Removing $OTHER_ARCH packages from local clone..."
     rm -f "$PROJECT_DIR/core/"*-"${OTHER_ARCH}".pkg.tar.zst* 2>/dev/null || true
-    rm -f "$PROJECT_DIR/output/"*-"${OTHER_ARCH}".pkg.tar.zst* 2>/dev/null || true
+    rm -f "$PROJECT_DIR/extra/"*-"${OTHER_ARCH}".pkg.tar.zst* 2>/dev/null || true
 fi
 
 activate_prebuilt_db() {
@@ -335,7 +335,7 @@ activate_prebuilt_db() {
 }
 
 activate_prebuilt_db "$PROJECT_DIR/core" "core"
-activate_prebuilt_db "$PROJECT_DIR/output" "pacman"
+activate_prebuilt_db "$PROJECT_DIR/extra" "extra"
 
 # -----------------------------------------------------------------------------
 # 7. Configure pacman.conf & makepkg.conf Exclusively for Current Architecture
@@ -355,7 +355,7 @@ LogFile     = $PACMAN_PREFIX/var/log/pacman.log
 GPGDir      = $PACMAN_PREFIX/etc/pacman.d/gnupg/
 HookDir     = $PACMAN_PREFIX/etc/pacman.d/hooks/
 HoldPkg     = pacman
-Architecture = $DARWIN_ARCH $HOST_ARCH any
+Architecture = auto any
 
 Color
 CheckSpace
@@ -366,15 +366,15 @@ LocalFileSigLevel = Optional
 RemoteFileSigLevel = Optional
 NoExtract   = opt/pacman/share/info/dir
 
-[pacman]
-SigLevel = Optional TrustAll
-Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/output
-Server = https://revanthnemtoor.github.io/project_pacman/output
-
 [core]
 SigLevel = Optional TrustAll
 Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/core
 Server = https://revanthnemtoor.github.io/project_pacman/core
+
+[extra]
+SigLevel = Optional TrustAll
+Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/extra
+Server = https://revanthnemtoor.github.io/project_pacman/extra
 EOF
 
 cp "$PACMAN_PREFIX/etc/pacman.conf" "$PROJECT_DIR/configs/pacman.conf" 2>/dev/null || true
