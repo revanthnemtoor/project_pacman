@@ -80,6 +80,12 @@ def build_pacman(workdir):
     
     pacman_src = PROJECT_DIR / "pacman"
     
+    # Ensure libcurl.pc exists so Meson finds system libcurl
+    curl_pc = Path("/opt/pacman/lib/pkgconfig/libcurl.pc")
+    if not curl_pc.exists():
+        curl_pc.parent.mkdir(parents=True, exist_ok=True)
+        curl_pc.write_text("prefix=/usr\nexec_prefix=${prefix}\nlibdir=${prefix}/lib\nincludedir=${prefix}/include\n\nName: libcurl\nDescription: Multiprotocol transfer library (macOS System)\nVersion: 8.7.1\nLibs: -L${libdir} -lcurl\nCflags:\n")
+
     meson_cmd = [
         "meson", "setup", str(build_dir), str(pacman_src),
         "--prefix=/opt/pacman",
@@ -89,8 +95,9 @@ def build_pacman(workdir):
         "-Dcrypto=openssl",
         "-Ddoc=disabled",
         "-Dgpgme=disabled",
-        "-Dc_link_args=-L/opt/pacman/lib -lintl",
-        "-Dbuild.c_link_args=-L/opt/pacman/lib -lintl"
+        "-Dcurl=enabled",
+        "-Dc_link_args=-L/opt/pacman/lib -lintl -lcurl",
+        "-Dbuild.c_link_args=-L/opt/pacman/lib -lintl -lcurl"
     ]
     print("  -> Meson setup...")
     subprocess.run(meson_cmd, env=BUILD_ENV, check=True)
@@ -101,6 +108,11 @@ def build_pacman(workdir):
     print("  -> Installing to staging...")
     subprocess.run(["meson", "install", "-C", str(build_dir), "--destdir", str(pkgdir)], env=BUILD_ENV, check=True)
     
+    # Overwrite staging pacman.conf with our tailored configs/pacman.conf
+    conf_src = PROJECT_DIR / "configs/pacman.conf"
+    if conf_src.exists():
+        shutil.copyfile(conf_src, pkgdir / "opt/pacman/etc/pacman.conf")
+
     # Remove var
     shutil.rmtree(pkgdir / "opt/pacman/var", ignore_errors=True)
     

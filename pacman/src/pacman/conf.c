@@ -309,6 +309,28 @@ static int download_with_xfercommand(void *ctx, const char *url,
 	if(!filename) {
 		return -1;
 	}
+
+#ifdef __APPLE__
+	char clean_filename[PATH_MAX];
+	if (strstr(filename, "-darwin_x86_64.db.tar.gz")) {
+		snprintf(clean_filename, sizeof(clean_filename), "%.*s.db",
+			(int)(strstr(filename, "-darwin_x86_64.db.tar.gz") - filename), filename);
+		filename = clean_filename;
+	} else if (strstr(filename, "-darwin_arm64.db.tar.gz")) {
+		snprintf(clean_filename, sizeof(clean_filename), "%.*s.db",
+			(int)(strstr(filename, "-darwin_arm64.db.tar.gz") - filename), filename);
+		filename = clean_filename;
+	} else if (strstr(filename, "-darwin_x86_64.files.tar.gz")) {
+		snprintf(clean_filename, sizeof(clean_filename), "%.*s.files",
+			(int)(strstr(filename, "-darwin_x86_64.files.tar.gz") - filename), filename);
+		filename = clean_filename;
+	} else if (strstr(filename, "-darwin_arm64.files.tar.gz")) {
+		snprintf(clean_filename, sizeof(clean_filename), "%.*s.files",
+			(int)(strstr(filename, "-darwin_arm64.files.tar.gz") - filename), filename);
+		filename = clean_filename;
+	}
+#endif
+
 	destfile = get_destfile(localpath, filename);
 	tempfile = get_tempfile(localpath, filename);
 
