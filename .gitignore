@@ -35,9 +35,6 @@ fromsource/*/*.tar.*
 packages/*
 !packages/.gitkeep
 
-new_packages/*
-!new_packages/.gitkeep
-
 # Repository data
 repo/*
 !repo/.gitkeep

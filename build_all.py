@@ -117,11 +117,9 @@ def main():
     project_dir = Path(__file__).resolve().parent
     output_dir = project_dir / "output"
     core_dir = project_dir / "core"
-    new_packages_dir = project_dir / "new_packages"
 
     output_dir.mkdir(exist_ok=True)
     core_dir.mkdir(exist_ok=True)
-    new_packages_dir.mkdir(exist_ok=True)
 
     target_pkgs = args.packages if args.packages else list(dict.fromkeys(EXTRA_PACKAGES + (CORE_PACKAGES if args.core else [])))
 
@@ -182,10 +180,6 @@ def main():
                 if files_link.is_symlink() or files_link.exists():
                     files_link.unlink()
                 shutil.copy2(files_tar, files_link)
-
-    # Copy to new_packages
-    for file_path in output_dir.glob("*.pkg.tar.zst"):
-        shutil.copy2(file_path, new_packages_dir / file_path.name)
 
     # Sync pacman database
     subprocess.run(["/opt/pacman/bin/pacman", "-Sy"], check=False)
