@@ -6,9 +6,11 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from env_loader import get_packager
+
 PROJECT_DIR = Path(__file__).resolve().parent
 CORE_DIR = PROJECT_DIR / "core"
-MAINTAINER = "Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"
+MAINTAINER = get_packager()
 
 BUILD_ENV = os.environ.copy()
 BUILD_ENV["PATH"] = f"/opt/pacman/bin:/opt/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"

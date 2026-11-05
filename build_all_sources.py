@@ -8,9 +8,13 @@ from pathlib import Path
 PROJECT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_DIR / "converter" / "src"))
 try:
-    from pacman_macos.constants import DEFAULT_PACKAGER
+    from env_loader import get_packager
+    DEFAULT_PACKAGER = get_packager()
 except ImportError:
-    DEFAULT_PACKAGER = "Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"
+    try:
+        from pacman_macos.constants import DEFAULT_PACKAGER
+    except ImportError:
+        DEFAULT_PACKAGER = "Pacman Packager <packager@localhost>"
 FROMSOURCE_DIR = PROJECT_DIR / "fromsource"
 CORE_DIR = PROJECT_DIR / "core"
 PACMAN_BIN = Path("/opt/pacman/bin/pacman")

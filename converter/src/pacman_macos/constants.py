@@ -45,12 +45,33 @@ PROJECT_PACMAN_CONF = PACMAN_ROOT / "etc" / "pacman.conf"
 INSTALL_PREFIX = Path("/opt/pacman")
 
 # Default packager / maintainer resolution:
-# 1. $PACKAGER environment variable
+# 1. $PACKAGER or $MAINTAINER in os.environ (or loaded from .env)
 # 2. git config (user.name <user.email>)
 # 3. Fallback author default
+def _load_env_file() -> None:
+    for env_path in [PROJECT_ROOT / ".env", Path.cwd() / ".env"]:
+        if env_path.is_file():
+            try:
+                with open(env_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line or line.startswith("#"):
+                            continue
+                        if "=" in line:
+                            k, v = line.split("=", 1)
+                            k, v = k.strip(), v.strip().strip('"').strip("'")
+                            if k and k not in os.environ:
+                                os.environ[k] = v
+                break
+            except Exception:
+                pass
+
 def get_default_packager() -> str:
+    _load_env_file()
     if os.environ.get("PACKAGER"):
         return os.environ["PACKAGER"].strip()
+    if os.environ.get("MAINTAINER"):
+        return os.environ["MAINTAINER"].strip()
     try:
         name = subprocess.check_output(
             ["git", "config", "user.name"],
@@ -68,7 +89,7 @@ def get_default_packager() -> str:
             return name
     except Exception:
         pass
-    return "Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"
+    return "Pacman Packager <packager@localhost>"
 
 DEFAULT_PACKAGER = get_default_packager()
 

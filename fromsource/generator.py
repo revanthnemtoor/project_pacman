@@ -67,13 +67,17 @@ class PKGBUILDGenerator:
     # -----------------------------------------------------------------
 
     def _gen_header(self) -> str:
-        packager = os.environ.get("PACKAGER")
+        packager = os.environ.get("PACKAGER") or os.environ.get("MAINTAINER")
         if not packager:
             try:
                 from pacman_macos.constants import DEFAULT_PACKAGER
                 packager = DEFAULT_PACKAGER
             except Exception:
-                packager = "Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"
+                try:
+                    from env_loader import get_packager
+                    packager = get_packager()
+                except Exception:
+                    packager = "Pacman Packager <packager@localhost>"
         maintainer = packager.split("<")[0].strip() if "<" in packager else packager
         deps_str = " ".join(f"'{d}'" for d in self.depends)
         return dedent(f"""\

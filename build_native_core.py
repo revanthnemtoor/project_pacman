@@ -12,7 +12,9 @@ EXTRA_DIR = PROJECT_DIR / "extra"
 FROMSOURCE_DIR = PROJECT_DIR / "fromsource"
 PACMAN_ROOT = Path("/opt/pacman")
 
-MAINTAINER = "Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"
+from env_loader import get_packager
+
+MAINTAINER = get_packager()
 
 # Environment: strictly use /opt/pacman and macOS system SDK, never Homebrew
 BUILD_ENV = os.environ.copy()

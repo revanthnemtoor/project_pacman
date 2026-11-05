@@ -11,7 +11,9 @@ CORE_DIR = PROJECT_DIR / "core"
 EXTRA_DIR = PROJECT_DIR / "extra"
 PACMAN_ROOT = Path("/opt/pacman")
 
-MAINTAINER = "Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"
+from env_loader import get_packager
+
+MAINTAINER = get_packager()
 
 BUILD_ENV = os.environ.copy()
 BUILD_ENV["PATH"] = f"/opt/pacman/bin:/opt/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
