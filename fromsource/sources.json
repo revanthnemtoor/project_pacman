@@ -1,0 +1,94 @@
+{
+    "autoconf": {
+        "url": "https://ftpmirror.gnu.org/autoconf/autoconf-2.73.tar.gz",
+        "system": "autotools",
+        "version": "2.73",
+        "desc": "Automatic configure script builder",
+        "depends": [
+            "m4"
+        ]
+    },
+    "automake": {
+        "url": "https://ftpmirror.gnu.org/automake/automake-1.19.tar.xz",
+        "system": "autotools",
+        "version": "1.19",
+        "desc": "Tool for generating GNU Standards-compliant Makefiles",
+        "depends": [
+            "autoconf"
+        ]
+    },
+    "bash": {
+        "url": "https://ftpmirror.gnu.org/bash/bash-5.3.tar.gz",
+        "system": "autotools",
+        "version": "5.3.20",
+        "desc": "Bourne-Again SHell, a UNIX command interpreter",
+        "depends": [
+            "ncurses",
+            "readline",
+            "gettext"
+        ]
+    },
+    "binutils": {
+        "url": "https://ftpmirror.gnu.org/binutils/binutils-2.47.tar.bz2",
+        "system": "autotools",
+        "version": "2.47",
+        "desc": "GNU binary tools for native development",
+        "depends": [
+            "zstd"
+        ]
+    },
+    "bison": {
+        "url": "https://ftpmirror.gnu.org/bison/bison-3.8.2.tar.xz",
+        "system": "autotools",
+        "version": "3.8.2",
+        "desc": "Parser generator",
+        "depends": []
+    },
+    "brotli": {
+        "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.1.tar.gz",
+        "system": "cmake",
+        "version": "1.2.1",
+        "desc": "Generic-purpose lossless compression algorithm by Google",
+        "depends": []
+    },
+    "bzip2": {
+        "url": "https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz",
+        "system": "autotools",
+        "version": "1.0.8",
+        "desc": "Freely available high-quality data compressor",
+        "depends": []
+    },
+    "ca-certificates": {
+        "url": "https://curl.se/ca/cacert-2026-10-20.pem",
+        "system": "autotools",
+        "version": "2026-10-20",
+        "desc": "Mozilla CA certificate store",
+        "depends": []
+    },
+    "coreutils": {
+        "url": "https://ftpmirror.gnu.org/coreutils/coreutils-9.12.tar.xz",
+        "system": "autotools",
+        "version": "9.12",
+        "desc": "GNU File, Shell, and Text utilities",
+        "depends": [
+            "gmp",
+            "openssl@4"
+        ]
+    },
+    "curl": {
+        "url": "https://curl.se/download/curl-8.23.0.tar.bz2",
+        "system": "autotools",
+        "version": "8.23.0",
+        "desc": "Get a file from an HTTP, HTTPS or FTP server",
+        "depends": [
+            "brotli",
+            "libnghttp2",
+            "libnghttp3",
+            "libngtcp2",
+            "libpsl",
+            "libssh2",
+            "openssl@4",
+            "zstd"
+        ]
+    }
+}
