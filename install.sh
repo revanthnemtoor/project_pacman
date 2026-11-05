@@ -138,6 +138,11 @@ fi
 if [ ! -d "$PROJECT_DIR/core" ]; then
     echo "-> Cloning project_pacman repository to $PROJECT_DIR..."
     git clone "$PROJECT_REPO_URL" "$PROJECT_DIR"
+else
+    if [ -d "$PROJECT_DIR/.git" ] && [ "$PROJECT_DIR" != "${SCRIPT_DIR:-}" ]; then
+        echo "-> Updating existing clone at $PROJECT_DIR..."
+        git -C "$PROJECT_DIR" pull --ff-only origin main 2>/dev/null || true
+    fi
 fi
 
 # -----------------------------------------------------------------------------
