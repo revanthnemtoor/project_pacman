@@ -51,6 +51,7 @@ pacman/build/
 *.src.tar.gz
 
 # Temporary files
+tmp/
 *.log
 *.tmp
 *.temp
