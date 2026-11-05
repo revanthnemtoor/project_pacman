@@ -241,3 +241,4 @@ Server = https://revanthnemtoor.github.io/project_pacman/extra
 * **Maintainer & Packager**: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 * **Repository**: [https://github.com/revanthnemtoor/project_pacman](https://github.com/revanthnemtoor/project_pacman)
 * **License**: [GPL-2.0-or-later](https://gitlab.archlinux.org/pacman/pacman/-/blob/master/COPYING) (matching upstream GNU / Pacman licensing)
+
