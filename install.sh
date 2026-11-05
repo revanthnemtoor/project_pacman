@@ -29,6 +29,14 @@ fi
 # -----------------------------------------------------------------------------
 # 1. Detect OS & Architecture (Apple Silicon arm64 & Intel x86_64)
 # -----------------------------------------------------------------------------
+for arg in "$@"; do
+    case "$arg" in
+        -y|--yes|--non-interactive|-non-interactive)
+            NONINTERACTIVE=1
+            ;;
+    esac
+done
+
 OS_NAME="$(uname -s)"
 if [ "$OS_NAME" != "Darwin" ]; then
     echo "Error: This installer is only for macOS (detected: $OS_NAME)."
@@ -64,6 +72,65 @@ echo "  Host Arch     : $HOST_ARCH ($DARWIN_ARCH)"
 echo "  Install Prefix: $PACMAN_PREFIX"
 echo "  Project Dir   : $PROJECT_DIR"
 echo "========================================================"
+
+# -----------------------------------------------------------------------------
+# Interactive Prompts: Continue / Install & PATH Configuration
+# -----------------------------------------------------------------------------
+TTY_INPUT=""
+if [ -e /dev/tty ]; then
+    TTY_INPUT="/dev/tty"
+fi
+
+if [ -z "${NONINTERACTIVE:-}" ] && [ -n "$TTY_INPUT" ]; then
+    echo ""
+    echo "Do you want to proceed with the installation?"
+    echo "  [1] Continue with Installation (default)"
+    echo "  [2] Cancel / Exit"
+    printf "Select option [1-2, default: 1]: "
+    read -r PROCEED_OPT < "$TTY_INPUT" || PROCEED_OPT="1"
+    case "${PROCEED_OPT:-1}" in
+        1|[yY]|[yY][eE][sS]|"")
+            echo "-> Proceeding with installation..."
+            ;;
+        2|[nN]|[nN][oO]|"q"|"quit"|"exit")
+            echo "-> Installation cancelled by user."
+            exit 0
+            ;;
+        *)
+            echo "-> Invalid option '$PROCEED_OPT'. Aborting installation."
+            exit 1
+            ;;
+    esac
+
+    echo ""
+    echo "How would you like to configure /opt/pacman/bin in your PATH?"
+    echo "  [1] Top Priority  - Prepend to PATH (/opt/pacman tools take precedence over macOS system tools) [default]"
+    echo "  [2] Add to PATH   - Append to PATH (system tools take precedence, pacman tools used as fallback)"
+    echo "  [3] Skip PATH     - Do not modify shell profile files"
+    printf "Select option [1-3, default: 1]: "
+    read -r PATH_OPT < "$TTY_INPUT" || PATH_OPT="1"
+    case "${PATH_OPT:-1}" in
+        1|"")
+            PATH_PRIORITY="top"
+            echo "-> Selected: Top priority (prepended to PATH)"
+            ;;
+        2)
+            PATH_PRIORITY="append"
+            echo "-> Selected: Standard priority (appended to PATH)"
+            ;;
+        3)
+            PATH_PRIORITY="skip"
+            echo "-> Selected: Skip PATH configuration"
+            ;;
+        *)
+            echo "-> Invalid option '$PATH_OPT'. Defaulting to Top Priority."
+            PATH_PRIORITY="top"
+            ;;
+    esac
+else
+    echo "-> Non-interactive mode detected: continuing with defaults (Top Priority PATH)..."
+    PATH_PRIORITY="${PATH_PRIORITY:-top}"
+fi
 
 # -----------------------------------------------------------------------------
 # 2. Clone project_pacman if running via curl | bash
@@ -189,8 +256,9 @@ if add_c.exists():
 pkey = src / "scripts/pacman-key.sh.in"
 if pkey.exists():
     txt = pkey.read_text()
-    txt = txt.replace("&& EUID != 0 )); then", "&& false && EUID != 0 )); then")
-    pkey.write_text(txt)
+    if "&& false && EUID != 0 )); then" not in txt:
+        txt = txt.replace("&& EUID != 0 )); then", "&& false && EUID != 0 )); then")
+        pkey.write_text(txt)
 
 # 5. scripts/repo-add.sh.in: bsdtar -tqf -> bsdtar -tf & shasum fallback
 repoadd = src / "scripts/repo-add.sh.in"
@@ -356,6 +424,7 @@ GPGDir      = $PACMAN_PREFIX/etc/pacman.d/gnupg/
 HookDir     = $PACMAN_PREFIX/etc/pacman.d/hooks/
 HoldPkg     = pacman
 Architecture = auto any
+XferCommand = /usr/bin/curl -L -C - -f -o %o %u
 
 Color
 CheckSpace
@@ -381,9 +450,14 @@ cp "$PACMAN_PREFIX/etc/pacman.conf" "$PROJECT_DIR/configs/pacman.conf" 2>/dev/nu
 
 # Ensure makepkg.conf has CARCH set to current darwin architecture and !strip
 if [ -f "$PACMAN_PREFIX/etc/makepkg.conf" ]; then
-    sed -i '' "s/^CARCH=.*/CARCH=\"$DARWIN_ARCH\"/" "$PACMAN_PREFIX/etc/makepkg.conf" || true
-    sed -i '' "s/^CHOST=.*/CHOST=\"$CHOST\"/" "$PACMAN_PREFIX/etc/makepkg.conf" || true
-    sed -i '' "s/^OPTIONS=(strip /OPTIONS=(!strip /" "$PACMAN_PREFIX/etc/makepkg.conf" || true
+    if sed --version 2>/dev/null | grep -q GNU; then
+        SED_INPLACE=(-i)
+    else
+        SED_INPLACE=(-i '')
+    fi
+    sed "${SED_INPLACE[@]}" "s/^CARCH=.*/CARCH=\"$DARWIN_ARCH\"/" "$PACMAN_PREFIX/etc/makepkg.conf" || true
+    sed "${SED_INPLACE[@]}" "s/^CHOST=.*/CHOST=\"$CHOST\"/" "$PACMAN_PREFIX/etc/makepkg.conf" || true
+    sed "${SED_INPLACE[@]}" "s/^OPTIONS=(strip /OPTIONS=(!strip /" "$PACMAN_PREFIX/etc/makepkg.conf" || true
     GIT_USER_NAME="$(git config user.name 2>/dev/null || true)"
     GIT_USER_EMAIL="$(git config user.email 2>/dev/null || true)"
     if [ -n "$GIT_USER_NAME" ] && [ -n "$GIT_USER_EMAIL" ]; then
@@ -394,54 +468,104 @@ if [ -f "$PACMAN_PREFIX/etc/makepkg.conf" ]; then
         RESOLVED_PACKAGER="Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"
     fi
     PACKAGER_VAL="${PACKAGER:-$RESOLVED_PACKAGER}"
-    sed -i '' "s/^#*PACKAGER=.*/PACKAGER=\"$PACKAGER_VAL\"/" "$PACMAN_PREFIX/etc/makepkg.conf" || true
+    sed "${SED_INPLACE[@]}" "s/^#*PACKAGER=.*/PACKAGER=\"$PACKAGER_VAL\"/" "$PACMAN_PREFIX/etc/makepkg.conf" || true
 fi
 
 # -----------------------------------------------------------------------------
-# 8. Prepend /opt/pacman/bin to Top of PATH (Fish, Zsh, Bash)
+# 8. Configure PATH (Fish, Zsh, Bash) based on user selection
 # -----------------------------------------------------------------------------
-echo "-> Putting $PACMAN_PREFIX/bin at highest priority in PATH (fish, zsh, bash)..."
+if [ "$PATH_PRIORITY" = "skip" ]; then
+    echo "-> Skipping shell configuration file modifications as requested."
+    echo "   To use pacman manually, add to your shell profile:"
+    echo "     export PATH=\"$PACMAN_PREFIX/bin:$PACMAN_PREFIX/sbin:\$PATH\""
+elif [ "$PATH_PRIORITY" = "append" ]; then
+    echo "-> Adding $PACMAN_PREFIX/bin to PATH (Standard Priority - appended to PATH)..."
 
-# Fish shell (prepend & move to front of PATH)
-FISH_CONFIG="$HOME/.config/fish/config.fish"
-mkdir -p "$(dirname "$FISH_CONFIG")"
-if [ -f "$FISH_CONFIG" ]; then
-    grep -v "$PACMAN_PREFIX/bin" "$FISH_CONFIG" | grep -v "# Pacman for macOS" > "${FISH_CONFIG}.tmp" || true
-    {
-        echo "# Pacman for macOS (Highest Priority in PATH)"
-        echo "fish_add_path -g -p -m -P $PACMAN_PREFIX/bin $PACMAN_PREFIX/sbin"
-        echo "set -gx GIT_EXEC_PATH $PACMAN_PREFIX/libexec/git-core"
-        echo "set -gx GIT_TEMPLATE_DIR $PACMAN_PREFIX/share/git-core/templates"
-        echo ""
-        cat "${FISH_CONFIG}.tmp"
-    } > "$FISH_CONFIG"
-    rm -f "${FISH_CONFIG}.tmp"
-else
-    {
-        echo "# Pacman for macOS (Highest Priority in PATH)"
-        echo "fish_add_path -g -p -m -P $PACMAN_PREFIX/bin $PACMAN_PREFIX/sbin"
-        echo "set -gx GIT_EXEC_PATH $PACMAN_PREFIX/libexec/git-core"
-        echo "set -gx GIT_TEMPLATE_DIR $PACMAN_PREFIX/share/git-core/templates"
-    } > "$FISH_CONFIG"
-fi
-echo "   Prepended $PACMAN_PREFIX/bin to $FISH_CONFIG"
-
-# Zsh & Bash
-for RC_FILE in "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.bashrc" "$HOME/.bash_profile"; do
-    if [ -f "$RC_FILE" ] || [ "$RC_FILE" = "$HOME/.zshrc" ] || [ "$RC_FILE" = "$HOME/.bash_profile" ]; then
-        touch "$RC_FILE"
-        if ! grep -q "$PACMAN_PREFIX/bin" "$RC_FILE"; then
-            {
-                echo ""
-                echo "# Pacman for macOS (Highest Priority in PATH)"
-                echo "export PATH=\"$PACMAN_PREFIX/bin:$PACMAN_PREFIX/sbin:\$PATH\""
-                echo "export GIT_EXEC_PATH=\"$PACMAN_PREFIX/libexec/git-core\""
-                echo "export GIT_TEMPLATE_DIR=\"$PACMAN_PREFIX/share/git-core/templates\""
-            } >> "$RC_FILE"
-            echo "   Prepended $PACMAN_PREFIX/bin to $RC_FILE"
-        fi
+    # Fish shell (append to PATH)
+    FISH_CONFIG="$HOME/.config/fish/config.fish"
+    mkdir -p "$(dirname "$FISH_CONFIG")"
+    if [ -f "$FISH_CONFIG" ]; then
+        grep -v "$PACMAN_PREFIX/bin" "$FISH_CONFIG" | grep -v "# Pacman for macOS" > "${FISH_CONFIG}.tmp" || true
+        {
+            cat "${FISH_CONFIG}.tmp"
+            echo ""
+            echo "# Pacman for macOS (Standard Priority in PATH)"
+            echo "fish_add_path -g -a $PACMAN_PREFIX/bin $PACMAN_PREFIX/sbin"
+            echo "set -gx GIT_EXEC_PATH $PACMAN_PREFIX/libexec/git-core"
+            echo "set -gx GIT_TEMPLATE_DIR $PACMAN_PREFIX/share/git-core/templates"
+        } > "$FISH_CONFIG"
+        rm -f "${FISH_CONFIG}.tmp"
+    else
+        {
+            echo "# Pacman for macOS (Standard Priority in PATH)"
+            echo "fish_add_path -g -a $PACMAN_PREFIX/bin $PACMAN_PREFIX/sbin"
+            echo "set -gx GIT_EXEC_PATH $PACMAN_PREFIX/libexec/git-core"
+            echo "set -gx GIT_TEMPLATE_DIR $PACMAN_PREFIX/share/git-core/templates"
+        } > "$FISH_CONFIG"
     fi
-done
+    echo "   Appended $PACMAN_PREFIX/bin to $FISH_CONFIG"
+
+    # Zsh & Bash
+    for RC_FILE in "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.bashrc" "$HOME/.bash_profile"; do
+        if [ -f "$RC_FILE" ] || [ "$RC_FILE" = "$HOME/.zshrc" ] || [ "$RC_FILE" = "$HOME/.bash_profile" ]; then
+            touch "$RC_FILE"
+            if ! grep -q "$PACMAN_PREFIX/bin" "$RC_FILE"; then
+                {
+                    echo ""
+                    echo "# Pacman for macOS (Standard Priority in PATH)"
+                    echo "export PATH=\"\$PATH:$PACMAN_PREFIX/bin:$PACMAN_PREFIX/sbin\""
+                    echo "export GIT_EXEC_PATH=\"$PACMAN_PREFIX/libexec/git-core\""
+                    echo "export GIT_TEMPLATE_DIR=\"$PACMAN_PREFIX/share/git-core/templates\""
+                } >> "$RC_FILE"
+                echo "   Appended $PACMAN_PREFIX/bin to $RC_FILE"
+            fi
+        fi
+    done
+else
+    # Default: top priority (prepend)
+    echo "-> Putting $PACMAN_PREFIX/bin at highest priority in PATH (prepended to PATH)..."
+
+    # Fish shell (prepend & move to front of PATH)
+    FISH_CONFIG="$HOME/.config/fish/config.fish"
+    mkdir -p "$(dirname "$FISH_CONFIG")"
+    if [ -f "$FISH_CONFIG" ]; then
+        grep -v "$PACMAN_PREFIX/bin" "$FISH_CONFIG" | grep -v "# Pacman for macOS" > "${FISH_CONFIG}.tmp" || true
+        {
+            echo "# Pacman for macOS (Highest Priority in PATH)"
+            echo "fish_add_path -g -p -m -P $PACMAN_PREFIX/bin $PACMAN_PREFIX/sbin"
+            echo "set -gx GIT_EXEC_PATH $PACMAN_PREFIX/libexec/git-core"
+            echo "set -gx GIT_TEMPLATE_DIR $PACMAN_PREFIX/share/git-core/templates"
+            echo ""
+            cat "${FISH_CONFIG}.tmp"
+        } > "$FISH_CONFIG"
+        rm -f "${FISH_CONFIG}.tmp"
+    else
+        {
+            echo "# Pacman for macOS (Highest Priority in PATH)"
+            echo "fish_add_path -g -p -m -P $PACMAN_PREFIX/bin $PACMAN_PREFIX/sbin"
+            echo "set -gx GIT_EXEC_PATH $PACMAN_PREFIX/libexec/git-core"
+            echo "set -gx GIT_TEMPLATE_DIR $PACMAN_PREFIX/share/git-core/templates"
+        } > "$FISH_CONFIG"
+    fi
+    echo "   Prepended $PACMAN_PREFIX/bin to $FISH_CONFIG"
+
+    # Zsh & Bash
+    for RC_FILE in "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.bashrc" "$HOME/.bash_profile"; do
+        if [ -f "$RC_FILE" ] || [ "$RC_FILE" = "$HOME/.zshrc" ] || [ "$RC_FILE" = "$HOME/.bash_profile" ]; then
+            touch "$RC_FILE"
+            if ! grep -q "$PACMAN_PREFIX/bin" "$RC_FILE"; then
+                {
+                    echo ""
+                    echo "# Pacman for macOS (Highest Priority in PATH)"
+                    echo "export PATH=\"$PACMAN_PREFIX/bin:$PACMAN_PREFIX/sbin:\$PATH\""
+                    echo "export GIT_EXEC_PATH=\"$PACMAN_PREFIX/libexec/git-core\""
+                    echo "export GIT_TEMPLATE_DIR=\"$PACMAN_PREFIX/share/git-core/templates\""
+                } >> "$RC_FILE"
+                echo "   Prepended $PACMAN_PREFIX/bin to $RC_FILE"
+            fi
+        fi
+    done
+fi
 
 # -----------------------------------------------------------------------------
 # 9. Sync Package Databases & Register Pacman Package
