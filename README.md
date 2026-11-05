@@ -4,7 +4,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%20(Darwin)-black.svg)](https://apple.com/macos)
 [![Architecture](https://img.shields.io/badge/arch-arm64%20%7C%20x86__64-orange.svg)](#architecture-support)
 [![Build](https://img.shields.io/badge/build-100%25%20source--built-green.svg)](#native-toolchain)
-[![License](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
 
 A fully native, rootless port of Arch Linux's **Pacman (v7.1.0)** and **libalpm (v16.0)** package manager to **macOS (Darwin)**.
 
@@ -240,5 +240,5 @@ Server = https://revanthnemtoor.github.io/project_pacman/extra
 
 * **Maintainer & Packager**: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 * **Repository**: [https://github.com/revanthnemtoor/project_pacman](https://github.com/revanthnemtoor/project_pacman)
-* **License**: [GPL-2.0-or-later](https://gitlab.archlinux.org/pacman/pacman/-/blob/master/COPYING) (matching upstream GNU / Pacman licensing)
+* **License**: [GPL-3.0-or-later](LICENSE) (GNU General Public License v3.0 or later)
 
