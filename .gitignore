@@ -46,6 +46,10 @@ dist/
 *.src.tar.gz
 !core/*.pkg.tar.zst
 !extra/*.pkg.tar.zst
+!core/*.pkg.tar.zst.sig
+!extra/*.pkg.tar.zst.sig
+!core/*.sig
+!extra/*.sig
 pacman/build/
 *.src.tar.gz
 

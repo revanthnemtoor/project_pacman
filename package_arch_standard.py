@@ -24,8 +24,21 @@ EXTRA_DIR = PROJECT_DIR / "extra"
 CONFIGS_DIR = PROJECT_DIR / "configs"
 MAINTAINER = get_packager()
 NOW = int(time.time())
+GPG_KEYID = "CEC5B78775CA4628"
 
 ZSTD_BIN = "/opt/pacman/bin/zstd"
+
+
+def sign_package(pkg_path: Path):
+    """Generate a detached PGP signature (.sig) for the package archive."""
+    sig = pkg_path.with_name(pkg_path.name + ".sig")
+    if sig.exists():
+        sig.unlink()
+    cmd = [
+        "/opt/pacman/bin/gpg", "--detach-sign", "--batch", "--yes",
+        "-u", GPG_KEYID, str(pkg_path)
+    ]
+    subprocess.run(cmd, check=True)
 
 
 def create_pkg(pkg_name: str, pkgver: str, arch: str, desc: str, url: str,
@@ -108,7 +121,8 @@ def create_pkg(pkg_name: str, pkgver: str, arch: str, desc: str, url: str,
         cmd = f"cd {pkg_root_path} && tar -cf - -T _files.txt | {ZSTD_BIN} -c -T0 -19 -z > {dest_pkg}"
         subprocess.run(cmd, shell=True, check=True)
 
-    print(f"  -> Successfully generated {dest_pkg.name} ({dest_pkg.stat().st_size:,} bytes)")
+    sign_package(dest_pkg)
+    print(f"  -> Successfully generated {dest_pkg.name} ({dest_pkg.stat().st_size:,} bytes) + .sig")
     return dest_pkg
 
 
@@ -197,7 +211,8 @@ def repack_existing(pkg_path: Path, new_arch: str = None, new_packager: str = No
 
         cmd = f"cd {tmp_path} && tar -cf - -T _files.txt | {ZSTD_BIN} -c -T0 -19 -z > {out_pkg}"
         subprocess.run(cmd, shell=True, check=True)
-        print(f"  -> Repacked: {out_pkg.name} ({out_pkg.stat().st_size:,} bytes)")
+        sign_package(out_pkg)
+        print(f"  -> Repacked: {out_pkg.name} ({out_pkg.stat().st_size:,} bytes) + .sig")
         return out_pkg
 
 
@@ -326,7 +341,7 @@ def build_libarchive_pkg():
                 license_str="BSD-2-Clause",
                 depends=["zlib", "bzip2", "xz", "lz4", "zstd", "openssl"],
                 optdepends=[],
-                provides=["libarchive.dylib=13"],
+                provides=["libarchive.dylib=13", "libarchive.so=13-64"],
                 stage_dir=sdir,
                 dest_dir=CORE_DIR,
             )
@@ -350,7 +365,7 @@ def build_gpgme_pkg():
             license_str="LGPL-2.1-or-later",
             depends=["gnupg", "libgpg-error", "libassuan"],
             optdepends=[],
-            provides=["libgpgme.dylib=11"],
+            provides=["libgpgme.dylib=11", "libgpgme.so=11-64"],
             stage_dir=src_stage,
             dest_dir=CORE_DIR,
         )
@@ -376,7 +391,7 @@ def build_curl_pkgs():
             license_str="MIT",
             depends=["zlib", "openssl"],
             optdepends=[],
-            provides=["libcurl.dylib=4"],
+            provides=["libcurl.dylib=4", "libcurl.so=4-64"],
             stage_dir=curl_stage,
             dest_dir=CORE_DIR,
         )
@@ -385,8 +400,24 @@ def build_curl_pkgs():
     arm_curl = CORE_DIR / "curl-8.12.0-1-darwin_arm64.pkg.tar.zst"
     if arm_curl.exists():
         repack_existing(arm_curl, new_arch="darwin_arm64", new_packager=MAINTAINER,
-                       new_url="https://curl.se/", new_provides=["libcurl.dylib=4"],
+                       new_url="https://curl.se/", new_provides=["libcurl.dylib=4", "libcurl.so=4-64"],
                        new_depends=["zlib", "openssl"])
+
+
+def repack_openssl_pkgs():
+    print("\n" + "="*50)
+    print("Repackaging openssl with sonames...")
+    print("="*50)
+    openssl_provides = [
+        "libcrypto.so=3-64", "libssl.so=3-64",
+        "libcrypto.dylib=3", "libssl.dylib=3"
+    ]
+    x86_ssl = CORE_DIR / "openssl-3.4.1-1-darwin_x86_64.pkg.tar.zst"
+    if x86_ssl.exists():
+        repack_existing(x86_ssl, new_provides=openssl_provides)
+    arm_ssl = CORE_DIR / "openssl-3.6.3-1-darwin_arm64.pkg.tar.zst"
+    if arm_ssl.exists():
+        repack_existing(arm_ssl, new_provides=openssl_provides)
 
 
 def build_fish_pkgs():
@@ -442,7 +473,8 @@ def build_pacman_pkgs():
 
         pacman_deps = [
             "bash", "coreutils", "curl", "gawk", "gettext", "gnupg", "gpgme",
-            "grep", "libarchive", "openssl", "pacman-mirrorlist"
+            "grep", "libarchive", "openssl", "pacman-mirrorlist",
+            "libarchive.so=13-64", "libcurl.so=4-64", "libgpgme.so=11-64", "libcrypto.so=3-64"
         ]
         pacman_optdeps = [
             "base-devel: required to use makepkg",
@@ -483,15 +515,27 @@ def build_pacman_pkgs():
         )
 
 
+def sign_all_packages():
+    print("\n" + "="*50)
+    print("Signing all packages in core and extra...")
+    print("="*50)
+    for p in sorted(list(CORE_DIR.glob("*.pkg.tar.zst")) + list(EXTRA_DIR.glob("*.pkg.tar.zst"))):
+        sig = p.with_name(p.name + ".sig")
+        if not sig.exists():
+            sign_package(p)
+
+
 def main():
     build_pacman_mirrorlist()
     build_meta_packages()
     build_libarchive_pkg()
     build_gpgme_pkg()
     build_curl_pkgs()
+    repack_openssl_pkgs()
     build_fish_pkgs()
     build_pacman_pkgs()
-    print("\nAll Arch-standard packages successfully built and staged!")
+    sign_all_packages()
+    print("\nAll Arch-standard packages successfully built, staged, and signed!")
 
 
 if __name__ == "__main__":

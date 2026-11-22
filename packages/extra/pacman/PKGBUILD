@@ -7,7 +7,8 @@ arch=('darwin_x86_64' 'darwin_arm64')
 url="https://archlinux.org/pacman/"
 license=('GPL-2.0-or-later')
 provides=('libalpm.so=16-64' 'libalpm.dylib=16')
-depends=('bash' 'coreutils' 'curl' 'gawk' 'gettext' 'gnupg' 'gpgme' 'grep' 'libarchive' 'openssl' 'pacman-mirrorlist')
+depends=('bash' 'coreutils' 'curl' 'gawk' 'gettext' 'gnupg' 'gpgme' 'grep' 'libarchive' 'openssl' 'pacman-mirrorlist'
+         'libarchive.so=13-64' 'libcurl.so=4-64' 'libgpgme.so=11-64' 'libcrypto.so=3-64')
 optdepends=('base-devel: required to use makepkg'
             'perl-locale-gettext: translation support in makepkg-template')
 options=('!strip')
