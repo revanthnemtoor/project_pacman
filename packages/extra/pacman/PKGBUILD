@@ -2,12 +2,14 @@
 pkgname=pacman
 pkgver=7.1.0
 pkgrel=1
-pkgdesc="A library-based package manager with dependency support (Darwin native port)"
+pkgdesc="A library-based package manager with dependency support"
 arch=('darwin_x86_64' 'darwin_arm64')
-url="https://gitlab.archlinux.org/pacman/pacman"
+url="https://archlinux.org/pacman/"
 license=('GPL-2.0-or-later')
-depends=('openssl' 'zstd')
-optdepends=('bash: for makepkg and pacman-key scripts')
+provides=('libalpm.so=16-64' 'libalpm.dylib=16')
+depends=('bash' 'coreutils' 'curl' 'gawk' 'gettext' 'gnupg' 'gpgme' 'grep' 'libarchive' 'openssl' 'pacman-mirrorlist')
+optdepends=('base-devel: required to use makepkg'
+            'perl-locale-gettext: translation support in makepkg-template')
 options=('!strip')
 
 build() {

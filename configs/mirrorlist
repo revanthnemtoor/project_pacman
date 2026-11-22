@@ -1,0 +1,7 @@
+#
+# /opt/pacman/etc/pacman.d/mirrorlist
+# Official project_pacman macOS Mirror List
+#
+
+Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/$repo
+Server = https://revanthnemtoor.github.io/project_pacman/$repo

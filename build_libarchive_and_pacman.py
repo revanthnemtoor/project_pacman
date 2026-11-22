@@ -128,20 +128,33 @@ def build_pacman(workdir):
             except Exception:
                 pass
                 
+    import time
     installed_size = sum(f.stat().st_size for f in pkgdir.rglob("*") if f.is_file() and not f.is_symlink())
     pkginfo = (
         "pkgname = pacman\n"
         "pkgver = 7.1.0-1\n"
-        "pkgdesc = A library-based package manager with dependency support (Darwin native port, built from source)\n"
-        "url = https://gitlab.archlinux.org/pacman/pacman\n"
-        "builddate = 1730764800\n"
+        "pkgdesc = A library-based package manager with dependency support\n"
+        "url = https://archlinux.org/pacman/\n"
+        f"builddate = {int(time.time())}\n"
         f"packager = {MAINTAINER}\n"
         f"size = {installed_size}\n"
         "arch = darwin_x86_64\n"
         "license = GPL-2.0-or-later\n"
-        "depend = openssl\n"
-        "depend = zstd\n"
+        "provides = libalpm.so=16-64\n"
+        "provides = libalpm.dylib=16\n"
         "depend = bash\n"
+        "depend = coreutils\n"
+        "depend = curl\n"
+        "depend = gawk\n"
+        "depend = gettext\n"
+        "depend = gnupg\n"
+        "depend = gpgme\n"
+        "depend = grep\n"
+        "depend = libarchive\n"
+        "depend = openssl\n"
+        "depend = pacman-mirrorlist\n"
+        "optdepend = base-devel: required to use makepkg\n"
+        "optdepend = perl-locale-gettext: translation support in makepkg-template\n"
     )
     (pkgdir / ".PKGINFO").write_text(pkginfo)
     (pkgdir / ".BUILDINFO").write_text("format = 2\npkgname = pacman\npkgver = 7.1.0-1\n")
