@@ -1,35 +1,37 @@
+# Maintainer: Arch Darwin Pacman Port
 pkgname=nano
 pkgver=9.1
 pkgrel=1
-pkgdesc="Free (GNU) replacement for the Pico text editor"
-
+pkgdesc="Free (GNU) replacement for the Pico text editor (native x86_64-apple-darwin port for Intel Mac)"
+arch=('darwin_x86_64')
 url="https://www.nano-editor.org/"
-arch=(
-    'darwin_arm64'
-)
-license=(
-    'GPL-3.0-or-later'
-)
-depends=(
-    'gettext'
-    'ncurses'
-)
-makedepends=(
-    'pkgconf'
-)
-options=('!strip')
-source=()
-sha256sums=()
+license=('GPL-3.0-or-later')
+depends=('ncurses' 'gettext')
+options=('!strip' '!libtool')
+source=("https://www.nano-editor.org/dist/v9/nano-${pkgver}.tar.xz")
+sha256sums=('5f47764274cb7532349ce0aa20ec10f1e8e851a6e9fa3eb66812c43d196db042')
+
+build() {
+    cd "$srcdir/nano-$pkgver"
+    ./configure \
+        --prefix=/opt/pacman \
+        --sysconfdir=/opt/pacman/etc \
+        --enable-utf8 \
+        --disable-libmagic \
+        CFLAGS="-g -O2 -I/opt/pacman/include" \
+        LDFLAGS="-L/opt/pacman/lib" \
+        PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig"
+    make -j$(sysctl -n hw.ncpu)
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir"
-    mkdir -p "$_dest"
+    cd "$srcdir/nano-$pkgver"
+    make DESTDIR="$pkgdir" install
 
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
+    # Sign Mach-O binaries for Darwin
+    find "$pkgdir/opt/pacman" -type f -perm -u+x | while read -r f; do
+        if file "$f" 2>/dev/null | grep -q "Mach-O"; then
+            codesign -f -s - "$f" 2>/dev/null || true
         fi
     done
 }
