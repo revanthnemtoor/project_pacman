@@ -1,0 +1,78 @@
+# Maintainer: Arch Darwin Pacman Port
+pkgname=gcc
+pkgver=14.2.0
+pkgrel=1
+pkgdesc="The GNU Compiler Collection (native x86_64-apple-darwin port for Intel Mac)"
+arch=('darwin_x86_64')
+url="https://gcc.gnu.org"
+license=('GPL-3.0-or-later WITH GCC-exception-3.1')
+depends=('zstd')
+optdepends=('binutils: for objdump, readelf, and inspection tools')
+provides=('gcc' 'gcc-libs')
+options=('!strip' '!libtool')
+source=("https://ftp.gnu.org/gnu/gcc/gcc-${pkgver}/gcc-${pkgver}.tar.xz")
+sha256sums=('a7b39bc69cbf9e25826c5a60ab26477001f7c08d85cec04bc0e29cabed6f3cc9')
+
+prepare() {
+    cd "$srcdir/gcc-$pkgver"
+    # Download in-tree gmp, mpfr, mpc, and isl for self-contained bootstrap
+    if [[ ! -d gmp ]]; then
+        ./contrib/download_prerequisites
+    fi
+
+    # Fix Apple ld-prime / Xcode 16 linker error:
+    # Modern 64-bit Darwin does not export legacy 32-bit frame unwinding symbols
+    # in libSystem. Prune them from darwin-unwind.ver so -reexported_symbols_list succeeds.
+    python3 -c '
+path = "libgcc/config/darwin-unwind.ver"
+with open(path, "r") as f:
+    lines = f.readlines()
+filtered = [l for l in lines if not any(k in l for k in ["_frame_info", "_frame_table"])]
+with open(path, "w") as f:
+    f.writelines(filtered)
+'
+
+    mkdir -p "$srcdir/build"
+}
+
+build() {
+    cd "$srcdir/build"
+    local _darwin_ver=$(uname -r | cut -d. -f1)
+    local _sdk_path=$(xcrun --show-sdk-path)
+
+    if [[ ! -f Makefile ]]; then
+        "$srcdir/gcc-$pkgver/configure" \
+            --prefix=/opt/pacman \
+            --build="x86_64-apple-darwin${_darwin_ver}" \
+            --with-sysroot="${_sdk_path}" \
+            --with-native-system-header-dir=/usr/include \
+            --enable-languages=c,c++,lto \
+            --disable-multilib \
+            --disable-nls \
+            --enable-checking=release \
+            --with-pkgversion="Arch Darwin x86_64" \
+            --with-system-zlib
+    fi
+
+    make -j$(sysctl -n hw.ncpu)
+}
+
+package() {
+    cd "$srcdir/build"
+    make DESTDIR="$pkgdir" install
+
+    # Fixincludes trap: prevent stale Apple SDK headers from breaking C++ builds
+    find "$pkgdir"/opt/pacman/lib/gcc/*/*/include-fixed -maxdepth 1 -mindepth 1 \
+        ! -name 'limits.h' ! -name 'syslimits.h' -exec rm -rf {} + 2>/dev/null || true
+
+    # Link standard cc and c++
+    ln -sf gcc "$pkgdir/opt/pacman/bin/cc"
+    ln -sf g++ "$pkgdir/opt/pacman/bin/c++"
+
+    # Sign Mach-O binaries for Darwin
+    find "$pkgdir/opt/pacman" -type f -perm -u+x | while read -r f; do
+        if file "$f" 2>/dev/null | grep -q "Mach-O"; then
+            codesign -f -s - "$f" 2>/dev/null || true
+        fi
+    done
+}
