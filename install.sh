@@ -371,7 +371,7 @@ if [ ! -f build/build.ninja ]; then
         -Dpkg-ext=.pkg.tar.zst \
         -Dcrypto=openssl \
         -Ddoc=disabled \
-        -Dgpgme=disabled
+        -Dgpgme=enabled
 fi
 ninja -C build install
 

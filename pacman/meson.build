@@ -326,7 +326,7 @@ if build_doc
   subdir('doc')
 endif
 
-includes = include_directories('src/common', 'lib/libalpm')
+includes = include_directories('src/common', 'lib/libalpm', '/opt/pacman/include')
 
 libcommon = static_library(
   'common',
@@ -373,7 +373,7 @@ pacman_bin = executable(
   pacman_sources,
   include_directories : includes,
   link_with : [libalpm, libcommon],
-  dependencies : [libarchive],
+  dependencies : [libarchive, libintl],
   install : true,
 )
 
@@ -382,7 +382,7 @@ executable(
   pacman_conf_sources,
   include_directories : includes,
   link_with : [libalpm, libcommon],
-  dependencies : [libarchive],
+  dependencies : [libarchive, libintl],
   install : true,
 )
 
@@ -391,7 +391,7 @@ executable(
   testpkg_sources,
   include_directories : includes,
   link_with : [libalpm],
-  dependencies : [libarchive],
+  dependencies : [libarchive, libintl],
   install : true,
 )
 

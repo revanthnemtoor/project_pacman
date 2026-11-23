@@ -302,7 +302,7 @@ int _alpm_pkg_validate_internal(alpm_handle_t *handle,
 
 	/* can we get away with skipping checksums? */
 	has_sig = 0;
-	if(level & ALPM_SIG_PACKAGE) {
+	if(level & (ALPM_SIG_PACKAGE | ALPM_SIG_PACKAGE_OPTIONAL)) {
 		if(syncpkg && syncpkg->base64_sig) {
 			has_sig = 1;
 		} else {
@@ -328,7 +328,7 @@ int _alpm_pkg_validate_internal(alpm_handle_t *handle,
 	}
 
 	/* even if we don't have a sig, run the check code if level tells us to */
-	if(level & ALPM_SIG_PACKAGE) {
+	if(level & (ALPM_SIG_PACKAGE | ALPM_SIG_PACKAGE_OPTIONAL)) {
 		const char *sig = syncpkg ? syncpkg->base64_sig : NULL;
 		_alpm_log(handle, ALPM_LOG_DEBUG, "sig data: %s\n", sig ? sig : "<from .sig>");
 		if(!has_sig && !(level & ALPM_SIG_PACKAGE_OPTIONAL)) {
@@ -723,7 +723,7 @@ int SYMEXPORT alpm_pkg_load(alpm_handle_t *handle, const char *filename, int ful
 
 	sigpath = _alpm_sigpath(handle, filename);
 	if(sigpath && !_alpm_access(handle, NULL, sigpath, R_OK)) {
-		if(level & ALPM_SIG_PACKAGE) {
+		if(level & (ALPM_SIG_PACKAGE | ALPM_SIG_PACKAGE_OPTIONAL)) {
 			alpm_list_t *keys = NULL;
 			int fail = 0;
 			unsigned char *sig = NULL;

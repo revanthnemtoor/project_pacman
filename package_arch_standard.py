@@ -253,8 +253,8 @@ def build_meta_packages():
         "openssl", "sed", "which", "zstd", "ca-certificates"
     ]
     base_devel_deps = [
-        "pacman", "autoconf", "automake", "diffutils", "findutils", "gawk",
-        "gettext", "grep", "gzip", "m4", "make", "pkgconf", "sed", "tar",
+        "pacman", "gcc", "make", "autoconf", "automake", "diffutils", "findutils", "gawk",
+        "gettext", "grep", "gzip", "m4", "pkgconf", "sed", "tar",
         "texinfo", "which"
     ]
 
@@ -276,7 +276,7 @@ def build_meta_packages():
             )
             create_pkg(
                 pkg_name="base-devel",
-                pkgver="2026.11.22-1",
+                pkgver="2026.11.23-1",
                 arch=arch,
                 desc="Basic tools to build Arch Linux packages",
                 url="https://archlinux.org",

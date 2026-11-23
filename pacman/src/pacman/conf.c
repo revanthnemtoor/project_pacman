@@ -312,21 +312,24 @@ static int download_with_xfercommand(void *ctx, const char *url,
 
 #ifdef __APPLE__
 	char clean_filename[PATH_MAX];
+	int is_sig = (strstr(filename, ".sig") != NULL);
+	const char *sig_suffix = is_sig ? ".sig" : "";
+
 	if (strstr(filename, "-darwin_x86_64.db.tar.gz")) {
-		snprintf(clean_filename, sizeof(clean_filename), "%.*s.db",
-			(int)(strstr(filename, "-darwin_x86_64.db.tar.gz") - filename), filename);
+		snprintf(clean_filename, sizeof(clean_filename), "%.*s.db%s",
+			(int)(strstr(filename, "-darwin_x86_64.db.tar.gz") - filename), filename, sig_suffix);
 		filename = clean_filename;
 	} else if (strstr(filename, "-darwin_arm64.db.tar.gz")) {
-		snprintf(clean_filename, sizeof(clean_filename), "%.*s.db",
-			(int)(strstr(filename, "-darwin_arm64.db.tar.gz") - filename), filename);
+		snprintf(clean_filename, sizeof(clean_filename), "%.*s.db%s",
+			(int)(strstr(filename, "-darwin_arm64.db.tar.gz") - filename), filename, sig_suffix);
 		filename = clean_filename;
 	} else if (strstr(filename, "-darwin_x86_64.files.tar.gz")) {
-		snprintf(clean_filename, sizeof(clean_filename), "%.*s.files",
-			(int)(strstr(filename, "-darwin_x86_64.files.tar.gz") - filename), filename);
+		snprintf(clean_filename, sizeof(clean_filename), "%.*s.files%s",
+			(int)(strstr(filename, "-darwin_x86_64.files.tar.gz") - filename), filename, sig_suffix);
 		filename = clean_filename;
 	} else if (strstr(filename, "-darwin_arm64.files.tar.gz")) {
-		snprintf(clean_filename, sizeof(clean_filename), "%.*s.files",
-			(int)(strstr(filename, "-darwin_arm64.files.tar.gz") - filename), filename);
+		snprintf(clean_filename, sizeof(clean_filename), "%.*s.files%s",
+			(int)(strstr(filename, "-darwin_arm64.files.tar.gz") - filename), filename, sig_suffix);
 		filename = clean_filename;
 	}
 #endif
