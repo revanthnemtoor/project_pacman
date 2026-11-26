@@ -180,14 +180,14 @@ project_pacman/
 * **Crypto & Core Libraries**: `openssl 3.4.1`, `gmp 6.3.0`, `mpfr 4.2.1`, `expat 2.6.4`, `libffi 3.4.6`, `ncurses 6.5`, `sqlite 3.47.0`, `m4 1.4.20`, `libunistring 1.2`, `libidn2 2.3.7`, `libpsl 0.21.5`, `libtasn1 4.19.0`, `libgcrypt 1.11.0`, `libksba 1.6.7`, `npth 1.7`, `nettle 3.10`, `libxml2 2.13.4`, `gettext 0.22.5`
 
 ### Extended Utilities & GUI (`[extra]`)
-* **CLI Tools**: `jq 1.7.1`, `nano 8.2`, `tree 2.2.1`, `oniguruma 6.9.9`, `utf8proc 2.9.0`, `libevent 2.1.12`
+* **CLI & Productivity Tools**: `fzf 0.75.0`, `yazi 26.9.1`, `jq 1.7.1`, `nano 8.2`, `tree 2.2.1`, `ripgrep 15.2.0`, `tmux 3.8`, `vim 9.2`, `wget 1.25.0`, `oniguruma 6.9.9`, `utf8proc 2.9.0`, `libevent 2.1.12`
 * **Qt 6 Framework**: 16 native modules (`qt6-base 6.12.0`, `qt6-declarative`, `qt6-svg`, `qt6-tools`, `qt6-multimedia`, etc.)
 * **KDE Frameworks 6**: 34 native frameworks (`karchive`, `kcoreaddons`, `kconfig`, `kio`, `kxmlgui`, `solid`, `sonnet`, `breeze-icons`, etc.)
 * **Applications**: Gwenview image viewer (`gwenview 26.08.2`)
 
 ---
 
-## Configuration (`pacman.conf`)
+## Configuration (`pacman.conf` & `mirrorlist`)
 
 The primary configuration file is located at `/opt/pacman/etc/pacman.conf`:
 
@@ -205,33 +205,43 @@ Architecture = auto any
 Color
 CheckSpace
 ParallelDownloads = 5
-XferCommand = /usr/bin/curl -L -C - -f -o %o %u
 
-SigLevel    = Optional TrustAll
+SigLevel    = Required DatabaseOptional
 LocalFileSigLevel = Optional
-RemoteFileSigLevel = Optional
+RemoteFileSigLevel = Required
+
+NoExtract   = opt/pacman/share/info/dir
 
 [core]
-SigLevel = Optional TrustAll
-Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/core
-Server = https://revanthnemtoor.github.io/project_pacman/core
+SigLevel = PackageRequired DatabaseOptional
+Include = /opt/pacman/etc/pacman.d/mirrorlist
 
 [extra]
-SigLevel = Optional TrustAll
-Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/extra
-Server = https://revanthnemtoor.github.io/project_pacman/extra
+SigLevel = PackageRequired DatabaseOptional
+Include = /opt/pacman/etc/pacman.d/mirrorlist
+```
+
+### Mirrorlist (`/opt/pacman/etc/pacman.d/mirrorlist`)
+
+Servers for `core` and `extra` repositories:
+
+```ini
+# Official project_pacman macOS Mirror List
+Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/$repo
+Server = https://revanthnemtoor.github.io/project_pacman/$repo
 ```
 
 ---
 
 ## Security & Verification
 
-1. **SHA-256 Sums**: All packages are verified against their SHA-256 digests in `core.db` and `extra.db` prior to installation. Corrupted or altered downloads are automatically rejected.
-2. **Codesigning**: All Mach-O executables and `.dylib` shared libraries undergo ad-hoc codesigning (`codesign --sign -`) to satisfy macOS Gatekeeper and security frameworks.
-3. **Integrity Validation**: Query any installed package to verify its validation mechanism:
+1. **Cryptographic PGP Signatures**: All package archives (`.pkg.tar.zst.sig`) and sync databases (`.db.tar.gz.sig`) are signed with detached PGP signatures using the official release key (`CEC5B78775CA4628`), fully verified by pacman prior to database sync and installation.
+2. **SHA-256 Digest Verification**: Every package is additionally verified against the SHA-256 digest recorded in the signed repository database metadata.
+3. **Codesigning**: All Mach-O executables and `.dylib` shared libraries undergo ad-hoc codesigning (`codesign --sign -`) to satisfy macOS Gatekeeper and security frameworks.
+4. **Integrity Validation**: Query any installed package to verify its validation mechanism:
    ```bash
-   pacman -Qi bash | grep "Validated By"
-   # Output: Validated By : SHA-256 Sum
+   pacman -Qi yazi | grep "Validated By"
+   # Output: Validated By : Signature
    ```
 
 ---

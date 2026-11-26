@@ -666,27 +666,34 @@ Architecture = auto any
 Color
 CheckSpace
 ParallelDownloads = 5
-XferCommand = /usr/bin/curl -L -C - -f -o %o %u
 
-SigLevel    = Optional TrustAll
+SigLevel    = Required DatabaseOptional
 LocalFileSigLevel = Optional
-RemoteFileSigLevel = Optional
+RemoteFileSigLevel = Required
+
+NoExtract   = opt/pacman/share/info/dir
 
 [core]
-SigLevel = Optional TrustAll
-Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/core
-Server = https://revanthnemtoor.github.io/project_pacman/core
+SigLevel = PackageRequired DatabaseOptional
+Include = /opt/pacman/etc/pacman.d/mirrorlist
 
 [extra]
-SigLevel = Optional TrustAll
-Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/extra
-Server = https://revanthnemtoor.github.io/project_pacman/extra</code></pre>
+SigLevel = PackageRequired DatabaseOptional
+Include = /opt/pacman/etc/pacman.d/mirrorlist</code></pre>
+        <h3>Mirrorlist (<code>/opt/pacman/etc/pacman.d/mirrorlist</code>)</h3>
+        <pre><code># Official project_pacman macOS Mirror List
+Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/$repo
+Server = https://revanthnemtoor.github.io/project_pacman/$repo</code></pre>
       </section>
 
       <!-- Security -->
       <section id="security">
         <h2>Security &amp; Integrity</h2>
         <div class="grid">
+          <div class="card">
+            <h4>Detached PGP Signatures</h4>
+            <p>All packages (<code>.pkg.tar.zst.sig</code>) and databases (<code>.db.tar.gz.sig</code>) are cryptographically signed with the official project key (<code>CEC5B78775CA4628</code>) and verified by ALPM.</p>
+          </div>
           <div class="card">
             <h4>SHA-256 Checksums</h4>
             <p>Every package archive is verified against SHA-256 digests in <code>core.db</code> and <code>extra.db</code> before unpacking. Tampered files are rejected.</p>
@@ -713,7 +720,7 @@ Server = https://revanthnemtoor.github.io/project_pacman/extra</code></pre>
       <section id="extra-repo">
         <h2>Extended Utilities &amp; GUI (<code>[extra]</code>)</h2>
         <ul>
-          <li><strong>Developer Tools:</strong> <code>git 2.56.0</code>, <code>jq 1.7.1</code>, <code>nano 8.2</code>, <code>tree 2.2.1</code>, <code>oniguruma 6.9.9</code>, <code>utf8proc 2.9.0</code>, <code>libevent 2.1.12</code></li>
+          <li><strong>Developer &amp; CLI Tools:</strong> <code>fzf 0.75.0</code>, <code>yazi 26.9.1</code>, <code>git 2.56.0</code>, <code>jq 1.7.1</code>, <code>nano 8.2</code>, <code>tree 2.2.1</code>, <code>ripgrep 15.2.0</code>, <code>tmux 3.8</code>, <code>vim 9.2</code>, <code>wget 1.25.0</code>, <code>oniguruma 6.9.9</code>, <code>utf8proc 2.9.0</code>, <code>libevent 2.1.12</code></li>
           <li><strong>Qt 6 Framework:</strong> 16 native modules including <code>qt6-base 6.12.0</code>, <code>qt6-declarative</code>, <code>qt6-svg</code>, <code>qt6-tools</code>, <code>qt6-multimedia</code></li>
           <li><strong>KDE Frameworks 6:</strong> 34 native modular libraries (<code>karchive</code>, <code>kcoreaddons</code>, <code>kconfig</code>, <code>kio</code>, <code>kxmlgui</code>, <code>solid</code>, <code>sonnet</code>, <code>breeze-icons</code>)</li>
           <li><strong>Applications:</strong> Gwenview image viewer (<code>gwenview 26.08.2</code>)</li>

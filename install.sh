@@ -429,26 +429,24 @@ GPGDir      = $PACMAN_PREFIX/etc/pacman.d/gnupg/
 HookDir     = $PACMAN_PREFIX/etc/pacman.d/hooks/
 HoldPkg     = pacman
 Architecture = auto any
-XferCommand = /usr/bin/curl -L -C - -f -o %o %u
+#XferCommand = /usr/bin/curl -L -C - -f -o %o %u
 
 Color
 CheckSpace
 ParallelDownloads = 5
 
-SigLevel    = Optional TrustAll
+SigLevel    = Required DatabaseOptional
 LocalFileSigLevel = Optional
-RemoteFileSigLevel = Optional
+RemoteFileSigLevel = Required
 NoExtract   = opt/pacman/share/info/dir
 
 [core]
-SigLevel = Optional TrustAll
-Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/core
-Server = https://revanthnemtoor.github.io/project_pacman/core
+SigLevel = PackageRequired DatabaseOptional
+Include = $PACMAN_PREFIX/etc/pacman.d/mirrorlist
 
 [extra]
-SigLevel = Optional TrustAll
-Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/extra
-Server = https://revanthnemtoor.github.io/project_pacman/extra
+SigLevel = PackageRequired DatabaseOptional
+Include = $PACMAN_PREFIX/etc/pacman.d/mirrorlist
 EOF
 
 cp "$PACMAN_PREFIX/etc/pacman.conf" "$PROJECT_DIR/configs/pacman.conf" 2>/dev/null || true
