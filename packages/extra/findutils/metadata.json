@@ -1,0 +1,40 @@
+{
+    "name": "findutils",
+    "version": "4.11.0",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Collection of GNU find, xargs, and locate",
+    "homepage": "https://www.gnu.org/software/findutils/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/findutils/blobs/sha256:327fd9cdb2d0196d87f01e852f07c571caacdef69760cbe04cec4b91f3d8fbfd",
+    "bottle_sha256": "327fd9cdb2d0196d87f01e852f07c571caacdef69760cbe04cec4b91f3d8fbfd",
+    "source_url": "https://ftpmirror.gnu.org/findutils/findutils-4.11.0.tar.xz",
+    "source_sha256": "bfd19cb06cc71f3352d567e90284d8cdac02ac89774bbeadf0b533b0c11432fd",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/f/findutils.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

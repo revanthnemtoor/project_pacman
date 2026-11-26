@@ -1,0 +1,32 @@
+pkgname=gh
+pkgver=2.103.3
+pkgrel=1
+pkgdesc="GitHub command-line tool"
+
+url="https://cli.github.com/"
+arch=(
+    'darwin_arm64'
+    'darwin_x86_64'
+)
+license=(
+    'MIT'
+)
+makedepends=(
+    'go'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir/opt/pacman"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

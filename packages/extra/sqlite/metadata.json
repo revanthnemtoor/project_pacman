@@ -1,0 +1,42 @@
+{
+    "name": "sqlite",
+    "version": "3.54.1",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Command-line interface for SQLite",
+    "homepage": "https://sqlite.org/index.html",
+    "license": [
+        "blessing"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "readline"
+    ],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "",
+    "bottle_sha256": "",
+    "source_url": "https://www.sqlite.org/2026/sqlite-autoconf-3540100.tar.gz",
+    "source_sha256": "926ef8d3eab93fbf6e06011901273eec076b25594a4e1cdadd50c987f4f6d64e",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/s/sqlite.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

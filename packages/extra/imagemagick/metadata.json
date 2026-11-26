@@ -1,0 +1,38 @@
+{
+    "name": "imagemagick",
+    "version": "7.1.2.36",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "An image viewing/manipulation program (macOS native)",
+    "homepage": "https://imagemagick.org/",
+    "license": [
+        "ImageMagick"
+    ],
+    "architecture": "darwin_x86_64",
+    "architectures": [
+        "darwin_x86_64",
+        "darwin_arm64"
+    ],
+    "platform": "darwin",
+    "repository": "extra",
+    "prefix": "/opt/pacman",
+    "depends": [
+        "lcms2",
+        "libjpeg-turbo",
+        "libpng",
+        "libtiff",
+        "xz",
+        "zlib",
+        "zstd"
+    ],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "build_type": "autotools",
+    "packager": "Revanth Reddy Nemtoor <developerrevanth123@gmail.com>",
+    "origin": "native"
+}

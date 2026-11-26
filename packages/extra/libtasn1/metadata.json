@@ -1,0 +1,40 @@
+{
+    "name": "libtasn1",
+    "version": "4.21.0",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "ASN.1 structure parser library",
+    "homepage": "https://www.gnu.org/software/libtasn1/",
+    "license": [
+        "LGPL-2.1-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/libtasn1/blobs/sha256:71c5d144fdce79e4cfe7bbd5863da5171a13d892a26475c5ea183e7e3ef21d8f",
+    "bottle_sha256": "71c5d144fdce79e4cfe7bbd5863da5171a13d892a26475c5ea183e7e3ef21d8f",
+    "source_url": "https://ftpmirror.gnu.org/libtasn1/libtasn1-4.21.0.tar.gz",
+    "source_sha256": "1d8a444a223cc5464240777346e125de51d8e6abf0b8bac742ac84609167dc87",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/lib/libtasn1.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

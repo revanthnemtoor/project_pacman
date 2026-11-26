@@ -1,0 +1,45 @@
+{
+    "name": "gawk",
+    "version": "5.4.1",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "GNU awk utility",
+    "homepage": "https://www.gnu.org/software/gawk/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "gettext",
+        "gmp",
+        "mpfr",
+        "readline"
+    ],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/gawk/blobs/sha256:17192ebb78bf9dea945724c11258b02ccdabf0f8833902d179f88ebab4491a4d",
+    "bottle_sha256": "17192ebb78bf9dea945724c11258b02ccdabf0f8833902d179f88ebab4491a4d",
+    "source_url": "https://ftpmirror.gnu.org/gawk/gawk-5.4.1.tar.xz",
+    "source_sha256": "07f6f7342b7febe4313fc2c2542ad93d64fe20ad8717200109f105a826f5fd37",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/g/gawk.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

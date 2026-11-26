@@ -1,0 +1,40 @@
+{
+    "name": "make",
+    "version": "4.4.1",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Utility for directing compilation",
+    "homepage": "https://www.gnu.org/software/make/",
+    "license": [
+        "GPL-3.0-only"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/make/blobs/sha256:cd86f41f2d02a827e15380a13a055606ba2f61819ad5100e4feba0400ef685a7",
+    "bottle_sha256": "cd86f41f2d02a827e15380a13a055606ba2f61819ad5100e4feba0400ef685a7",
+    "source_url": "https://ftpmirror.gnu.org/make/make-4.4.1.tar.lz",
+    "source_sha256": "8814ba072182b605d156d7589c19a43b89fc58ea479b9355146160946f8cf6e9",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/m/make.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

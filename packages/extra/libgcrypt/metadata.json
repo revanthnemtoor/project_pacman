@@ -1,0 +1,42 @@
+{
+    "name": "libgcrypt",
+    "version": "1.12.4",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Cryptographic library based on the code from GnuPG",
+    "homepage": "https://gnupg.org/related_software/libgcrypt/",
+    "license": [
+        "LGPL-2.1-or-later AND GPL-2.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "libgpg-error"
+    ],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/libgcrypt/blobs/sha256:e34a1bac9f4df523b3c05d7410c48039fc9470100d39880183a8c6495643f0bd",
+    "bottle_sha256": "e34a1bac9f4df523b3c05d7410c48039fc9470100d39880183a8c6495643f0bd",
+    "source_url": "https://gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.12.4.tar.bz2",
+    "source_sha256": "d77f68f48879510e79a2f65977ccc68981781ea0923e5bdffac2a193ea3d660e",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/lib/libgcrypt.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

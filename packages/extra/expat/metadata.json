@@ -1,0 +1,40 @@
+{
+    "name": "expat",
+    "version": "2.9.0",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "XML 1.0 parser",
+    "homepage": "https://libexpat.github.io/",
+    "license": [
+        "MIT"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/expat/blobs/sha256:f3d074919307bdc8b8dd6b140a1cf90479256055b0beccfe4518cf18ae2c1031",
+    "bottle_sha256": "f3d074919307bdc8b8dd6b140a1cf90479256055b0beccfe4518cf18ae2c1031",
+    "source_url": "https://github.com/libexpat/libexpat/releases/download/R_2_9_0/expat-2.9.0.tar.xz",
+    "source_sha256": "1e6371862cc31999b368c3b89b49994f0677e1bab5f1b2b85ae3741f5d803051",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/e/expat.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

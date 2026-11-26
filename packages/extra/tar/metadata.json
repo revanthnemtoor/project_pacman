@@ -1,0 +1,40 @@
+{
+    "name": "tar",
+    "version": "1.35",
+    "release": 2,
+    "epoch": 0,
+    "base": null,
+    "description": "GNU version of the tar archiving utility",
+    "homepage": "https://www.gnu.org/software/tar/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/gnu-tar/blobs/sha256:cfc20759e66fb504327deba772787d6b9780b09c11c8fe64000cee054dbc9aa0",
+    "bottle_sha256": "cfc20759e66fb504327deba772787d6b9780b09c11c8fe64000cee054dbc9aa0",
+    "source_url": "https://ftpmirror.gnu.org/tar/tar-1.35.tar.gz",
+    "source_sha256": "14d55e32063ea9526e057fbf35fcabd53378e769787eff7919c3755b02d2b57e",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/g/gnu-tar.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

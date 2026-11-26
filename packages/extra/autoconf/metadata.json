@@ -1,0 +1,44 @@
+{
+    "name": "autoconf",
+    "version": "2.73",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Automatic configure script builder",
+    "homepage": "https://www.gnu.org/software/autoconf/",
+    "license": [
+        "GPL-3.0-or-later AND (GPL-3.0-or-later WITH Autoconf-exception-3.0)"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "m4"
+    ],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/autoconf/blobs/sha256:bc785e044f4bec3efa3e9875f154905dad8a249e6e57d2a3ab0250eebdc866e8",
+    "bottle_sha256": "bc785e044f4bec3efa3e9875f154905dad8a249e6e57d2a3ab0250eebdc866e8",
+    "source_url": "https://ftpmirror.gnu.org/autoconf/autoconf-2.73.tar.gz",
+    "source_sha256": "259ddfa3bddc799cfb81489cc0f17dfdf1bd6d1505dda53c0f45ff60d6a4f9a7",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/a/autoconf.rb",
+        "uses_from_macos": [
+            "perl"
+        ],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

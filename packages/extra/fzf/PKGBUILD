@@ -1,31 +1,44 @@
+# Maintainer: Arch Darwin Pacman Port
 pkgname=fzf
-pkgver=0.74.0
+pkgver=0.75.0
 pkgrel=1
 pkgdesc="Command-line fuzzy finder written in Go"
-
+arch=('darwin_x86_64' 'darwin_arm64')
 url="https://junegunn.github.io/fzf/"
-arch=(
-    'darwin_arm64'
-)
-license=(
-    'MIT'
-)
-makedepends=(
-    'go'
-)
+license=('MIT')
+depends=()
 options=('!strip')
-source=()
-sha256sums=()
+source_darwin_x86_64=("https://github.com/junegunn/fzf/releases/download/v${pkgver}/fzf-${pkgver}-darwin_amd64.tar.gz")
+source_darwin_arm64=("https://github.com/junegunn/fzf/releases/download/v${pkgver}/fzf-${pkgver}-darwin_arm64.tar.gz")
+source=("https://github.com/junegunn/fzf/archive/refs/tags/v${pkgver}.tar.gz")
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir"
-    mkdir -p "$_dest"
+    mkdir -p "$pkgdir/opt/pacman/bin"
+    mkdir -p "$pkgdir/opt/pacman/share/man/man1"
+    mkdir -p "$pkgdir/opt/pacman/share/fzf"
+    mkdir -p "$pkgdir/opt/pacman/share/bash-completion/completions"
+    mkdir -p "$pkgdir/opt/pacman/share/fish/vendor_completions.d"
+    mkdir -p "$pkgdir/opt/pacman/share/zsh/site-functions"
+    mkdir -p "$pkgdir/opt/pacman/share/licenses/fzf"
 
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
+    local _bin="fzf"
+    install -Dm755 "$srcdir/fzf" "$pkgdir/opt/pacman/bin/fzf"
+    install -Dm755 "$srcdir/fzf-$pkgver/bin/fzf-tmux" "$pkgdir/opt/pacman/bin/fzf-tmux"
+    install -Dm755 "$srcdir/fzf-$pkgver/bin/fzf-preview.sh" "$pkgdir/opt/pacman/bin/fzf-preview.sh"
+
+    install -Dm644 "$srcdir/fzf-$pkgver/man/man1/fzf.1" "$pkgdir/opt/pacman/share/man/man1/fzf.1"
+    install -Dm644 "$srcdir/fzf-$pkgver/man/man1/fzf-tmux.1" "$pkgdir/opt/pacman/share/man/man1/fzf-tmux.1"
+
+    install -Dm644 "$srcdir/fzf-$pkgver/shell/completion.bash" "$pkgdir/opt/pacman/share/bash-completion/completions/fzf"
+    install -Dm644 "$srcdir/fzf-$pkgver/shell/key-bindings.fish" "$pkgdir/opt/pacman/share/fish/vendor_completions.d/fzf.fish"
+    install -Dm644 "$srcdir/fzf-$pkgver/shell/key-bindings.zsh" "$pkgdir/opt/pacman/share/zsh/site-functions/_fzf"
+
+    install -Dm644 "$srcdir/fzf-$pkgver/LICENSE" "$pkgdir/opt/pacman/share/licenses/fzf/LICENSE"
+
+    # Sign Mach-O binaries
+    find "$pkgdir/opt/pacman" -type f -perm -u+x | while read -r f; do
+        if file "$f" 2>/dev/null | grep -q "Mach-O"; then
+            codesign -f -s - "$f" 2>/dev/null || true
         fi
     done
 }

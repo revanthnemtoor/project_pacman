@@ -1,0 +1,39 @@
+_resolve_target_user_home() {
+    local target_user="${SUDO_USER:-$USER}"
+    if [ -z "$target_user" ] || [ "$target_user" = "root" ]; then
+        target_user="$(stat -f '%Su' /dev/console 2>/dev/null || true)"
+    fi
+    if [ -n "$target_user" ] && [ "$target_user" != "root" ]; then
+        dscl . -read "/Users/$target_user" NFSHomeDirectory 2>/dev/null | awk '{print $2}'
+    else
+        echo "$HOME"
+    fi
+}
+
+_wipe_old_fish_functions() {
+    local user_home
+    user_home="$(_resolve_target_user_home)"
+    rm -f "$user_home/.config/fish/functions/sitecheck.fish" \
+          "$user_home/.config/fish/functions/sitecheck.fish.bak"* 2>/dev/null || true
+    rm -f /opt/pacman/share/fish/vendor_functions.d/sitecheck.fish \
+          /opt/pacman/share/fish/vendor_conf.d/sitecheck.fish \
+          /opt/pacman/share/fish/vendor_completions.d/sitecheck.fish 2>/dev/null || true
+}
+
+pre_install() {
+    _wipe_old_fish_functions
+}
+
+post_install() {
+    _wipe_old_fish_functions
+    echo "==> sitecheck native CLI installed to /opt/pacman/bin/sitecheck"
+    echo "==> Usage: sitecheck [-dns <DNS_IP>] <URL>"
+}
+
+post_upgrade() {
+    _wipe_old_fish_functions
+}
+
+post_remove() {
+    echo "==> sitecheck has been removed from /opt/pacman/bin/sitecheck"
+}

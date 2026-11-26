@@ -1,0 +1,40 @@
+{
+    "name": "sed",
+    "version": "4.10",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "GNU implementation of the famous stream editor",
+    "homepage": "https://www.gnu.org/software/sed/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/gnu-sed/blobs/sha256:04dad428ef00e0d35bcbb5964058d96e53b01768232679e67f8fa59b13afc576",
+    "bottle_sha256": "04dad428ef00e0d35bcbb5964058d96e53b01768232679e67f8fa59b13afc576",
+    "source_url": "https://ftpmirror.gnu.org/sed/sed-4.10.tar.xz",
+    "source_sha256": "b8e72182b2ec96a3574e2998c47b7aaa64cc20ce000d8e9ac313cc07cecf28c7",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/g/gnu-sed.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

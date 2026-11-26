@@ -1,0 +1,40 @@
+{
+    "name": "diffutils",
+    "version": "3.12",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "File comparison utilities",
+    "homepage": "https://www.gnu.org/software/diffutils/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/diffutils/blobs/sha256:710e012f9f4c1f2f4cbd489741e98ac26d3e48133bb5c1c2cad3d6e08d64a5d8",
+    "bottle_sha256": "710e012f9f4c1f2f4cbd489741e98ac26d3e48133bb5c1c2cad3d6e08d64a5d8",
+    "source_url": "https://ftpmirror.gnu.org/diffutils/diffutils-3.12.tar.xz",
+    "source_sha256": "7c8b7f9fc8609141fdea9cece85249d308624391ff61dedaf528fcb337727dfd",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/d/diffutils.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

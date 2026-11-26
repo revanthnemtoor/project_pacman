@@ -1,0 +1,29 @@
+pkgname=tar
+pkgver=1.35
+pkgrel=2
+pkgdesc="GNU version of the tar archiving utility"
+
+url="https://www.gnu.org/software/tar/"
+arch=(
+    'darwin_arm64'
+    'darwin_x86_64'
+)
+license=(
+    'GPL-3.0-or-later'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir/opt/pacman"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

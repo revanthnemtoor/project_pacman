@@ -1,0 +1,46 @@
+{
+    "name": "libxml2",
+    "version": "2.15.4",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "GNOME XML library",
+    "homepage": "http://xmlsoft.org/",
+    "license": [
+        "MIT"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "readline"
+    ],
+    "makedepends": [
+        "pkgconf"
+    ],
+    "checkdepends": [
+        "pkgconf"
+    ],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/libxml2/blobs/sha256:c39f8567f5d228ab173ab8c467b65cae0b85f7da07d8cd8984597d5e3caeafd3",
+    "bottle_sha256": "c39f8567f5d228ab173ab8c467b65cae0b85f7da07d8cd8984597d5e3caeafd3",
+    "source_url": "https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.4.tar.xz",
+    "source_sha256": "98087fd181d9070724f3fbc65c7377db03038eb92bd882374daff44940138821",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/lib/libxml2.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

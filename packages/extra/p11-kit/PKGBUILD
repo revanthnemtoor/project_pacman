@@ -1,0 +1,38 @@
+pkgname=p11-kit
+pkgver=0.26.5
+pkgrel=1
+pkgdesc="Library to load and enumerate PKCS#11 modules"
+
+url="https://p11-glue.github.io/p11-glue/p11-kit.html"
+arch=(
+    'darwin_arm64'
+    'darwin_x86_64'
+)
+license=(
+    'BSD-3-Clause'
+)
+depends=(
+    'ca-certificates'
+    'libtasn1'
+)
+makedepends=(
+    'meson'
+    'ninja'
+    'pkgconf'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir/opt/pacman"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

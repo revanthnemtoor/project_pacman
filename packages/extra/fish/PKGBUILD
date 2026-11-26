@@ -1,0 +1,37 @@
+pkgname=fish
+pkgver=4.9.3
+pkgrel=1
+pkgdesc="User-friendly command-line shell for UNIX-like operating systems"
+
+url="https://fishshell.com"
+arch=(
+    'darwin_arm64'
+    'darwin_x86_64'
+)
+license=(
+    'GPL-2.0-only'
+)
+depends=(
+    'pcre2'
+)
+makedepends=(
+    'cmake'
+    'rust'
+    'sphinx-doc'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir/opt/pacman"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

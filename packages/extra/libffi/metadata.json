@@ -1,0 +1,40 @@
+{
+    "name": "libffi",
+    "version": "3.8.0",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Portable Foreign Function Interface library",
+    "homepage": "https://sourceware.org/libffi/",
+    "license": [
+        "MIT"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/libffi/blobs/sha256:0673ee23d31fd844c4da1fecc4d2de4e62c2da97f9253667eb7bdc0f7f0dc55e",
+    "bottle_sha256": "0673ee23d31fd844c4da1fecc4d2de4e62c2da97f9253667eb7bdc0f7f0dc55e",
+    "source_url": "https://github.com/libffi/libffi/releases/download/v3.8.0/libffi-3.8.0.tar.gz",
+    "source_sha256": "7da3e2d9a171eb0a038f592ecad3ff2bb2550f3496d87b3b29ad0cf4430c0db4",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/lib/libffi.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

@@ -1,0 +1,44 @@
+{
+    "name": "bash",
+    "version": "5.3.20",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Bourne-Again SHell, a UNIX command interpreter",
+    "homepage": "https://www.gnu.org/software/bash/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "gettext",
+        "ncurses",
+        "readline"
+    ],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/bash/blobs/sha256:08169a5a5ac9762bd3dc6f63c20b0530b95d9de8befae8b69ff140ff371b0c92",
+    "bottle_sha256": "08169a5a5ac9762bd3dc6f63c20b0530b95d9de8befae8b69ff140ff371b0c92",
+    "source_url": "https://ftpmirror.gnu.org/bash/bash-5.3.tar.gz",
+    "source_sha256": "0d5cd86965f869a26cf64f4b71be7b96f90a3ba8b3d74e27e8e9d9d5550f31ba",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/b/bash.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

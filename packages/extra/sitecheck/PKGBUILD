@@ -1,0 +1,46 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+# Native macOS port for Pacman (/opt/pacman)
+pkgname=sitecheck
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Minimal native macOS CLI utility to diagnose website availability, DNS resolution, HTTP errors, and response times"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/revanth/sitecheck"
+license=('MIT')
+depends=()
+install=sitecheck.install
+source=(
+    "sitecheck.c"
+    "sitecheck.1"
+    "LICENSE"
+    "README.md"
+)
+sha256sums=(
+    'c093cfd4ae6a05c519ae32dbdd0b7be18aff78b5d58a39dbdbd2801a2870e68c'
+    '9ae36003613c36c551cd60b941a2a7377fe39a721996b7c92c09df9c50cd8bad'
+    'e8de84593754fa9c377d8fddc446aa5ef4d7cc5f60aa6ac99357c1e671073204'
+    'daf0b638b9f9ed29268fba245dc137eba4c2f17b2687bf2e158153b23f1b468b'
+)
+
+build() {
+    local _arch="x86_64"
+    if [[ "$CARCH" == "darwin_arm64" ]]; then
+        _arch="arm64"
+    fi
+    /usr/bin/clang -std=c11 -O2 -Wall -Wextra -Werror -arch "$_arch" \
+        "$srcdir/sitecheck.c" -o "$srcdir/sitecheck"
+    /usr/bin/codesign --force --sign - "$srcdir/sitecheck"
+}
+
+package() {
+    install -Dm755 "$srcdir/sitecheck" \
+        "$pkgdir/opt/pacman/bin/sitecheck"
+    install -Dm644 "$srcdir/sitecheck.1" \
+        "$pkgdir/opt/pacman/share/man/man1/sitecheck.1"
+    install -Dm644 "$srcdir/LICENSE" \
+        "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    install -Dm644 "$srcdir/README.md" \
+        "$pkgdir/opt/pacman/share/doc/$pkgname/README.md"
+
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

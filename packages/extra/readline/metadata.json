@@ -1,0 +1,42 @@
+{
+    "name": "readline",
+    "version": "8.3.6",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Library for command-line editing",
+    "homepage": "https://tiswww.case.edu/php/chet/readline/rltop.html",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/readline/blobs/sha256:e8282967aafb40068b336fd38871347e663385ba91c4f6d5277d31258583b696",
+    "bottle_sha256": "e8282967aafb40068b336fd38871347e663385ba91c4f6d5277d31258583b696",
+    "source_url": "https://ftpmirror.gnu.org/readline/readline-8.3.tar.gz",
+    "source_sha256": "fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/r/readline.rb",
+        "uses_from_macos": [
+            "ncurses"
+        ],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

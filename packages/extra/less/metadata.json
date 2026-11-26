@@ -1,0 +1,43 @@
+{
+    "name": "less",
+    "version": "710",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Pager program similar to more",
+    "homepage": "https://www.greenwoodsoftware.com/less/index.html",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "ncurses",
+        "pcre2"
+    ],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/less/blobs/sha256:c833a353ee8cd88ccd5c893f90217c237d036c78d433fbcece2e9394952aaebc",
+    "bottle_sha256": "c833a353ee8cd88ccd5c893f90217c237d036c78d433fbcece2e9394952aaebc",
+    "source_url": "https://www.greenwoodsoftware.com/less/less-710.tar.gz",
+    "source_sha256": "d1008fb78dcae1323ddab664bcb352a61f022b1b131bd8018548e021d975ec7a",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/l/less.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

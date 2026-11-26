@@ -1,0 +1,40 @@
+{
+    "name": "pkgconf",
+    "version": "3.0.10",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Package compiler and linker metadata toolkit",
+    "homepage": "https://github.com/pkgconf/pkgconf",
+    "license": [
+        "ISC"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "",
+    "bottle_sha256": "",
+    "source_url": "https://distfiles.ariadne.space/pkgconf/pkgconf-3.0.10.tar.xz",
+    "source_sha256": "9371b2f6372da574d4c6dc96fe9b1463037bcf6afcb6671c1555afde7b17e2de",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/p/pkgconf.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

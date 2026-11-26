@@ -1,0 +1,57 @@
+{
+    "name": "gnupg",
+    "version": "2.5.24",
+    "release": 2,
+    "epoch": 0,
+    "base": null,
+    "description": "GNU Privacy Guard (OpenPGP)",
+    "homepage": "https://gnupg.org/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "gettext",
+        "gnutls",
+        "libassuan",
+        "libgcrypt",
+        "libgpg-error",
+        "libksba",
+        "libusb",
+        "npth",
+        "pinentry",
+        "readline"
+    ],
+    "makedepends": [
+        "pkgconf"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/gnupg/blobs/sha256:b8da334b8bc5df2deecededfbcdf725b44a9dddfd344051ad7dcb8c1eb1d2046",
+    "bottle_sha256": "b8da334b8bc5df2deecededfbcdf725b44a9dddfd344051ad7dcb8c1eb1d2046",
+    "source_url": "https://gnupg.org/ftp/gcrypt/gnupg/gnupg-2.5.24.tar.bz2",
+    "source_sha256": "bf149d01a2b9fcc0e4589b8ae8697d3d5c557ea48ed95a3fa55dd3b1187e6039",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/g/gnupg.rb",
+        "uses_from_macos": [
+            "bzip2",
+            "openldap",
+            "sqlite"
+        ],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

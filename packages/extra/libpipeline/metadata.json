@@ -1,0 +1,40 @@
+{
+    "name": "libpipeline",
+    "version": "1.5.8",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "C library for manipulating pipelines of subprocesses",
+    "homepage": "https://libpipeline.gitlab.io/libpipeline/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/libpipeline/blobs/sha256:e0354d5f278901871e1fc4ba62668680a1c80fe90bd9f3345206e5e5ea798b71",
+    "bottle_sha256": "e0354d5f278901871e1fc4ba62668680a1c80fe90bd9f3345206e5e5ea798b71",
+    "source_url": "https://download.savannah.nongnu.org/releases/libpipeline/libpipeline-1.5.8.tar.gz",
+    "source_sha256": "1b1203ca152ccd63983c3f2112f7fe6fa5afd453218ede5153d1b31e11bb8405",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/lib/libpipeline.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

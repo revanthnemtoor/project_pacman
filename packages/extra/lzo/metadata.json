@@ -1,0 +1,40 @@
+{
+    "name": "lzo",
+    "version": "2.10",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Real-time data compression library",
+    "homepage": "https://www.oberhumer.com/opensource/lzo/",
+    "license": [
+        "GPL-2.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/lzo/blobs/sha256:11b8557744feb28974cb4caa92a16a89f3ead77468778cc17c2f349502df495e",
+    "bottle_sha256": "11b8557744feb28974cb4caa92a16a89f3ead77468778cc17c2f349502df495e",
+    "source_url": "https://www.oberhumer.com/opensource/lzo/download/lzo-2.10.tar.gz",
+    "source_sha256": "c0f892943208266f9b6543b3ae308fab6284c5c90e627931446fb49b4221a072",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/l/lzo.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

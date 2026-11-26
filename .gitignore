@@ -17,6 +17,7 @@ logs/*
 # Cache
 cache/*
 !cache/.gitkeep
+.build_cache/
 
 # Staging
 staging/*
@@ -37,6 +38,9 @@ packages/*
 !packages/core/
 !packages/extra/
 packages/extra/*
+!packages/extra/*/
+!packages/extra/*/PKGBUILD
+!packages/extra/*/metadata.json
 !packages/extra/gcc/
 !packages/extra/gcc/**
 packages/*/src/

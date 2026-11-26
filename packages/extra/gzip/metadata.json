@@ -1,0 +1,40 @@
+{
+    "name": "gzip",
+    "version": "1.15",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Popular GNU data compression program",
+    "homepage": "https://www.gnu.org/software/gzip/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/gzip/blobs/sha256:e590ecd558a1eec60fe790370d3ab2cde6d44fc918fe64ec98a56c31fbffc36c",
+    "bottle_sha256": "e590ecd558a1eec60fe790370d3ab2cde6d44fc918fe64ec98a56c31fbffc36c",
+    "source_url": "https://ftpmirror.gnu.org/gzip/gzip-1.15.tar.gz",
+    "source_sha256": "545886cf57fa88a65e967fbf705903d7fcb2567c82c7342493e82e8d7b1a210b",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/g/gzip.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

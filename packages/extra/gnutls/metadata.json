@@ -1,0 +1,52 @@
+{
+    "name": "gnutls",
+    "version": "3.8.13",
+    "release": 3,
+    "epoch": 0,
+    "base": null,
+    "description": "GNU Transport Layer Security (TLS) Library",
+    "homepage": "https://gnutls.org/",
+    "license": [
+        "LGPL-2.1-or-later AND GPL-3.0-only"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "ca-certificates",
+        "gettext",
+        "gmp",
+        "libidn2",
+        "libtasn1",
+        "libunistring",
+        "nettle",
+        "p11-kit"
+    ],
+    "makedepends": [
+        "pkgconf",
+        "texinfo"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/gnutls/blobs/sha256:77ec479ca9c1a6c80058f5bc9a908a1afd271f39a5cf69935e07fea4129a3824",
+    "bottle_sha256": "77ec479ca9c1a6c80058f5bc9a908a1afd271f39a5cf69935e07fea4129a3824",
+    "source_url": "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.13.tar.xz",
+    "source_sha256": "ffed8ec1bf09c2426d4f14aae377de4753b53e537d685e604e99a8b16ca9c97e",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/g/gnutls.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

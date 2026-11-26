@@ -1,0 +1,36 @@
+pkgname=pinentry
+pkgver=1.3.3
+pkgrel=1
+pkgdesc="Passphrase entry dialog utilizing the Assuan protocol"
+
+url="https://www.gnupg.org/related_software/pinentry/"
+arch=(
+    'darwin_arm64'
+    'darwin_x86_64'
+)
+license=(
+    'GPL-2.0-or-later'
+)
+depends=(
+    'libassuan'
+    'libgpg-error'
+)
+makedepends=(
+    'pkgconf'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir/opt/pacman"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

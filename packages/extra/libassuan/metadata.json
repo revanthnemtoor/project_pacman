@@ -1,0 +1,42 @@
+{
+    "name": "libassuan",
+    "version": "3.0.2",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Assuan IPC Library",
+    "homepage": "https://www.gnupg.org/related_software/libassuan/",
+    "license": [
+        "LGPL-2.1-or-later AND GPL-3.0-or-later AND FSFULLR"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "libgpg-error"
+    ],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/libassuan/blobs/sha256:0ec4ad2607107d27bb8b0acb1f7fb3a81c8bea66ed17b69afbd6bec70a9a5b98",
+    "bottle_sha256": "0ec4ad2607107d27bb8b0acb1f7fb3a81c8bea66ed17b69afbd6bec70a9a5b98",
+    "source_url": "https://gnupg.org/ftp/gcrypt/libassuan/libassuan-3.0.2.tar.bz2",
+    "source_sha256": "d2931cdad266e633510f9970e1a2f346055e351bb19f9b78912475b8074c36f6",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/lib/libassuan.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

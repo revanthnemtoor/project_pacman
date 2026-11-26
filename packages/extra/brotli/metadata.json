@@ -1,0 +1,42 @@
+{
+    "name": "brotli",
+    "version": "1.2.1",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Generic-purpose lossless compression algorithm by Google",
+    "homepage": "https://github.com/google/brotli",
+    "license": [
+        "MIT"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [
+        "cmake"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/brotli/blobs/sha256:c9d272f3ac33b730d548da14ca323e8b4e0185273a6c85b0f12a4bbcd9f684af",
+    "bottle_sha256": "c9d272f3ac33b730d548da14ca323e8b4e0185273a6c85b0f12a4bbcd9f684af",
+    "source_url": "https://github.com/google/brotli/archive/refs/tags/v1.2.1.tar.gz",
+    "source_sha256": "98d35d11a78dc453aebb7d10c3748f3f73ff78c8267c0dc697b8631f67bf7e8f",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/b/brotli.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

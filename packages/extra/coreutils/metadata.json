@@ -1,0 +1,53 @@
+{
+    "name": "coreutils",
+    "version": "9.12",
+    "release": 2,
+    "epoch": 0,
+    "base": null,
+    "description": "GNU File, Shell, and Text utilities",
+    "homepage": "https://www.gnu.org/software/coreutils/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "gmp",
+        "openssl"
+    ],
+    "makedepends": [
+        "texinfo"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [
+        "b2sum",
+        "gfold",
+        "idutils"
+    ],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/coreutils/blobs/sha256:dc73c410c602bd1a311d70d3ba5a196d768ff0c89c64dd9db0635b8df52249f2",
+    "bottle_sha256": "dc73c410c602bd1a311d70d3ba5a196d768ff0c89c64dd9db0635b8df52249f2",
+    "source_url": "https://ftpmirror.gnu.org/coreutils/coreutils-9.12.tar.xz",
+    "source_sha256": "a480198559733e9b3da999e90543ac6f888a2caa544d8d664c5a1f17e528e210",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/c/coreutils.rb",
+        "uses_from_macos": [
+            {
+                "gperf": "build"
+            }
+        ],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

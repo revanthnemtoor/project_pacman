@@ -1,0 +1,44 @@
+{
+    "name": "grep",
+    "version": "3.12",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "GNU grep, egrep and fgrep",
+    "homepage": "https://www.gnu.org/software/grep/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "pcre2"
+    ],
+    "makedepends": [
+        "pkgconf"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/grep/blobs/sha256:742da3d1e04f240f7dc0de96eb1a9d309a36e238af851adc1623d1482c1f6699",
+    "bottle_sha256": "742da3d1e04f240f7dc0de96eb1a9d309a36e238af851adc1623d1482c1f6699",
+    "source_url": "https://ftpmirror.gnu.org/grep/grep-3.12.tar.xz",
+    "source_sha256": "2649b27c0e90e632eadcd757be06c6e9a4f48d941de51e7c0f83ff76408a07b9",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/g/grep.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

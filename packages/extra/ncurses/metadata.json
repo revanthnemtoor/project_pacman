@@ -1,0 +1,40 @@
+{
+    "name": "ncurses",
+    "version": "6.6",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Text-based UI library",
+    "homepage": "https://invisible-island.net/ncurses/announce.html",
+    "license": [
+        "X11-distribute-modifications-variant"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/ncurses/blobs/sha256:3981626d4214e14e1d01528b4652e0c9ac470c0a63fc2c995b875cd39efd1976",
+    "bottle_sha256": "3981626d4214e14e1d01528b4652e0c9ac470c0a63fc2c995b875cd39efd1976",
+    "source_url": "https://invisible-mirror.net/archives/ncurses/ncurses-6.6.tar.gz",
+    "source_sha256": "355b4cbbed880b0381a04c46617b7656e362585d52e9cf84a67e2009b749ff11",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/n/ncurses.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

@@ -1,0 +1,35 @@
+pkgname=grep
+pkgver=3.12
+pkgrel=1
+pkgdesc="GNU grep, egrep and fgrep"
+
+url="https://www.gnu.org/software/grep/"
+arch=(
+    'darwin_arm64'
+    'darwin_x86_64'
+)
+license=(
+    'GPL-3.0-or-later'
+)
+depends=(
+    'pcre2'
+)
+makedepends=(
+    'pkgconf'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir/opt/pacman"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

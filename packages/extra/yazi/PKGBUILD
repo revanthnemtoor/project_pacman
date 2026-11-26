@@ -1,0 +1,45 @@
+# Maintainer: Arch Darwin Pacman Port
+pkgname=yazi
+pkgver=26.9.1
+pkgrel=1
+pkgdesc="Blazing fast terminal file manager written in Rust, based on async I/O"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/sxyazi/yazi"
+license=('MIT')
+depends=()
+options=('!strip')
+source_darwin_x86_64=("https://github.com/sxyazi/yazi/releases/download/v${pkgver}/yazi-x86_64-apple-darwin.zip")
+source_darwin_arm64=("https://github.com/sxyazi/yazi/releases/download/v${pkgver}/yazi-aarch64-apple-darwin.zip")
+
+package() {
+    mkdir -p "$pkgdir/opt/pacman/bin"
+    mkdir -p "$pkgdir/opt/pacman/share/bash-completion/completions"
+    mkdir -p "$pkgdir/opt/pacman/share/fish/vendor_completions.d"
+    mkdir -p "$pkgdir/opt/pacman/share/zsh/site-functions"
+    mkdir -p "$pkgdir/opt/pacman/share/licenses/yazi"
+    mkdir -p "$pkgdir/opt/pacman/share/doc/yazi"
+
+    local _src="yazi-${CARCH}-apple-darwin"
+    [ "$CARCH" = "darwin_arm64" ] && _src="yazi-aarch64-apple-darwin"
+    [ "$CARCH" = "darwin_x86_64" ] && _src="yazi-x86_64-apple-darwin"
+
+    install -Dm755 "$srcdir/$_src/yazi" "$pkgdir/opt/pacman/bin/yazi"
+    install -Dm755 "$srcdir/$_src/ya" "$pkgdir/opt/pacman/bin/ya"
+
+    install -Dm644 "$srcdir/$_src/completions/yazi.bash" "$pkgdir/opt/pacman/share/bash-completion/completions/yazi"
+    install -Dm644 "$srcdir/$_src/completions/ya.bash" "$pkgdir/opt/pacman/share/bash-completion/completions/ya"
+    install -Dm644 "$srcdir/$_src/completions/yazi.fish" "$pkgdir/opt/pacman/share/fish/vendor_completions.d/yazi.fish"
+    install -Dm644 "$srcdir/$_src/completions/ya.fish" "$pkgdir/opt/pacman/share/fish/vendor_completions.d/ya.fish"
+    install -Dm644 "$srcdir/$_src/completions/_yazi" "$pkgdir/opt/pacman/share/zsh/site-functions/_yazi"
+    install -Dm644 "$srcdir/$_src/completions/_ya" "$pkgdir/opt/pacman/share/zsh/site-functions/_ya"
+
+    install -Dm644 "$srcdir/$_src/LICENSE" "$pkgdir/opt/pacman/share/licenses/yazi/LICENSE"
+    install -Dm644 "$srcdir/$_src/README.md" "$pkgdir/opt/pacman/share/doc/yazi/README.md"
+
+    # Sign Mach-O binaries
+    find "$pkgdir/opt/pacman" -type f -perm -u+x | while read -r f; do
+        if file "$f" 2>/dev/null | grep -q "Mach-O"; then
+            codesign -f -s - "$f" 2>/dev/null || true
+        fi
+    done
+}

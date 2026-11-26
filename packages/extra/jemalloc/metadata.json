@@ -1,0 +1,40 @@
+{
+    "name": "jemalloc",
+    "version": "5.4.0",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Implementation of malloc emphasizing fragmentation avoidance",
+    "homepage": "https://jemalloc.net/",
+    "license": [
+        "BSD-2-Clause"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/jemalloc/blobs/sha256:0783dba303dacc3110b7a15df15c7567a144ca99994f1e69ee1419eb4c75e8bc",
+    "bottle_sha256": "0783dba303dacc3110b7a15df15c7567a144ca99994f1e69ee1419eb4c75e8bc",
+    "source_url": "https://github.com/jemalloc/jemalloc/releases/download/5.4.0/jemalloc-5.4.0.tar.bz2",
+    "source_sha256": "200776fac271093e7c2f21edd6d62657ecd2be578d9328633f2a86bfa6ef4f1d",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/j/jemalloc.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

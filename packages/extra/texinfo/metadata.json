@@ -1,0 +1,43 @@
+{
+    "name": "texinfo",
+    "version": "7.3",
+    "release": 2,
+    "epoch": 0,
+    "base": null,
+    "description": "Official documentation format of the GNU project",
+    "homepage": "https://www.gnu.org/software/texinfo/",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/texinfo/blobs/sha256:7b4c695db9ec5cd2dc8a7c73311b4ba1cbc17f60c2b6f583afc6d45801059de3",
+    "bottle_sha256": "7b4c695db9ec5cd2dc8a7c73311b4ba1cbc17f60c2b6f583afc6d45801059de3",
+    "source_url": "https://ftpmirror.gnu.org/texinfo/texinfo-7.3.tar.xz",
+    "source_sha256": "51f74eb0f51cfa9873b85264dfdd5d46e8957ec95b88f0fb762f63d9e164c72e",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/t/texinfo.rb",
+        "uses_from_macos": [
+            "ncurses",
+            "perl"
+        ],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

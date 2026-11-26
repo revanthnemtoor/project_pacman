@@ -1,0 +1,46 @@
+{
+    "name": "nettle",
+    "version": "4.0",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Low-level cryptographic library",
+    "homepage": "https://www.lysator.liu.se/~nisse/nettle/",
+    "license": [
+        "GPL-2.0-or-later OR LGPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "gmp"
+    ],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/nettle/blobs/sha256:2830a19a06e2995fc7a19ecd7c14d3bc87e9362fb9c52d2489582246f256662d",
+    "bottle_sha256": "2830a19a06e2995fc7a19ecd7c14d3bc87e9362fb9c52d2489582246f256662d",
+    "source_url": "https://ftpmirror.gnu.org/nettle/nettle-4.0.tar.gz",
+    "source_sha256": "3addbc00da01846b232fb3bc453538ea5468da43033f21bb345cb1e9073f5094",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/n/nettle.rb",
+        "uses_from_macos": [
+            {
+                "m4": "build"
+            }
+        ],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

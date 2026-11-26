@@ -1,0 +1,30 @@
+{
+    "name": "sitecheck",
+    "version": "1.0.0",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "Minimal native macOS CLI utility to diagnose website availability, DNS resolution, HTTP errors, and response times",
+    "homepage": "https://github.com/revanth/sitecheck",
+    "license": [
+        "MIT"
+    ],
+    "architecture": "darwin_x86_64",
+    "architectures": [
+        "darwin_x86_64",
+        "darwin_arm64"
+    ],
+    "platform": "darwin",
+    "repository": "extra",
+    "prefix": "/opt/pacman",
+    "depends": [],
+    "makedepends": [],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "build_type": "custom",
+    "packager": "Revanth Reddy Nemtoor <developerrevanth123@gmail.com>",
+    "origin": "native"
+}

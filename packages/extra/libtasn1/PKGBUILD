@@ -1,0 +1,29 @@
+pkgname=libtasn1
+pkgver=4.21.0
+pkgrel=1
+pkgdesc="ASN.1 structure parser library"
+
+url="https://www.gnu.org/software/libtasn1/"
+arch=(
+    'darwin_arm64'
+    'darwin_x86_64'
+)
+license=(
+    'LGPL-2.1-or-later'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir/opt/pacman"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

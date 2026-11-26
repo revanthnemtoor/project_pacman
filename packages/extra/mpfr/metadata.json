@@ -1,0 +1,47 @@
+{
+    "name": "mpfr",
+    "version": "4.2.2",
+    "release": 1,
+    "epoch": 0,
+    "base": null,
+    "description": "C library for multiple-precision floating-point computations",
+    "homepage": "https://www.mpfr.org/",
+    "license": [
+        "LGPL-3.0-or-later"
+    ],
+    "architecture": "darwin_x86_64",
+    "platform": "darwin",
+    "repository": "extra",
+    "depends": [
+        "gmp"
+    ],
+    "makedepends": [
+        "autoconf",
+        "automake",
+        "libtool",
+        "texinfo"
+    ],
+    "checkdepends": [],
+    "optdepends": [],
+    "provides": [],
+    "conflicts": [],
+    "replaces": [],
+    "bottle_url": "https://ghcr.io/v2/homebrew/core/mpfr/blobs/sha256:ba4a1b8388386e6618de7c7e27199ae8de473373330f5773e2095567a71d76fd",
+    "bottle_sha256": "ba4a1b8388386e6618de7c7e27199ae8de473373330f5773e2095567a71d76fd",
+    "source_url": "https://ftpmirror.gnu.org/mpfr/mpfr-4.2.2.tar.xz",
+    "source_sha256": "b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01",
+    "installed_size": -1,
+    "download_size": -1,
+    "build_type": "bottle",
+    "packager": "",
+    "build_date": null,
+    "files": [],
+    "origin": "homebrew",
+    "metadata": {
+        "tap": "homebrew/core",
+        "ruby_source": "Formula/m/mpfr.rb",
+        "uses_from_macos": [],
+        "runtime_dependencies": []
+    },
+    "xdata": {}
+}

@@ -1,0 +1,67 @@
+# Maintainer: Revanth Reddy Nemtoor <revanthreddyn123@gmail.com>
+pkgname=qt6-base
+pkgver=6.12.0
+pkgrel=1
+pkgdesc="A cross-platform application and UI framework (core libraries for Darwin)"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.qt.io"
+license=('LGPL-3.0-only' 'GPL-2.0-only' 'GPL-3.0-only')
+depends=('openssl' 'pcre2' 'zstd')
+options=('!strip')
+source=("https://download.qt.io/official_releases/qt/6.12/${pkgver}/submodules/qtbase-everywhere-src-${pkgver}.tar.xz")
+sha256sums=('a951bd163c7b80fc6b8c88d7668fb56abf91c152373e13c10666763238131307')
+
+build() {
+  local _arch
+  case "$(uname -m)" in
+    x86_64) _arch="x86_64" ;;
+    arm64)  _arch="arm64" ;;
+    *)      _arch="$(uname -m)" ;;
+  esac
+
+  # Strictly isolate build from MacPorts and Homebrew runtime paths
+  export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig"
+  export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+  cmake -B build -S "qtbase-everywhere-src-${pkgver}" -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/opt/pacman \
+    -DCMAKE_OSX_ARCHITECTURES="${_arch}" \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0 \
+    -DCMAKE_PREFIX_PATH=/opt/pacman \
+    -DCMAKE_IGNORE_PREFIX_PATH="/opt/local;/usr/local" \
+    -DINSTALL_BINDIR=bin \
+    -DINSTALL_LIBDIR=lib \
+    -DINSTALL_INCLUDEDIR=include/qt6 \
+    -DINSTALL_DOCDIR=share/doc/qt6 \
+    -DINSTALL_ARCHDATADIR=lib/qt6 \
+    -DINSTALL_DATADIR=share/qt6 \
+    -DFEATURE_openssl_linked=ON \
+    -DOPENSSL_ROOT_DIR=/opt/pacman \
+    -DINPUT_pcre=system \
+    -DINPUT_doubleconversion=qt \
+    -DINPUT_sqlite=qt \
+    -DFEATURE_framework=OFF \
+    -DFEATURE_relocatable=ON \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_EXAMPLES=OFF
+
+  cmake --build build
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+
+  # Expose developer tools from libexec/ into bin/ so moc, rcc, uic, etc. are on PATH
+  install -d "${pkgdir}/opt/pacman/bin"
+  for tool in moc rcc uic qlalr qvkgen tracegen syncqt cmake_automoc_parser; do
+    if [[ -f "${pkgdir}/opt/pacman/libexec/${tool}" ]]; then
+      ln -sf "../libexec/${tool}" "${pkgdir}/opt/pacman/bin/${tool}"
+    fi
+  done
+
+  # Ad-hoc sign all Mach-O executables, dylibs, and plugins
+  find "${pkgdir}" -type f -exec sh -c '
+    file "$1" | grep -qE "Mach-O.*(executable|dynamically linked shared library|bundle)" && codesign --sign - --force "$1" 2>/dev/null || true
+  ' _ {} \;
+}

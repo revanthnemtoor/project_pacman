@@ -1,0 +1,32 @@
+.TH SITECHECK 1 "November 2026" "sitecheck 1.0.0" "User Commands"
+.SH NAME
+sitecheck \- diagnose website availability, DNS resolution, HTTP status codes, and response times
+.SH SYNOPSIS
+.B sitecheck
+[\fB\-dns\fR \fIDNS_IP\fR]
+\fIURL\fR
+.br
+.B sitecheck
+\fB\-h\fR | \fB\-\-help\fR
+.SH DESCRIPTION
+.B sitecheck
+checks the availability and response behavior of an HTTP or HTTPS URL using base macOS networking tools (\fBcurl\fR and \fBdig\fR).
+It supports resolving hostnames via either the system DNS resolver or a custom IPv4 DNS resolver while preserving HTTPS SNI and certificate verification via \fBcurl \-\-resolve\fR.
+.SH OPTIONS
+.TP
+.BR \-dns ", " \-\-dns " " \fIDNS_IP\fR
+Resolve the URL hostname using the specified IPv4 DNS server (for example \fB1.1.1.1\fR, \fB8.8.8.8\fR, or \fB9.9.9.9\fR) before connecting.
+.TP
+.BR \-h ", " \-\-help
+Print usage information and exit.
+.SH EXAMPLES
+.nf
+sitecheck https://github.com
+sitecheck https://citizenx.com
+sitecheck -dns 1.1.1.1 https://citizenx.com
+sitecheck -dns 8.8.8.8 https://citizenx.com
+sitecheck -dns 9.9.9.9 https://citizenx.com
+.fi
+.SH EXIT STATUS
+Returns \fB0\fR on HTTP 2xx/3xx responses (or \fB\-\-help\fR), and \fB1\fR on invalid input, DNS failure, connection failure, or HTTP 4xx/5xx error responses.
+
