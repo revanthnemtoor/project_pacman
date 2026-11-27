@@ -17,6 +17,7 @@ on:
     branches:
       - main
     paths:
+      - ".github/workflows/build-arm64.yml"
       - "packages/core/**/PKGBUILD"
       - "packages/extra/**/PKGBUILD"
       - "core/*-darwin_x86_64.pkg.tar.zst"
@@ -41,7 +42,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -50,7 +51,7 @@ jobs:
           uname -a
           test "$(uname -m)" = "arm64"
           HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 \
-            brew install meson ninja pkgconf libarchive gpgme gnupg zstd autoconf automake libtool gettext
+            brew install bash meson ninja pkgconf libarchive openssl@3 gpgme gnupg zstd autoconf automake libtool gettext coreutils gnu-sed gawk grep
 
       - name: Import PGP Signing Key (CEC5B78775CA4628)
         env:
@@ -81,8 +82,14 @@ jobs:
 
       - name: Bootstrap Rootless /opt/pacman & Populate Existing darwin_arm64 Sysroot
         run: |
-          sudo mkdir -p /opt/pacman
+          sudo mkdir -p /opt/pacman/bin
           sudo chown -R "$USER:$(id -gn)" /opt/pacman
+          export PATH="/opt/pacman/bin:/opt/homebrew/bin:$PATH"
+
+          # Stage working arm64 Bash 5.x at /opt/pacman/bin/bash so meson binds #!/opt/pacman/bin/bash
+          # before core/readline is built in Tier 1
+          cp -f /opt/homebrew/bin/bash /opt/pacman/bin/bash
+          chmod 755 /opt/pacman/bin/bash
 
           # 1. Build native darwin_arm64 pacman, makepkg & repo-add
           NONINTERACTIVE=1 PATH_PRIORITY=skip bash ./install.sh -y
@@ -116,7 +123,11 @@ jobs:
 
           # 4. Re-install patched pacman/makepkg/repo-add over seeded prebuilt pacman so all latest Darwin makepkg fixes are active
           ninja -C pacman/build install
-          # Copy GPG secret keyring into /opt/pacman/etc/pacman.d/gnupg and ensure gpg symlink exists if needed
+          # Keep working arm64 bash at /opt/pacman/bin/bash until Tier 1 builds core/readline
+          if ! /opt/pacman/bin/bash --version >/dev/null 2>&1; then
+            cp -f /opt/homebrew/bin/bash /opt/pacman/bin/bash
+            chmod 755 /opt/pacman/bin/bash
+          fi
           if [ ! -x /opt/pacman/bin/gpg ] || ! /opt/pacman/bin/gpg --version >/dev/null 2>&1; then
             ln -sf "$(command -v gpg)" /opt/pacman/bin/gpg
           fi

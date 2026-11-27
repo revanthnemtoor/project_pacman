@@ -333,6 +333,7 @@ PYEOF
 # 5. Build and Install Pacman via Meson + Ninja
 # -----------------------------------------------------------------------------
 echo "-> Building and installing pacman to $PACMAN_PREFIX..."
+export PATH="$PACMAN_PREFIX/bin:/opt/homebrew/bin:/usr/local/bin:/opt/local/bin:$PATH"
 
 PKG_DIRS=""
 for d in \

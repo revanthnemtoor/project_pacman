@@ -37,11 +37,11 @@ META_PACKAGES = {"base", "base-devel", "pacman-mirrorlist", "filesystem"}
 # Topological build order across [core] and [extra] so dependencies install into /opt/pacman
 # before downstream consumers compile against them.
 ORDERED_TIERS: list[str] = [
-    # Tier 1: Pure data, m4, autotools, GnuPG low-level crypto libs, and self-hosted build tools
-    "iana-etc", "filesystem", "tzdata",
+    # Tier 1: readline first (unlocks core/bash), pure data, autotools, GnuPG crypto libs & build tools
+    "readline", "iana-etc", "filesystem", "tzdata",
     "m4", "autoconf", "libtool", "bison", "flex", "patch", "file", "which", "fakeroot",
     "npth", "libgpg-error", "libassuan", "libgcrypt", "libksba",
-    "readline", "pinentry", "libedit", "dash",
+    "pinentry", "libedit", "dash",
     "mpfr", "libmpc", "libisl",
     "ninja", "meson", "ccache", "cmake", "pigz", "7zip",
     # Tier 2: ASN.1, TLS, Compression/DB/JSON/Network & System Libraries
@@ -299,6 +299,13 @@ def main() -> None:
                 check=True,
                 env=env,
             )
+            if pkgname == "readline":
+                for bash_pkg in CORE_DIR.glob("bash-*-darwin_arm64.pkg.tar.zst"):
+                    subprocess.run(
+                        [str(PACMAN_BIN), "-U", "-dd", "--overwrite", "*", "--noconfirm", str(bash_pkg)],
+                        check=False,
+                        env=env,
+                    )
             all_succeeded.append(pkgname)
             batch_built.append(pkgname)
             print(f"✓ Built, signed & installed {target_pkg.name} ({sz / 1024:.1f} KB)", flush=True)
