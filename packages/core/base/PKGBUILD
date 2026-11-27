@@ -1,0 +1,17 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=base
+pkgver=2026.11.22
+pkgrel=1
+pkgdesc="Minimal macOS Darwin package set for pacman"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/revanthnemtoor/project_pacman"
+license=('GPL-3.0-or-later')
+depends=(
+  'filesystem' 'iana-etc' 'tzdata' 'pacman' 'pacman-mirrorlist'
+  'bash' 'coreutils' 'findutils' 'diffutils' 'gawk' 'grep' 'sed' 'tar'
+  'gzip' 'bzip2' 'xz' 'zstd' 'less' 'curl' 'openssl' 'ca-certificates' 'which'
+)
+
+package() {
+  mkdir -p "${pkgdir}/opt/pacman/etc"
+}

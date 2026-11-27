@@ -1,0 +1,50 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=zstd
+pkgver=1.5.7
+pkgrel=2
+pkgdesc="Zstandard - fast real-time compression algorithm"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://facebook.github.io/zstd/"
+license=('BSD-3-Clause AND GPL-2.0-only')
+depends=('zlib' 'xz' 'lz4')
+options=('!strip')
+source=("https://github.com/facebook/zstd/releases/download/v${pkgver}/zstd-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/zstd-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CXX="/usr/bin/clang++"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
+    export CFLAGS="-O3 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export CXXFLAGS="-O3 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    make -C lib prefix=/opt/pacman lib-mt -j"$(sysctl -n hw.ncpu)"
+    make -C programs prefix=/opt/pacman HAVE_ZLIB=1 HAVE_LZMA=1 HAVE_LZ4=1 -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/zstd-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    make prefix=/opt/pacman DESTDIR="$pkgdir" install
+    rm -f "$pkgdir/opt/pacman/lib/libzstd.a"
+    # Ensure install_name is /opt/pacman/lib/libzstd.1.dylib
+    for dylib in "$pkgdir"/opt/pacman/lib/libzstd.*.dylib; do
+        [ -f "$dylib" ] && [ ! -L "$dylib" ] && /usr/bin/install_name_tool -id "/opt/pacman/lib/libzstd.1.dylib" "$dylib" || true
+    done
+    if [ -f "$pkgdir/opt/pacman/bin/zstd" ]; then
+        /usr/bin/install_name_tool -change "@rpath/libzstd.1.dylib" "/opt/pacman/lib/libzstd.1.dylib" "$pkgdir/opt/pacman/bin/zstd" 2>/dev/null || true
+    fi
+    /opt/pacman/bin/install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

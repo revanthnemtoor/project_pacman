@@ -707,21 +707,23 @@ Server = https://revanthnemtoor.github.io/project_pacman/$repo</code></pre>
 
       <!-- Packages -->
       <section id="core-repo">
-        <h2>Core Packages (<code>[core]</code>)</h2>
-        <p>Includes essential command-line tools and system runtime libraries:</p>
+        <h2>Core Packages (<code>[core]</code> &mdash; 112 FOSS Packages)</h2>
+        <p>Complete Arch-equivalent Darwin userspace, toolchain, networking, and runtime foundation:</p>
         <ul>
-          <li><strong>Shells &amp; GNU Utilities:</strong> <code>bash 5.3</code>, <code>readline 8.3</code>, <code>coreutils 9.6</code>, <code>diffutils 3.12</code>, <code>grep 3.12</code>, <code>sed 4.10</code>, <code>findutils 4.11.0</code>, <code>gawk 5.4.1</code>, <code>gzip 1.15</code>, <code>make 4.4.1</code>, <code>which 2.21</code>, <code>less 668</code></li>
-          <li><strong>Package Management:</strong> <code>pacman 7.1.0</code>, <code>libalpm 16.0</code>, <code>libarchive 3.7.7</code>, <code>pkgconf 2.3.0</code></li>
-          <li><strong>Compression:</strong> <code>zlib 1.3.1</code>, <code>bzip2 1.0.8</code>, <code>lz4 1.10.0</code>, <code>zstd 1.5.7</code>, <code>xz 5.6.4</code>, <code>brotli 1.1.0</code>, <code>lzo 2.10</code>, <code>xxhash 0.8.2</code></li>
-          <li><strong>Cryptography &amp; Runtimes:</strong> <code>openssl 3.4.1</code>, <code>gmp 6.3.0</code>, <code>mpfr 4.2.1</code>, <code>expat 2.6.4</code>, <code>libffi 3.4.6</code>, <code>ncurses 6.5</code>, <code>sqlite 3.47.0</code>, <code>gettext 0.22.5</code></li>
+          <li><strong>Base &amp; System Data:</strong> <code>base</code>, <code>base-devel</code>, <code>filesystem</code>, <code>iana-etc</code>, <code>tzdata</code>, <code>ca-certificates</code>, <code>pacman 7.1.0</code>, <code>pacman-mirrorlist</code></li>
+          <li><strong>Shells, Editors &amp; GNU Utilities:</strong> <code>bash</code>, <code>dash</code>, <code>readline</code>, <code>libedit</code>, <code>coreutils</code>, <code>diffutils</code>, <code>findutils</code>, <code>gawk</code>, <code>grep</code>, <code>sed</code>, <code>tar</code>, <code>gzip</code>, <code>less</code>, <code>which</code>, <code>file</code>, <code>patch</code>, <code>nano</code>, <code>links</code>, <code>groff</code>, <code>man-db</code>, <code>texinfo</code>, <code>inetutils</code>, <code>logrotate</code>, <code>s-nail</code></li>
+          <li><strong>Toolchain &amp; Runtimes:</strong> <code>gcc</code>, <code>binutils</code>, <code>make</code>, <code>autoconf</code>, <code>automake</code>, <code>libtool</code>, <code>m4</code>, <code>bison</code>, <code>flex</code>, <code>pkgconf</code>, <code>fakeroot</code>, <code>gettext</code>, <code>python</code>, <code>perl</code>, <code>guile</code></li>
+          <li><strong>Networking, Auth &amp; Cryptography:</strong> <code>openssl</code>, <code>gnutls</code>, <code>gnupg</code>, <code>gpgme</code>, <code>pinentry</code>, <code>curl</code>, <code>openssh</code>, <code>krb5</code>, <code>openldap</code>, <code>libsasl</code>, <code>nss</code>, <code>nspr</code>, <code>p11-kit</code>, <code>leancrypto</code>, <code>nettle</code>, <code>libssh2</code>, <code>libnghttp2</code>, <code>libnghttp3</code>, <code>libngtcp2</code>, <code>libmicrohttpd</code>, <code>ldns</code>, <code>libpcap</code></li>
+          <li><strong>Compression, Databases &amp; Core Libraries:</strong> <code>zlib</code>, <code>bzip2</code>, <code>lz4</code>, <code>lzo</code>, <code>xz</code>, <code>zstd</code>, <code>brotli</code>, <code>libarchive</code>, <code>sqlite</code>, <code>gdbm</code>, <code>unixodbc</code>, <code>icu</code>, <code>glib2</code>, <code>libsecret</code>, <code>libxml2</code>, <code>expat</code>, <code>jansson</code>, <code>json-c</code>, <code>gmp</code>, <code>mpfr</code>, <code>libmpc</code>, <code>libisl</code>, <code>mpdecimal</code>, <code>gc</code>, <code>libffi</code>, <code>ncurses</code>, <code>pcre2</code>, <code>popt</code>, <code>libpipeline</code>, <code>libinih</code>, <code>libevent</code>, <code>libverto</code>, <code>libunistring</code>, <code>libtasn1</code>, <code>libusb</code>, <code>libxcrypt</code></li>
         </ul>
       </section>
 
       <section id="extra-repo">
-        <h2>Extended Utilities &amp; GUI (<code>[extra]</code>)</h2>
+        <h2>Extended Utilities, Codecs &amp; GUI (<code>[extra]</code>)</h2>
         <ul>
-          <li><strong>Developer &amp; CLI Tools:</strong> <code>fzf 0.75.0</code>, <code>yazi 26.9.1</code>, <code>git 2.56.0</code>, <code>jq 1.7.1</code>, <code>nano 8.2</code>, <code>tree 2.2.1</code>, <code>ripgrep 15.2.0</code>, <code>tmux 3.8</code>, <code>vim 9.2</code>, <code>wget 1.25.0</code>, <code>oniguruma 6.9.9</code>, <code>utf8proc 2.9.0</code>, <code>libevent 2.1.12</code></li>
-          <li><strong>Qt 6 Framework:</strong> 16 native modules including <code>qt6-base 6.12.0</code>, <code>qt6-declarative</code>, <code>qt6-svg</code>, <code>qt6-tools</code>, <code>qt6-multimedia</code></li>
+          <li><strong>Developer &amp; CLI Tools:</strong> <code>fzf</code>, <code>yazi</code>, <code>gh</code>, <code>git</code>, <code>fastfetch</code>, <code>fd</code>, <code>fish</code>, <code>jq</code>, <code>yq</code>, <code>ripgrep</code>, <code>rsync</code>, <code>tmux</code>, <code>tree</code>, <code>vim</code>, <code>wget</code>, <code>xxhash</code></li>
+          <li><strong>Image &amp; Media Codecs:</strong> <code>imagemagick</code>, <code>libheif</code>, <code>aom</code>, <code>dav1d</code>, <code>libde265</code>, <code>kvazaar</code>, <code>libwebp</code>, <code>openjpeg2</code>, <code>libraw</code>, <code>libjpeg-turbo</code>, <code>libpng</code>, <code>libtiff</code>, <code>freetype2</code>, <code>lcms2</code>, <code>exiv2</code></li>
+          <li><strong>Qt 6 Framework:</strong> 16 native modules including <code>qt6-base</code>, <code>qt6-declarative</code>, <code>qt6-svg</code>, <code>qt6-tools</code>, <code>qt6-multimedia</code></li>
           <li><strong>KDE Frameworks 6:</strong> 34 native modular libraries (<code>karchive</code>, <code>kcoreaddons</code>, <code>kconfig</code>, <code>kio</code>, <code>kxmlgui</code>, <code>solid</code>, <code>sonnet</code>, <code>breeze-icons</code>)</li>
           <li><strong>Applications:</strong> Gwenview image viewer (<code>gwenview 26.08.2</code>)</li>
         </ul>
@@ -731,20 +733,21 @@ Server = https://revanthnemtoor.github.io/project_pacman/$repo</code></pre>
       <section id="structure">
         <h2>Repository Layout</h2>
         <pre><code>project_pacman/
-├── core/                                # Core base packages and ALPM sync database
+├── core/                                # 112 FOSS core packages and signed ALPM sync DB
 │   ├── core.db                          # Sync database
 │   ├── core.files                       # File list database
-│   └── *.pkg.tar.zst                    # Built package archives
-├── extra/                               # Extended packages, Qt6, KDE frameworks
+│   └── *.pkg.tar.zst                    # Built package archives + .sig
+├── extra/                               # Extended packages, codecs, Qt6, KDE frameworks
 │   ├── extra.db                         # Extra sync database
 │   ├── extra.files                      # Extra file list database
-│   └── *.pkg.tar.zst                    # Built package archives
+│   └── *.pkg.tar.zst                    # Built package archives + .sig
+├── packages/                            # Canonical PKGBUILD recipes (core/ and extra/)
 ├── configs/
 │   └── pacman.conf                      # Default pacman configuration
-├── pacman/                              # Pacman 7.1.0 C source tree
+├── darwin_core_packages.txt             # Authoritative 112 FOSS Darwin [core] manifest
+├── arch_builder.py                      # Unified Git-tag scanner, builder, signer &amp; daemon
 ├── install.sh                           # Interactive universal installer
 ├── env_loader.py                        # .env loader helper
-├── update_repo_db.py                    # repo-add database updater
 └── README.md                            # Complete markdown documentation</code></pre>
       </section>
 

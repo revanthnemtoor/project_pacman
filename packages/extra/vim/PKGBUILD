@@ -1,5 +1,5 @@
 pkgname=vim
-pkgver=9.2.0750
+pkgver=9.2.1250
 pkgrel=1
 pkgdesc="Vi 'workalike' with many additional features"
 

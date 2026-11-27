@@ -1,0 +1,29 @@
+pkgname=libffi
+pkgver=3.4.6
+pkgrel=1
+pkgdesc="Portable Foreign Function Interface library"
+
+url="https://sourceware.org/libffi/"
+arch=(
+    'darwin_arm64'
+    'darwin_x86_64'
+)
+license=(
+    'MIT'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir/opt/pacman"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

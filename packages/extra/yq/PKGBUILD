@@ -1,5 +1,5 @@
 pkgname=yq
-pkgver=4.53.3
+pkgver=4.54.1
 pkgrel=1
 pkgdesc="Process YAML, JSON, XML, CSV and properties documents from the CLI"
 

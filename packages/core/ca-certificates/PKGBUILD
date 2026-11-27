@@ -1,0 +1,22 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+# Native macOS port for Pacman (/opt/pacman)
+pkgname=ca-certificates
+pkgver=2026.11.05
+pkgrel=1
+pkgdesc="Mozilla CA certificate store for OpenSSL and curl (/opt/pacman/etc/ssl)"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://curl.se/docs/caextract.html"
+license=('MPL-2.0')
+options=('!strip')
+source=("cacert-${pkgver}.pem::https://curl.se/ca/cacert.pem")
+sha256sums=('SKIP')
+
+package() {
+    install -Dm644 "$srcdir/cacert-${pkgver}.pem" \
+        "$pkgdir/opt/pacman/etc/ssl/cert.pem"
+    install -dm755 "$pkgdir/opt/pacman/etc/ssl/certs"
+    ln -sf ../cert.pem "$pkgdir/opt/pacman/etc/ssl/certs/ca-certificates.crt"
+    install -dm755 "$pkgdir/opt/pacman/share/ca-certificates"
+    ln -sf ../../etc/ssl/cert.pem "$pkgdir/opt/pacman/share/ca-certificates/cacert.pem"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

@@ -1,0 +1,18 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=base-devel
+pkgver=2026.11.23
+pkgrel=1
+pkgdesc="Basic tools to build Arch Darwin packages from source"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/revanthnemtoor/project_pacman"
+license=('GPL-3.0-or-later')
+depends=(
+  'autoconf' 'automake' 'binutils' 'bison' 'diffutils' 'fakeroot'
+  'file' 'findutils' 'flex' 'gawk' 'gcc' 'gettext' 'grep' 'groff'
+  'gzip' 'libtool' 'm4' 'make' 'pacman' 'patch' 'pkgconf' 'sed'
+  'texinfo' 'which'
+)
+
+package() {
+  mkdir -p "${pkgdir}/opt/pacman/etc"
+}

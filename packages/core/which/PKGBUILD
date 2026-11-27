@@ -1,0 +1,33 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=which
+pkgver=2.21
+pkgrel=1
+pkgdesc="A utility to show the full path of commands"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://savannah.gnu.org/projects/which/"
+license=('GPL-3.0-or-later')
+source=("https://ftpmirror.gnu.org/gnu/which/which-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  local _sdk="$(xcrun --show-sdk-path)"
+  local _arch="$(uname -m)"
+  export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  export CFLAGS="-O2 -I/opt/pacman/include -isysroot ${_sdk} -arch ${_arch}"
+  export LDFLAGS="-L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk} -arch ${_arch}"
+
+  cd "${srcdir}/which-${pkgver}"
+  ./configure --prefix=/opt/pacman --infodir=/opt/pacman/share/info --mandir=/opt/pacman/share/man
+  make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+  cd "${srcdir}/which-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  rm -f "${pkgdir}/opt/pacman/share/info/dir"
+  find "${pkgdir}/opt/pacman" -type f -perm +111 | while read -r f; do
+    if file "$f" | grep -q "Mach-O"; then
+      codesign --force --sign - "$f" 2>/dev/null || true
+    fi
+  done
+}

@@ -1,0 +1,60 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+# Native macOS port for Pacman (/opt/pacman)
+pkgname=kvazaar
+pkgver=2.3.2
+pkgrel=1
+pkgdesc="Open-source HEVC/H.265 encoder for HEIF/HEIC and video"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/ultravideo/kvazaar"
+license=('BSD-3-Clause')
+provides=('libkvazaar.dylib')
+options=('!strip' '!libtool')
+source=("https://github.com/ultravideo/kvazaar/releases/download/v${pkgver}/kvazaar-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    local _cmake="/usr/local/bin/cmake"
+    [[ ! -x "$_cmake" ]] && _cmake="/opt/local/bin/cmake"
+
+    export PATH="/opt/pacman/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export PKG_CONFIG="/opt/pacman/bin/pkg-config"
+    export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export PKG_CONFIG_LIBDIR="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+
+    "$_cmake" -B build -S "kvazaar-${pkgver}" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/opt/pacman \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_INSTALL_NAME_DIR=/opt/pacman/lib \
+        -DCMAKE_INSTALL_RPATH=/opt/pacman/lib \
+        -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
+        -DCMAKE_OSX_ARCHITECTURES="${_arch}" \
+        -DCMAKE_OSX_SYSROOT="${_sdk}" \
+        -DCMAKE_PREFIX_PATH=/opt/pacman \
+        -DCMAKE_SYSTEM_PREFIX_PATH="/opt/pacman;${_sdk}/usr" \
+        -DCMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH=OFF \
+        -DCMAKE_C_COMPILER=/usr/bin/clang \
+        -DBUILD_SHARED_LIBS=ON \
+        -DBUILD_TESTS=OFF \
+        -DBUILD_KVAZAAR_BINARY=ON
+
+    "$_cmake" --build build -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    local _cmake="/usr/local/bin/cmake"
+    [[ ! -x "$_cmake" ]] && _cmake="/opt/local/bin/cmake"
+    DESTDIR="$pkgdir" "$_cmake" --install build
+    install -Dm644 "$srcdir/kvazaar-${pkgver}/LICENSE" \
+        "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

@@ -1,0 +1,48 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=perl
+pkgver=5.40.1
+pkgrel=1
+pkgdesc="A highly capable, feature-rich programming language"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.perl.org"
+license=('GPL-1.0-or-later OR Artistic-1.0-Perl')
+depends=('bzip2' 'gdbm' 'zlib')
+options=('!strip' 'emptydirs')
+source=("https://www.cpan.org/src/5.0/perl-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/perl-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+    ./Configure -des \
+        -Dprefix=/opt/pacman \
+        -Dvendorprefix=/opt/pacman \
+        -Dman1dir=/opt/pacman/share/man/man1 \
+        -Dman3dir=/opt/pacman/share/man/man3 \
+        -Dusethreads \
+        -Duseshrplib \
+        -Dcc="/usr/bin/clang" \
+        -Dccflags="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}" \
+        -Dldflags="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}" \
+        -Dlddlflags="-bundle -undefined dynamic_lookup -arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/perl-${pkgver}"
+    make DESTDIR="$pkgdir" install
+    chmod -R u+w "$pkgdir/opt/pacman" 2>/dev/null || true
+    install -Dm644 Copying "$pkgdir/opt/pacman/share/licenses/$pkgname/Copying"
+    install -Dm644 Artistic "$pkgdir/opt/pacman/share/licenses/$pkgname/Artistic"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

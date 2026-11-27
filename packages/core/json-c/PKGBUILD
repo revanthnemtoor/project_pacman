@@ -1,0 +1,53 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=json-c
+pkgver=0.18
+pkgrel=2
+pkgdesc="A JSON implementation in C"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/json-c/json-c/wiki"
+license=('MIT')
+options=('!strip')
+source=("https://github.com/json-c/json-c/archive/refs/tags/json-c-${pkgver}-20240915.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    local _cmake="/usr/local/bin/cmake"
+    [[ ! -x "$_cmake" ]] && _cmake="/opt/local/bin/cmake"
+
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    "$_cmake" -B build -S "json-c-json-c-${pkgver}-20240915" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+        -DCMAKE_INSTALL_PREFIX=/opt/pacman \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_INSTALL_NAME_DIR=/opt/pacman/lib \
+        -DCMAKE_INSTALL_RPATH=/opt/pacman/lib \
+        -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
+        -DCMAKE_OSX_ARCHITECTURES="${_arch}" \
+        -DCMAKE_OSX_SYSROOT="${_sdk}" \
+        -DCMAKE_SYSTEM_PREFIX_PATH="/opt/pacman;${_sdk}/usr" \
+        -DCMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH=OFF \
+        -DCMAKE_C_COMPILER=/usr/bin/clang \
+        -DBUILD_SHARED_LIBS=ON \
+        -DBUILD_STATIC_LIBS=OFF \
+        -DBUILD_TESTING=OFF
+
+    "$_cmake" --build build -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    local _cmake="/usr/local/bin/cmake"
+    [[ ! -x "$_cmake" ]] && _cmake="/opt/local/bin/cmake"
+    DESTDIR="$pkgdir" "$_cmake" --install build
+    /opt/pacman/bin/install -Dm644 "$srcdir/json-c-json-c-${pkgver}-20240915/COPYING" \
+        "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

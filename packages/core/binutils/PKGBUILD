@@ -1,0 +1,69 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=binutils
+pkgver=2.44
+pkgrel=1
+pkgdesc="A set of programs to assemble and manipulate binary and object files (objdump, readelf, nm, strings, addr2line)"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.gnu.org/software/binutils/"
+license=('GPL-3.0-or-later')
+depends=('zlib' 'zstd')
+options=('!strip' '!libtool')
+source=("https://ftp.gnu.org/gnu/binutils/binutils-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    mkdir -p "$srcdir/build"
+    cd "$srcdir/build"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CXX="/usr/bin/clang++"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk} -Wno-deprecated-non-prototype"
+    export CXXFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    # Configure with --program-prefix=g and symlinks for non-conflicting ELF/Mach-O inspection tools
+    # (Never shadow Apple's Mach-O /usr/bin/ld or /usr/bin/ar or /usr/bin/strip!)
+    "$srcdir/binutils-${pkgver}/configure" \
+        --prefix=/opt/pacman \
+        --program-prefix=g \
+        --mandir=/opt/pacman/share/man \
+        --infodir=/opt/pacman/share/info \
+        --enable-targets=all \
+        --enable-64-bit-bfd \
+        --with-system-zlib \
+        --with-zstd \
+        --disable-nls \
+        --disable-werror \
+        --disable-gdb \
+        --disable-gdbserver \
+        --disable-sim \
+        --disable-gprofng
+
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/build"
+    make DESTDIR="$pkgdir" install
+    # Expose safe non-conflicting GNU inspection tools without g-prefix (readelf, objdump, addr2line, c++filt, elfedit)
+    # Keep ld/as/ar/ranlib/strip prefixed as g* so Apple's Mach-O cctools are never shadowed
+    for tool in readelf objdump objcopy addr2line c++filt elfedit; do
+        if [[ -x "$pkgdir/opt/pacman/bin/g${tool}" ]]; then
+            ln -sf "g${tool}" "$pkgdir/opt/pacman/bin/${tool}"
+        fi
+    done
+    rm -f "$pkgdir/opt/pacman/share/info/dir"
+    rm -f "$pkgdir/opt/pacman/share/info/"{ standards.info,configure.info } 2>/dev/null || true
+    find "$pkgdir/opt/pacman/lib" -name '*.la' -delete 2>/dev/null || true
+    install -Dm644 "$srcdir/binutils-${pkgver}/COPYING3" "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

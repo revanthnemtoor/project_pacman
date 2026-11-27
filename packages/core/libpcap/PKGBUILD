@@ -1,0 +1,45 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=libpcap
+pkgver=1.10.5
+pkgrel=1
+pkgdesc="A system-independent interface for user-level packet capture"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.tcpdump.org/"
+license=('BSD-3-Clause')
+provides=('libpcap.dylib=1')
+options=('!strip' '!libtool')
+source=("https://www.tcpdump.org/release/libpcap-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/libpcap-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    ./configure \
+        --prefix=/opt/pacman \
+        --mandir=/opt/pacman/share/man \
+        --enable-ipv6 \
+        --disable-universal
+
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/libpcap-${pkgver}"
+    make DESTDIR="$pkgdir" install
+    rm -f "$pkgdir/opt/pacman/lib/libpcap.a" 2>/dev/null || true
+    install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

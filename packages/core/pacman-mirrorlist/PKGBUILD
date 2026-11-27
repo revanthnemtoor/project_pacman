@@ -1,0 +1,22 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=pacman-mirrorlist
+pkgver=2026.11.22
+pkgrel=1
+pkgdesc="Arch Darwin mirror list for pacman"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/revanthnemtoor/project_pacman"
+license=('GPL-3.0-or-later')
+backup=('opt/pacman/etc/pacman.d/mirrorlist')
+
+package() {
+  install -dm755 "${pkgdir}/opt/pacman/etc/pacman.d"
+  cat > "${pkgdir}/opt/pacman/etc/pacman.d/mirrorlist" <<'EOF'
+#
+# /opt/pacman/etc/pacman.d/mirrorlist
+# Official project_pacman macOS Mirror List
+#
+
+Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/$repo
+Server = https://revanthnemtoor.github.io/project_pacman/$repo
+EOF
+}

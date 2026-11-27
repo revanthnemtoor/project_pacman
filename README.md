@@ -163,9 +163,12 @@ project_pacman/
 │   └── *.pkg.tar.zst                    # Package archives
 ├── configs/
 │   └── pacman.conf                      # Reference pacman configuration
-├── pacman/                              # Pacman 7.1.0 native C source code
+├── packages/
+│   ├── core/                            # All 112 canonical [core] PKGBUILD recipes
+│   └── extra/                           # [extra] CLI, codec, Qt6, and KDE PKGBUILD recipes
+├── darwin_core_packages.txt             # Authoritative 112 FOSS Darwin [core] manifest
+├── arch_builder.py                      # Unified Git-tag scanner, builder, signer & daemon
 ├── install.sh                           # Universal interactive installer script
-├── update_repo_db.py                    # Script to regenerate repo databases via repo-add
 └── README.md                            # Documentation
 ```
 
@@ -173,15 +176,17 @@ project_pacman/
 
 ## Included Packages
 
-### Core System (`[core]`)
-* **Shell & Tools**: `bash 5.3`, `readline 8.3`, `coreutils 9.6`, `diffutils 3.12`, `sed 4.10`, `grep 3.12`, `findutils 4.11.0`, `gawk 5.4.1`, `gzip 1.15`, `make 4.4.1`, `which 2.21`, `less 668`
-* **Package Management**: `pacman 7.1.0` (with `libalpm 16.0`), `libarchive 3.7.7`, `pkgconf 2.3.0`
-* **Compression**: `zlib 1.3.1`, `bzip2 1.0.8`, `lz4 1.10.0`, `zstd 1.5.7`, `xz 5.6.4`, `brotli 1.1.0`, `lzo 2.10`, `xxhash 0.8.2`
-* **Crypto & Core Libraries**: `openssl 3.4.1`, `gmp 6.3.0`, `mpfr 4.2.1`, `expat 2.6.4`, `libffi 3.4.6`, `ncurses 6.5`, `sqlite 3.47.0`, `m4 1.4.20`, `libunistring 1.2`, `libidn2 2.3.7`, `libpsl 0.21.5`, `libtasn1 4.19.0`, `libgcrypt 1.11.0`, `libksba 1.6.7`, `npth 1.7`, `nettle 3.10`, `libxml2 2.13.4`, `gettext 0.22.5`
+### Core System (`[core]` — 112 FOSS Packages)
+* **Base & System Data**: `base`, `base-devel`, `filesystem`, `iana-etc`, `tzdata`, `ca-certificates`, `pacman 7.1.0` (`libalpm 16.0`), `pacman-mirrorlist`
+* **Shells, Editors & Userland**: `bash`, `dash`, `readline`, `libedit`, `coreutils`, `diffutils`, `findutils`, `gawk`, `grep`, `sed`, `tar`, `gzip`, `less`, `which`, `file`, `patch`, `nano`, `links`, `groff`, `man-db`, `texinfo`, `inetutils`, `logrotate`, `s-nail`
+* **Toolchain & Runtimes**: `gcc`, `binutils`, `make`, `autoconf`, `automake`, `libtool`, `m4`, `bison`, `flex`, `pkgconf`, `fakeroot`, `gettext`, `python`, `perl`, `guile`
+* **Networking, Auth & Crypto**: `openssl`, `gnutls`, `gnupg`, `gpgme`, `pinentry`, `curl`, `openssh`, `krb5`, `openldap`, `libsasl`, `nss`, `nspr`, `p11-kit`, `leancrypto`, `nettle`, `libgcrypt`, `libgpg-error`, `libassuan`, `libksba`, `npth`, `libssh2`, `libnghttp2`, `libnghttp3`, `libngtcp2`, `libmicrohttpd`, `libpsl`, `libidn2`, `ldns`, `libpcap`
+* **Compression, Databases & Core Libraries**: `zlib`, `bzip2`, `lz4`, `lzo`, `xz`, `zstd`, `brotli`, `libarchive`, `sqlite`, `gdbm`, `unixodbc`, `icu`, `glib2`, `libsecret`, `libxml2`, `expat`, `jansson`, `json-c`, `gmp`, `mpfr`, `libmpc`, `libisl`, `mpdecimal`, `gc`, `libffi`, `ncurses`, `pcre2`, `popt`, `libpipeline`, `libinih`, `libevent`, `libverto`, `libunistring`, `libtasn1`, `libusb`, `libxcrypt`
 
-### Extended Utilities & GUI (`[extra]`)
-* **CLI & Productivity Tools**: `fzf 0.75.0`, `yazi 26.9.1`, `jq 1.7.1`, `nano 8.2`, `tree 2.2.1`, `ripgrep 15.2.0`, `tmux 3.8`, `vim 9.2`, `wget 1.25.0`, `oniguruma 6.9.9`, `utf8proc 2.9.0`, `libevent 2.1.12`
-* **Qt 6 Framework**: 16 native modules (`qt6-base 6.12.0`, `qt6-declarative`, `qt6-svg`, `qt6-tools`, `qt6-multimedia`, etc.)
+### Extended Utilities, Codecs & GUI (`[extra]`)
+* **CLI & Productivity Tools**: `fzf`, `yazi`, `gh`, `git`, `fastfetch`, `fd`, `fish`, `jq`, `yq`, `ripgrep`, `rsync`, `tmux`, `tree`, `vim`, `wget`, `xxhash`
+* **Image & Media Codecs**: `imagemagick` (full `rw+` codec stack), `libheif`, `aom`, `dav1d`, `libde265`, `kvazaar`, `libwebp`, `openjpeg2`, `libraw`, `libjpeg-turbo`, `libpng`, `libtiff`, `freetype2`, `lcms2`, `exiv2`
+* **Qt 6 Framework**: 16 native modules (`qt6-base`, `qt6-declarative`, `qt6-svg`, `qt6-tools`, `qt6-multimedia`, etc.)
 * **KDE Frameworks 6**: 34 native frameworks (`karchive`, `kcoreaddons`, `kconfig`, `kio`, `kxmlgui`, `solid`, `sonnet`, `breeze-icons`, etc.)
 * **Applications**: Gwenview image viewer (`gwenview 26.08.2`)
 

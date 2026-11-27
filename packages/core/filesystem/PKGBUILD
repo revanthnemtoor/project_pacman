@@ -1,0 +1,28 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+# Native macOS port for Pacman (/opt/pacman)
+pkgname=filesystem
+pkgver=2026.11
+pkgrel=1
+pkgdesc="Base Arch Darwin rootless directory hierarchy and configuration (/opt/pacman)"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/revanthnemtoor/project_pacman"
+license=('GPL-3.0-or-later')
+depends=('iana-etc')
+options=('!strip' 'emptydirs')
+source=()
+sha256sums=()
+
+package() {
+    for d in bin sbin lib include etc etc/profile.d share share/man share/doc share/licenses var var/cache var/lib var/log var/tmp libexec; do
+        install -dm755 "$pkgdir/opt/pacman/$d"
+    done
+    cat << 'EOF' > "$pkgdir/opt/pacman/etc/os-release"
+NAME="Arch Darwin (Pacman for macOS)"
+PRETTY_NAME="Arch Darwin (Pacman for macOS)"
+ID=arch-darwin
+ID_LIKE=arch
+HOME_URL="https://github.com/revanthnemtoor/project_pacman"
+EOF
+    chmod 644 "$pkgdir/opt/pacman/etc/os-release"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

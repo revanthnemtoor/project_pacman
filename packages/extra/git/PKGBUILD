@@ -1,6 +1,6 @@
 pkgname=git
-pkgver=2.55.0
-pkgrel=1
+pkgver=2.56.0
+pkgrel=3
 pkgdesc="Distributed revision control system"
 
 url="https://git-scm.com"

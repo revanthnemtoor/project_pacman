@@ -1,0 +1,27 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=tzdata
+pkgver=2025c
+pkgrel=1
+pkgdesc="Sources for time zone and daylight saving time data"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.iana.org/time-zones"
+license=('LicenseRef-tz')
+options=('!strip')
+source=("https://data.iana.org/time-zones/releases/tzdata${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+    cd "$srcdir"
+    install -dm755 "$pkgdir/opt/pacman/share/zoneinfo"
+    for tz in africa antarctica asia australasia etcetera europe factory northamerica southamerica backward; do
+        if [[ -f "$tz" ]]; then
+            /usr/sbin/zic -d "$pkgdir/opt/pacman/share/zoneinfo" "$tz"
+        fi
+    done
+    install -Dm644 iso3166.tab "$pkgdir/opt/pacman/share/zoneinfo/iso3166.tab"
+    install -Dm644 zone1970.tab "$pkgdir/opt/pacman/share/zoneinfo/zone1970.tab"
+    install -Dm644 zone.tab "$pkgdir/opt/pacman/share/zoneinfo/zone.tab"
+    install -Dm644 leap-seconds.list "$pkgdir/opt/pacman/share/zoneinfo/leap-seconds.list" 2>/dev/null || true
+    install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

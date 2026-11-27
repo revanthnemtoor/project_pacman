@@ -1,0 +1,53 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=inetutils
+pkgver=2.6
+pkgrel=1
+pkgdesc="A collection of common network programs (telnet, ftp, hostname, dnsdomainname, tftp, whois)"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.gnu.org/software/inetutils/"
+license=('GPL-3.0-or-later')
+depends=('ncurses' 'readline')
+options=('!strip')
+source=("https://ftp.gnu.org/gnu/inetutils/inetutils-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/inetutils-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk} -Wno-implicit-function-declaration"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    ./configure \
+        --prefix=/opt/pacman \
+        --mandir=/opt/pacman/share/man \
+        --infodir=/opt/pacman/share/info \
+        --disable-servers \
+        --disable-ifconfig \
+        --disable-ping \
+        --disable-ping6 \
+        --disable-traceroute \
+        --disable-logger \
+        --without-pam
+
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/inetutils-${pkgver}"
+    make DESTDIR="$pkgdir" install
+    # Make sure binaries are writable before codesign (rcp/rlogin/rsh install 4755 or 0555)
+    chmod -R u+w "$pkgdir/opt/pacman" 2>/dev/null || true
+    rm -f "$pkgdir/opt/pacman/share/info/dir"
+    install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

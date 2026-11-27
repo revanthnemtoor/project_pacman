@@ -1,0 +1,58 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=nspr
+pkgver=4.36
+pkgrel=1
+pkgdesc="Netscape Portable Runtime"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSPR"
+license=('MPL-2.0')
+provides=('libnspr4.dylib' 'libplc4.dylib' 'libplds4.dylib')
+options=('!strip' '!libtool')
+source=("https://archive.mozilla.org/pub/nspr/releases/v${pkgver}/src/nspr-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/nspr-${pkgver}/nspr"
+    local _arch="x86_64"
+    local _64flag="--enable-64bit"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CXX="/usr/bin/clang++"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    ./configure \
+        --prefix=/opt/pacman \
+        --libdir=/opt/pacman/lib \
+        --includedir=/opt/pacman/include/nspr \
+        ${_64flag} \
+        --enable-optimize \
+        --disable-debug
+
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/nspr-${pkgver}/nspr"
+    make DESTDIR="$pkgdir" install
+    rm -f "$pkgdir/opt/pacman/lib/"*.a 2>/dev/null || true
+    # Fix Mach-O install_name on libnspr4/libplc4/libplds4 from @executable_path to /opt/pacman/lib
+    for dylib in "$pkgdir/opt/pacman/lib/"lib*.dylib; do
+        [[ -f "$dylib" && ! -L "$dylib" ]] || continue
+        base="$(basename "$dylib")"
+        install_name_tool -id "/opt/pacman/lib/${base}" "$dylib"
+        for dep in libnspr4.dylib libplc4.dylib libplds4.dylib; do
+            install_name_tool -change "@executable_path/${dep}" "/opt/pacman/lib/${dep}" "$dylib" 2>/dev/null || true
+        done
+    done
+    install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

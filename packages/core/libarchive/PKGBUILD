@@ -1,0 +1,42 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=libarchive
+pkgver=3.7.7
+pkgrel=1
+pkgdesc="Multi-format archive and compression library"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://libarchive.org/"
+license=('BSD-2-Clause')
+depends=('bzip2' 'expat' 'libxml2' 'lz4' 'lzo' 'openssl' 'xz' 'zlib' 'zstd')
+source=("https://github.com/libarchive/libarchive/releases/download/v${pkgver}/libarchive-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  local _sdk="$(xcrun --show-sdk-path)"
+  local _arch="$(uname -m)"
+  export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig"
+  export CFLAGS="-O2 -I/opt/pacman/include -isysroot ${_sdk} -arch ${_arch}"
+  export LDFLAGS="-L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk} -arch ${_arch}"
+
+  cd "${srcdir}/libarchive-${pkgver}"
+  ./configure \
+    --prefix=/opt/pacman \
+    --without-nettle \
+    --with-openssl \
+    --with-zstd \
+    --with-lz4 \
+    --with-lzma \
+    --with-bz2lib \
+    --with-zlib
+  make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+  cd "${srcdir}/libarchive-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  find "${pkgdir}/opt/pacman" -type f \( -perm +111 -o -name "*.dylib" \) | while read -r f; do
+    if file "$f" | grep -q "Mach-O"; then
+      codesign --force --sign - "$f" 2>/dev/null || true
+    fi
+  done
+}

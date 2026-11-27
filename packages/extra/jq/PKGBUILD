@@ -1,5 +1,5 @@
 pkgname=jq
-pkgver=1.8.2
+pkgver=1.7.1
 pkgrel=1
 pkgdesc="Lightweight and flexible command-line JSON processor"
 

@@ -1,0 +1,55 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=openssh
+pkgver=9.9p2
+pkgrel=1
+pkgdesc="SSH protocol implementation for remote login, command execution and file transfer"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.openssh.com/portable.html"
+license=('BSD-2-Clause')
+depends=('krb5' 'ldns' 'libedit' 'openssl' 'zlib')
+options=('!strip')
+source=("https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/openssh-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export PKG_CONFIG="/opt/pacman/bin/pkg-config"
+    export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export PKG_CONFIG_LIBDIR="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk} -D__APPLE_SANDBOX_NAMED_EXTERNAL__"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    ./configure \
+        --prefix=/opt/pacman \
+        --sysconfdir=/opt/pacman/etc/ssh \
+        --libexecdir=/opt/pacman/libexec/openssh \
+        --mandir=/opt/pacman/share/man \
+        --with-privsep-path=/var/empty \
+        --with-ssl-dir=/opt/pacman \
+        --with-libedit=/opt/pacman \
+        --with-ldns=/opt/pacman \
+        --with-kerberos5=/opt/pacman \
+        --with-zlib=/opt/pacman \
+        --without-pam
+
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/openssh-${pkgver}"
+    # Use install-nokeys so rootless build does not try to chown or generate host keys in live /opt/pacman
+    make DESTDIR="$pkgdir" install-nokeys
+    install -Dm644 LICENCE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

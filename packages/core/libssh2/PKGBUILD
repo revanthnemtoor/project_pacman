@@ -1,0 +1,58 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+# Native macOS port for Pacman (/opt/pacman)
+pkgname=libssh2
+pkgver=1.11.1
+pkgrel=1
+pkgdesc="A library implementing the SSH2 protocol as defined by Internet Drafts"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.libssh2.org/"
+license=('BSD-3-Clause')
+depends=('openssl' 'zlib')
+provides=('libssh2.dylib=1')
+options=('!strip' '!libtool')
+source=("https://github.com/libssh2/libssh2/releases/download/libssh2-${pkgver}/libssh2-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/libssh2-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CXX="/usr/bin/clang++"
+    export PKG_CONFIG="/opt/pacman/bin/pkg-config"
+    export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export PKG_CONFIG_LIBDIR="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export CXXFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    ./configure \
+        --prefix=/opt/pacman \
+        --with-crypto=openssl \
+        --with-libssl-prefix=/opt/pacman \
+        --with-libz \
+        --with-libz-prefix=/opt/pacman \
+        --enable-shared \
+        --disable-static \
+        --disable-examples-build
+
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/libssh2-${pkgver}"
+    make DESTDIR="$pkgdir" install
+    find "$pkgdir/opt/pacman/lib" -name '*.la' -delete 2>/dev/null || true
+    install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

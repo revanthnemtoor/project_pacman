@@ -1,0 +1,19 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=iana-etc
+pkgver=20250123
+pkgrel=1
+pkgdesc="/opt/pacman/etc/protocols and /opt/pacman/etc/services provided by IANA"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.iana.org/protocols"
+license=('LicenseRef-IANA')
+options=('!strip')
+source=("https://github.com/Mic92/iana-etc/releases/download/${pkgver}/iana-etc-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+    cd "$srcdir/iana-etc-${pkgver}"
+    install -Dm644 services "$pkgdir/opt/pacman/etc/services"
+    install -Dm644 protocols "$pkgdir/opt/pacman/etc/protocols"
+    install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE" 2>/dev/null || true
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

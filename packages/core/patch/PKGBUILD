@@ -1,0 +1,38 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=patch
+pkgver=2.8
+pkgrel=1
+pkgdesc="A utility to apply patch files to original sources"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.gnu.org/software/patch/"
+license=('GPL-3.0-or-later')
+options=('!strip')
+source=("https://ftp.gnu.org/gnu/patch/patch-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/patch-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    ./configure --prefix=/opt/pacman --mandir=/opt/pacman/share/man
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/patch-${pkgver}"
+    make DESTDIR="$pkgdir" install
+    install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

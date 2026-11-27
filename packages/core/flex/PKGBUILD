@@ -1,0 +1,50 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=flex
+pkgver=2.6.4
+pkgrel=1
+pkgdesc="A tool for generating text-scanning programs"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/westes/flex"
+license=('BSD-2-Clause')
+depends=('m4')
+options=('!strip' '!libtool')
+source=("https://github.com/westes/flex/releases/download/v${pkgver}/flex-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/flex-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CXX="/usr/bin/clang++"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    ./configure \
+        --prefix=/opt/pacman \
+        --mandir=/opt/pacman/share/man \
+        --infodir=/opt/pacman/share/info \
+        --enable-shared \
+        --disable-static \
+        --disable-nls
+
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/flex-${pkgver}"
+    make DESTDIR="$pkgdir" install
+    ln -sf flex "$pkgdir/opt/pacman/bin/lex"
+    rm -f "$pkgdir/opt/pacman/share/info/dir"
+    find "$pkgdir/opt/pacman/lib" -name '*.la' -delete 2>/dev/null || true
+    install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

@@ -1,10 +1,10 @@
 {
     "name": "imagemagick",
     "version": "7.1.2.36",
-    "release": 1,
+    "release": 2,
     "epoch": 0,
     "base": null,
-    "description": "An image viewing/manipulation program (macOS native)",
+    "description": "An image viewing/manipulation program with full codec support (WebP, HEIF, AVIF, JP2, RAW, FreeType, TIFF, PNG, JPEG)",
     "homepage": "https://imagemagick.org/",
     "license": [
         "ImageMagick"
@@ -18,10 +18,22 @@
     "repository": "extra",
     "prefix": "/opt/pacman",
     "depends": [
+        "aom",
+        "brotli",
+        "bzip2",
+        "dav1d",
+        "freetype2",
+        "kvazaar",
         "lcms2",
+        "libde265",
+        "libheif",
         "libjpeg-turbo",
         "libpng",
+        "libraw",
         "libtiff",
+        "libwebp",
+        "libxml2",
+        "openjpeg2",
         "xz",
         "zlib",
         "zstd"

@@ -1,0 +1,53 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=s-nail
+pkgver=14.9.25
+pkgrel=1
+pkgdesc="Environment for sending and receiving mail (POSIX mailx)"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.sdaoden.eu/code.html#s-mailx"
+license=('ISC AND BSD-3-Clause')
+depends=('libidn2' 'ncurses' 'openssl')
+options=('!strip')
+source=("https://www.sdaoden.eu/downloads/s-nail-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/s-nail-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+
+    make \
+        CC="/usr/bin/clang" \
+        OPT_AUTOCC=no \
+        OPT_USE_PKGSYS=no \
+        C_INCLUDE_PATH="/opt/pacman/include" \
+        LD_LIBRARY_PATH="/opt/pacman/lib" \
+        CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -I/opt/pacman/include/ncursesw -isysroot ${_sdk}" \
+        LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}" \
+        VAL_PREFIX=/opt/pacman \
+        VAL_SYSCONFDIR=/opt/pacman/etc \
+        VAL_LIBEXECDIR=/opt/pacman/libexec \
+        VAL_MANDIR=/opt/pacman/share/man \
+        OPT_DOTLOCK=no \
+        OPT_GSSAPI=no \
+        config
+
+    make build
+}
+
+package() {
+    cd "$srcdir/s-nail-${pkgver}"
+    make DESTDIR="$pkgdir" packager-install
+    ln -sf s-nail "$pkgdir/opt/pacman/bin/mail"
+    ln -sf s-nail "$pkgdir/opt/pacman/bin/mailx"
+    install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

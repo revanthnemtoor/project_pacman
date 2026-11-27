@@ -1,6 +1,6 @@
 pkgname=wget
 pkgver=1.25.0
-pkgrel=1
+pkgrel=3
 pkgdesc="Internet file retriever"
 
 url="https://www.gnu.org/software/wget/"

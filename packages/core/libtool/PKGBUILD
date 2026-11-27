@@ -1,0 +1,53 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=libtool
+pkgver=2.5.4
+pkgrel=1
+pkgdesc="A generic library support script"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.gnu.org/software/libtool"
+license=('LGPL-2.0-or-later WITH Libtool-exception')
+depends=('bash' 'm4' 'tar')
+provides=('libltdl.dylib=7')
+options=('!strip' '!libtool')
+source=("https://ftp.gnu.org/gnu/libtool/libtool-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/libtool-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CXX="/usr/bin/clang++"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export CXXFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    ./configure \
+        --prefix=/opt/pacman \
+        --mandir=/opt/pacman/share/man \
+        --infodir=/opt/pacman/share/info \
+        --enable-ltdl-install \
+        --enable-shared \
+        --disable-static
+
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/libtool-${pkgver}"
+    make DESTDIR="$pkgdir" install
+    ln -sf libtool "$pkgdir/opt/pacman/bin/glibtool"
+    ln -sf libtoolize "$pkgdir/opt/pacman/bin/glibtoolize"
+    rm -f "$pkgdir/opt/pacman/share/info/dir"
+    find "$pkgdir/opt/pacman/lib" -name '*.la' -delete 2>/dev/null || true
+    install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

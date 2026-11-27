@@ -1,0 +1,43 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=gpgme
+pkgver=1.24.2
+pkgrel=1
+pkgdesc="A C wrapper library for GnuPG"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://gnupg.org/related_software/gpgme/"
+license=('LGPL-2.1-or-later')
+depends=('gnupg' 'libassuan' 'libgpg-error')
+source=("https://www.gnupg.org/ftp/gcrypt/gpgme/gpgme-${pkgver}.tar.bz2")
+sha256sums=('SKIP')
+
+build() {
+  local _sdk="$(xcrun --show-sdk-path)"
+  local _arch="$(uname -m)"
+  export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig"
+  export CFLAGS="-O2 -I/opt/pacman/include -isysroot ${_sdk} -arch ${_arch}"
+  export CXXFLAGS="${CFLAGS}"
+  export LDFLAGS="-L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk} -arch ${_arch}"
+
+  cd "${srcdir}/gpgme-${pkgver}"
+  ./configure \
+    --prefix=/opt/pacman \
+    --enable-languages=cl,cpp \
+    --disable-gpgsm-test \
+    --disable-gpgconf-test \
+    --disable-g13-test \
+    --with-libgpg-error-prefix=/opt/pacman \
+    --with-libassuan-prefix=/opt/pacman
+  make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+  cd "${srcdir}/gpgme-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  rm -f "${pkgdir}/opt/pacman/share/info/dir"
+  find "${pkgdir}/opt/pacman" -type f \( -perm +111 -o -name "*.dylib" -o -name "*.so" \) | while read -r f; do
+    if file "$f" | grep -q "Mach-O"; then
+      codesign --force --sign - "$f" 2>/dev/null || true
+    fi
+  done
+}

@@ -1,0 +1,66 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=icu
+pkgver=77.1
+_u_ver=77_1
+pkgrel=1
+pkgdesc="International Components for Unicode library"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://icu.unicode.org/"
+license=('ICU')
+provides=('libicudata.dylib=77' 'libicui18n.dylib=77' 'libicuio.dylib=77' 'libicuuc.dylib=77')
+options=('!strip' '!libtool')
+source=("https://github.com/unicode-org/icu/releases/download/release-77-1/icu4c-${_u_ver}-src.tgz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/icu/source"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CXX="/usr/bin/clang++"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -isysroot ${_sdk}"
+    export CXXFLAGS="-O2 -arch ${_arch} -std=c++17 -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -headerpad_max_install_names -isysroot ${_sdk}"
+
+    ./configure \
+        --prefix=/opt/pacman \
+        --mandir=/opt/pacman/share/man \
+        --enable-rpath \
+        --enable-shared \
+        --disable-static \
+        --disable-samples \
+        --disable-tests
+
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/icu/source"
+    make DESTDIR="$pkgdir" install
+    # Ensure full /opt/pacman/lib install_name on ICU dylibs
+    for f in "$pkgdir/opt/pacman/lib/"libicu*.dylib; do
+        [[ -f "$f" && ! -L "$f" ]] || continue
+        install_name_tool -id "/opt/pacman/lib/$(basename "$f")" "$f" 2>/dev/null || true
+        for dep in libicudata.77.dylib libicuuc.77.dylib libicui18n.77.dylib libicuio.77.dylib libicutu.77.dylib; do
+            install_name_tool -change "$dep" "/opt/pacman/lib/${dep}" "$f" 2>/dev/null || true
+        done
+    done
+    for b in "$pkgdir/opt/pacman/bin/"* "$pkgdir/opt/pacman/sbin/"*; do
+        [[ -f "$b" && ! -L "$b" ]] || continue
+        if /usr/bin/file -b "$b" | grep -q "Mach-O"; then
+            for dep in libicudata.77.dylib libicuuc.77.dylib libicui18n.77.dylib libicuio.77.dylib libicutu.77.dylib; do
+                install_name_tool -change "$dep" "/opt/pacman/lib/${dep}" "$b" 2>/dev/null || true
+            done
+        fi
+    done
+    install -Dm644 "$srcdir/icu/LICENSE" "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

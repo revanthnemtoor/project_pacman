@@ -1,0 +1,141 @@
+# ==============================================================================
+# Pacman for macOS (Darwin Native Port) — Authoritative [core] Package Manifest
+# ==============================================================================
+# Scope:
+#   - 100% Free & Open-Source Software (FOSS: GPL, LGPL, MIT, BSD, Apache-2.0, MPL-2.0)
+#   - Native macOS Darwin Mach-O compatible (/opt/pacman rootless hierarchy)
+#   - Mirrors Arch Linux [core] userspace, toolchain, base-devel, crypto, and
+#     networking while excluding Linux-kernel-only packages (linux, linux-firmware,
+#     glibc, systemd, kmod, iptables, util-linux, lvm2, e2fsprogs, btrfs-progs,
+#     xfsprogs, cryptsetup, efibootmgr, grub, pam, wpa_supplicant, audit, etc.)
+#   - Consumed directly by `arch_builder.py` for automated upstream Git stable
+#     release/tag scanning, rebuilding, packaging, signing, and DB indexing.
+# ==============================================================================
+
+# --- 1. Meta & System Configuration (4) ---
+base
+base-devel
+filesystem
+pacman-mirrorlist
+
+# --- 2. Package Management Stack (3) ---
+pacman
+gpgme
+libarchive
+
+# --- 3. Compiler Toolchain & Base-Devel Build Tools (23) ---
+autoconf
+automake
+binutils
+bison
+diffutils
+fakeroot
+file
+findutils
+flex
+gawk
+gcc
+gettext
+groff
+libisl
+libmpc
+libtool
+m4
+make
+patch
+pkgconf
+sed
+texinfo
+which
+
+# --- 4. Shells, Terminal & Core POSIX Userspace (13) ---
+bash
+coreutils
+dash
+grep
+gzip
+inetutils
+less
+libedit
+man-db
+nano
+ncurses
+readline
+tar
+
+# --- 5. Compression Libraries & Tools (7) ---
+brotli
+bzip2
+lz4
+lzo
+xz
+zlib
+zstd
+
+# --- 6. Cryptography, TLS, GnuPG & Security (17) ---
+ca-certificates
+gnupg
+gnutls
+krb5
+leancrypto
+libassuan
+libgcrypt
+libgpg-error
+libksba
+libsecret
+libtasn1
+libxcrypt
+nettle
+npth
+openssl
+p11-kit
+pinentry
+
+# --- 7. Networking, HTTP/2/3, SSH & Directory Services (14) ---
+curl
+iana-etc
+ldns
+libidn2
+libmicrohttpd
+libnghttp2
+libnghttp3
+libngtcp2
+libpcap
+libpsl
+libsasl
+libssh2
+openldap
+openssh
+
+# --- 8. Core System Libraries, Runtimes, Databases & Parsers (31) ---
+expat
+gc
+gdbm
+glib2
+gmp
+guile
+icu
+jansson
+json-c
+libevent
+libffi
+libinih
+libpipeline
+libunistring
+libusb
+libverto
+libxml2
+links
+logrotate
+mpdecimal
+mpfr
+nspr
+nss
+pcre2
+perl
+popt
+python
+s-nail
+sqlite
+tzdata
+unixodbc

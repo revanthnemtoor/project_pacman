@@ -10,11 +10,13 @@ Full Lifecycle Orchestrator (Designed natively for macOS Darwin):
   6. Deploy & Install: Repository database update (repo-add) and pacman -U installation
 
 Usage:
+  python3 arch_builder.py core-status          # Audit darwin_core_packages.txt (built vs missing vs updates)
   python3 arch_builder.py scan                 # Fast scan of packages against upstream Git tags
   python3 arch_builder.py scan --updates-only  # Show only packages with new upstream git tags
   python3 arch_builder.py scan --refresh       # Bypass cache and re-fetch all git tags
   python3 arch_builder.py build <pkgname>      # Full build-package-sign-install pipeline
-  python3 arch_builder.py update-all           # Scan and rebuild all outdated packages
+  python3 arch_builder.py update-all           # Scan, bump PKGBUILD, rebuild, sign, index (cron/launchd ready)
+  python3 arch_builder.py daemon --days 2      # Run periodic stable update loop every N days
   python3 arch_builder.py index                # Re-index and sign all repo databases
 """
 
@@ -47,6 +49,7 @@ EXTRA_DIR = PROJECT_DIR / "extra"
 PACKAGES_DIR = PROJECT_DIR / "packages"
 CACHE_DIR = PROJECT_DIR / ".build_cache"
 TAGS_CACHE_FILE = CACHE_DIR / "git_tags_cache.json"
+DARWIN_CORE_MANIFEST = PROJECT_DIR / "darwin_core_packages.txt"
 
 PACMAN_ROOT = Path("/opt/pacman")
 PACMAN_BIN = PACMAN_ROOT / "bin" / "pacman"
@@ -87,10 +90,64 @@ UPSTREAM_GIT_REPOS: dict[str, str] = {
     "texinfo": "git://git.savannah.gnu.org/texinfo.git",
     "which": "git://git.savannah.gnu.org/which.git",
     "gcc": "https://github.com/gcc-mirror/gcc.git",
-    # Core Compression & Low-Level Libraries
+    "binutils": "https://sourceware.org/git/binutils-gdb.git",
+    "bison": "git://git.savannah.gnu.org/bison.git",
+    "dash": "https://git.kernel.org/pub/scm/utils/dash/dash.git",
+    "fakeroot": "https://salsa.debian.org/clint/fakeroot.git",
+    "file": "https://github.com/file/file.git",
+    "flex": "https://github.com/westes/flex.git",
+    "gettext": "git://git.savannah.gnu.org/gettext.git",
+    "groff": "git://git.savannah.gnu.org/groff.git",
+    "inetutils": "git://git.savannah.gnu.org/inetutils.git",
+    "libedit": "https://github.com/ThomasDickey/libedit-snapshots.git",
+    "libisl": "https://repo.or.cz/isl.git",
+    "libmpc": "https://gitlab.inria.fr/mpc/mpc.git",
+    "libtool": "git://git.savannah.gnu.org/libtool.git",
+    "man-db": "https://gitlab.com/man-db/man-db.git",
+    "patch": "git://git.savannah.gnu.org/patch.git",
+    # Core Compression, Crypto, Networking & Low-Level Libraries
     "brotli": "https://github.com/google/brotli.git",
     "bzip2": "https://gitlab.com/bzip2/bzip2.git",
     "curl": "https://github.com/curl/curl.git",
+    "gc": "https://github.com/ivmai/bdwgc.git",
+    "gdbm": "git://git.gnu.org.ua/gdbm.git",
+    "glib2": "https://gitlab.gnome.org/GNOME/glib.git",
+    "gnupg": "https://github.com/gpg/gnupg.git",
+    "gpgme": "https://github.com/gpg/gpgme.git",
+    "guile": "git://git.savannah.gnu.org/guile.git",
+    "iana-etc": "https://github.com/Mic92/iana-etc.git",
+    "icu": "https://github.com/unicode-org/icu.git",
+    "jansson": "https://github.com/akheron/jansson.git",
+    "krb5": "https://github.com/krb5/krb5.git",
+    "ldns": "https://github.com/NLnetLabs/ldns.git",
+    "leancrypto": "https://github.com/smuellerDD/leancrypto.git",
+    "libassuan": "https://github.com/gpg/libassuan.git",
+    "libgcrypt": "https://github.com/gpg/libgcrypt.git",
+    "libgpg-error": "https://github.com/gpg/libgpg-error.git",
+    "libidn2": "https://gitlab.com/libidn/libidn2.git",
+    "libinih": "https://github.com/benhoyt/inih.git",
+    "libksba": "https://github.com/gpg/libksba.git",
+    "libmicrohttpd": "https://git.gnunet.org/libmicrohttpd.git",
+    "libnghttp2": "https://github.com/nghttp2/nghttp2.git",
+    "libnghttp3": "https://github.com/ngtcp2/nghttp3.git",
+    "libngtcp2": "https://github.com/ngtcp2/ngtcp2.git",
+    "libpcap": "https://github.com/the-tcpdump-group/libpcap.git",
+    "libpipeline": "https://gitlab.com/man-db/libpipeline.git",
+    "libsasl": "https://github.com/cyrusimap/cyrus-sasl.git",
+    "libsecret": "https://gitlab.gnome.org/GNOME/libsecret.git",
+    "libssh2": "https://github.com/libssh2/libssh2.git",
+    "libverto": "https://github.com/latchset/libverto.git",
+    "logrotate": "https://github.com/logrotate/logrotate.git",
+    "mpdecimal": "https://github.com/skrah/mpdecimal.git",
+    "nspr": "https://github.com/nss-dev/nspr.git",
+    "nss": "https://github.com/nss-dev/nss.git",
+    "openldap": "https://git.openldap.org/openldap/openldap.git",
+    "openssh": "https://github.com/openssh/openssh-portable.git",
+    "perl": "https://github.com/Perl/perl5.git",
+    "python": "https://github.com/python/cpython.git",
+    "s-nail": "https://git.sdaoden.eu/scm/s-nail.git",
+    "tzdata": "https://github.com/eggert/tz.git",
+    "unixodbc": "https://github.com/lurcher/unixODBC.git",
     "expat": "https://github.com/libexpat/libexpat.git",
     "gmp": "https://github.com/alisw/GMP.git",
     "gnutls": "https://gitlab.com/gnutls/gnutls.git",
@@ -152,6 +209,16 @@ UPSTREAM_GIT_REPOS: dict[str, str] = {
     "yyjson": "https://github.com/ibireme/yyjson.git",
     "exiv2": "https://github.com/Exiv2/exiv2.git",
     "lcms2": "https://github.com/mm2/Little-CMS.git",
+    "libwebp": "https://github.com/webmproject/libwebp.git",
+    "openjpeg2": "https://github.com/uclouvain/openjpeg.git",
+    "freetype2": "https://gitlab.freedesktop.org/freetype/freetype.git",
+    "libde265": "https://github.com/strukturag/libde265.git",
+    "dav1d": "https://code.videolan.org/videolan/dav1d.git",
+    "aom": "https://aomedia.googlesource.com/aom",
+    "libheif": "https://github.com/strukturag/libheif.git",
+    "kvazaar": "https://github.com/ultravideo/kvazaar.git",
+    "libraw": "https://github.com/LibRaw/LibRaw.git",
+    "yazi": "https://github.com/sxyazi/yazi.git",
     # Qt6 Modules
     "qt6-base": "https://github.com/qt/qtbase.git",
     "qt6-declarative": "https://github.com/qt/qtdeclarative.git",
@@ -256,7 +323,7 @@ def sign_file(file_path: Path) -> Path:
     return sig_path
 
 
-def clean_git_tag(raw_tag: str) -> tuple[tuple[int, ...], str] | None:
+def clean_git_tag(raw_tag: str, pkgname: str = "") -> tuple[tuple[int, ...], str] | None:
     """Normalize and parse an upstream Git tag into a comparable version tuple.
     
     Handles:
@@ -269,35 +336,53 @@ def clean_git_tag(raw_tag: str) -> tuple[tuple[int, ...], str] | None:
     Filters out non-stable tags (rc, alpha, beta, dev, preview, pre, fuzz, test).
     """
     t = raw_tag.replace("refs/tags/", "").strip()
-    
+
+    # Ignore legacy SVN/RCS revision tags (e.g. r131 in lz4, r42 in xxhash, r275 in libusb)
+    if re.match(r"^r\d+$", t) and pkgname not in ("libinih",):
+        return None
+    if pkgname == "sqlite" and t.startswith("version-"):
+        t = t[len("version-"):]
+
     # Strip common prefixes
     for prefix in [
-        "v", "curl-", "openssl-", "jq-", "nano-", "pkgconf-", "fish-", 
-        "vim-", "gawk-", "texinfo-", "bash-", "release-", "version-", "tar-"
+        "releases/gcc-", "binutils-", "gdb-", "gpgme-", "gnupg-", "libgcrypt-",
+        "libgpg-error-", "libassuan-", "libksba-", "npth-", "ntbtls-",
+        "pcre2-", "json-c-", "R_", "FILE", "isl-", "V_", "OPENLDAP_REL_ENG_",
+        "cyrus-sasl-", "mpdecimal-", "NSPR_", "NSS_", "popt-", "release-",
+        "v", "curl-", "libssh2-", "VER-", "openssl-", "jq-", "nano-", "pkgconf-", "fish-", 
+        "vim-", "gawk-", "texinfo-", "bash-", "version-", "version.", "tar-", "r"
     ]:
         if t.startswith(prefix):
             t = t[len(prefix):]
             break
             
     t = t.replace("_", ".")
+    if re.match(r"^\d+(-\d+)+$", t):
+        t = t.replace("-", ".")
     
-    # Filter non-stable pre-releases
+    # Filter non-stable pre-releases (including GNOME/GLib odd-minor development series & Perl odd-minor dev)
     lower = t.lower()
-    if any(x in lower for x in ["rc", "alpha", "beta", "dev", "nightly", "pre", "test", "fuzz", "last", "preview"]):
+    if any(x in lower for x in ["rc", "alpha", "beta", "dev", "nightly", "pre", "test", "fuzz", "last", "preview", "tiny", "snapshot", "basepoint", "branch"]):
+        return None
+    # Reject Python/etc. PEP-440 alpha/beta/rc suffixes like 3.16.0a2, 3.15.0b1
+    if re.match(r"^\d+(\.\d+)+[ab]\d+", lower):
         return None
         
     # Match version pattern
-    m = re.match(r"^(\d+(\.\d+)+)", t)
+    m = re.match(r"^(\d+(\.\d+)+)$", t)
     if m:
         clean = m.group(1)
         nums = tuple(int(x) for x in clean.split("."))
+        # Filter odd-minor dev branches for Perl (5.45.x) and GLib (2.91.x)
+        if pkgname in ("perl", "glib2") and len(nums) >= 2 and (nums[1] % 2 == 1):
+            return None
+        if pkgname == "nss" and nums[0] > 100:
+            return None
         return (nums, clean)
         
-    # Single digit version fallback
-    m_single = re.match(r"^(\d+)", t)
-    if m_single:
-        clean = m_single.group(1)
-        return ((int(clean),), clean)
+    # Single integer version fallback (only for projects that version with integers: less, tzdata, libinih)
+    if pkgname in ("less", "tzdata", "libinih") and re.match(r"^\d+$", t):
+        return ((int(t),), t)
         
     return None
 
@@ -400,17 +485,20 @@ class GitTagScanner:
     def fetch_latest_git_tag(cls, pkgname: str, git_url: str) -> tuple[str | None, str | None]:
         """Query remote git tags via git ls-remote."""
         try:
+            git_env = os.environ.copy()
+            git_env["GIT_TERMINAL_PROMPT"] = "0"
             out = subprocess.check_output(
                 ["git", "ls-remote", "--tags", "--refs", git_url],
                 text=True,
                 stderr=subprocess.DEVNULL,
+                env=git_env,
                 timeout=10,
             )
             tags = []
             for line in out.splitlines():
                 parts = line.split("\t")
                 if len(parts) == 2:
-                    parsed = clean_git_tag(parts[1])
+                    parsed = clean_git_tag(parts[1], pkgname=pkgname)
                     if parsed:
                         tags.append(parsed)
             if tags:
@@ -525,6 +613,7 @@ class PackageBuilder:
         print(f"[{BOLD}{CYAN}BUILD{RESET}] Building via makepkg in {pkg_dir}...")
 
         env = get_darwin_env()
+        env["PKGEXT"] = ".pkg.tar.zst"
         cmd = [
             str(MAKEPKG_BIN),
             "-f",
@@ -546,10 +635,53 @@ class PackageBuilder:
         return latest_pkg
 
     @classmethod
+    def update_pkgbuild_version(cls, pkgbuild_path: Path, new_ver: str) -> bool:
+        """Auto-bump pkgver and reset pkgrel=1 inside PKGBUILD when a newer stable Git tag arrives."""
+        txt = pkgbuild_path.read_text(encoding="utf-8")
+        updated, count = re.subn(
+            r"(?m)^pkgver=.*$", f"pkgver={new_ver}", txt, count=1
+        )
+        if count == 0:
+            return False
+        updated = re.sub(r"(?m)^pkgrel=.*$", "pkgrel=1", updated, count=1)
+        if updated != txt:
+            pkgbuild_path.write_text(updated, encoding="utf-8")
+            return True
+        return False
+
+    META_PACKAGES = {"base", "base-devel", "pacman-mirrorlist", "filesystem"}
+
+    @classmethod
+    def is_source_pkgbuild(cls, pkgbuild_path: Path, pkgname: str = "") -> bool:
+        """Return True if PKGBUILD builds from upstream source (or is a known meta package)."""
+        if pkgname in cls.META_PACKAGES:
+            return True
+        txt = pkgbuild_path.read_text(encoding="utf-8", errors="replace")
+        if "_stage=" in txt or re.search(r"(?m)^source=\(\s*\)", txt):
+            return False
+        return "build()" in txt or "package()" in txt
+
+    @classmethod
     def deploy_package(cls, pkg_file: Path, target_repo: str = "extra") -> None:
-        """Sign and place package into target repository folder."""
+        """Sign and place package into target repository folder, purging older versions of same arch."""
         dest_dir = CORE_DIR if target_repo == "core" else EXTRA_DIR
         dest_dir.mkdir(parents=True, exist_ok=True)
+
+        # Guard against accidentally deploying an empty stub package
+        raw = pkg_file.name.replace(f"-{DARWIN_ARCH}.pkg.tar.zst", "")
+        parts = raw.split("-")
+        pkgname = "-".join(parts[:-2]) if len(parts) >= 3 else raw
+        if pkgname not in cls.META_PACKAGES and pkg_file.stat().st_size < 4096:
+            raise RuntimeError(
+                f"Refusing to deploy suspiciously small package {pkg_file.name} "
+                f"({pkg_file.stat().st_size} bytes < 4096 bytes)"
+            )
+
+        # Remove superseded archives of the same pkgname + arch before copying
+        if len(parts) >= 3:
+            for old in dest_dir.glob(f"{pkgname}-[0-9]*-{DARWIN_ARCH}.pkg.tar.zst*"):
+                if old.name not in (pkg_file.name, pkg_file.name + ".sig"):
+                    old.unlink(missing_ok=True)
 
         target_pkg = dest_dir / pkg_file.name
         if target_pkg.resolve() != pkg_file.resolve():
@@ -560,12 +692,32 @@ class PackageBuilder:
         print(f"[{BOLD}{GREEN}SIGNED{RESET}] {sig_file.name}")
 
     @classmethod
+    def cleanup_build_dir(cls, pkg_dir: Path) -> None:
+        """Remove temporary makepkg build trees and downloaded source archives."""
+        keep = {"PKGBUILD", "metadata.json", "README.md", "LICENSE"}
+        for item in pkg_dir.iterdir():
+            if item.name in keep or item.suffix in (".c", ".h", ".1", ".install", ".patch", ".diff"):
+                continue
+            if item.name in ("src", "pkg", "build", "stage", "logs") or item.name.endswith(
+                (".pkg.tar.zst", ".pkg.tar.zst.sig", ".tar.gz", ".tar.xz", ".tar.bz2", ".tar.lz", ".tgz", ".zip")
+            ):
+                try:
+                    if item.is_dir() and not item.is_symlink():
+                        subprocess.run(["chmod", "-R", "u+rwx", str(item)], check=False, capture_output=True)
+                        shutil.rmtree(item, ignore_errors=True)
+                    else:
+                        item.unlink(missing_ok=True)
+                except Exception:
+                    pass
+
+    @classmethod
     def install_package(cls, pkg_file: Path) -> None:
         """Install package locally using pacman -U."""
         print(f"[{BOLD}{CYAN}INSTALL{RESET}] Installing {pkg_file.name} into /opt/pacman...")
         subprocess.run(
             [str(PACMAN_BIN), "-U", "--overwrite", "*", "--noconfirm", str(pkg_file)],
             check=True,
+            env=get_darwin_env(),
         )
         print(f"[{BOLD}{GREEN}INSTALLED{RESET}] Package {pkg_file.name} active in /opt/pacman.")
 
@@ -573,6 +725,7 @@ class PackageBuilder:
 def update_repository_databases():
     """Index and sign core and extra repository databases."""
     print(f"\n{BOLD}{CYAN}=== Rebuilding & Signing Repository Databases ==={RESET}")
+    env = get_darwin_env()
     for repo_dir, repo_name in [(CORE_DIR, "core"), (EXTRA_DIR, "extra")]:
         if not repo_dir.exists():
             continue
@@ -596,7 +749,7 @@ def update_repository_databases():
                 "--include-sigs",
                 str(db_x86),
             ] + x86_pkgs
-            subprocess.run(cmd, check=True)
+            subprocess.run(cmd, check=True, env=env)
 
             for ext in [
                 ".db", ".db.tar.gz", ".files", ".files.tar.gz",
@@ -622,7 +775,7 @@ def update_repository_databases():
                 "--include-sigs",
                 str(db_arm),
             ] + arm_pkgs
-            subprocess.run(cmd, check=True)
+            subprocess.run(cmd, check=True, env=env)
 
         for p in list(repo_dir.glob("*.db*")) + list(repo_dir.glob("*.files*")):
             if p.is_symlink():
@@ -683,47 +836,176 @@ def cmd_build(args):
     pkg_file = PackageBuilder.build_from_pkgbuild(pkgbuild)
 
     # 2. Deploy & Sign
-    target_repo = "core" if "core" in str(pkgbuild) else "extra"
+    core_manifest_set = set(load_darwin_core_manifest())
+    target_repo = "core" if (pkgname in core_manifest_set or "core" in str(pkgbuild)) else "extra"
     PackageBuilder.deploy_package(pkg_file, target_repo=target_repo)
 
     # 3. Update databases
     update_repository_databases()
 
     # 4. Install
+    deployed_pkg = (CORE_DIR if target_repo == "core" else EXTRA_DIR) / pkg_file.name
     if not args.no_install:
-        PackageBuilder.install_package(pkg_file)
+        PackageBuilder.install_package(deployed_pkg)
+    PackageBuilder.cleanup_build_dir(pkgbuild.parent)
 
     print(f"\n{BOLD}{GREEN}✓ Pipeline for {pkgname} successfully completed!{RESET}\n")
 
 
-def cmd_update_all(args):
-    """Scan and update all packages with new upstream git tags."""
-    print(f"{BOLD}{CYAN}Checking for packages with new upstream git tags...{RESET}")
+def load_darwin_core_manifest() -> list[str]:
+    """Read target open-source Darwin [core] package names from darwin_core_packages.txt."""
+    if not DARWIN_CORE_MANIFEST.is_file():
+        return []
+    pkgs = []
+    for line in DARWIN_CORE_MANIFEST.read_text(encoding="utf-8").splitlines():
+        s = line.strip()
+        if s and not s.startswith("#"):
+            pkgs.append(s)
+    return pkgs
+
+
+def cmd_core_status(args):
+    """Audit darwin_core_packages.txt against built packages and upstream Git stable tags."""
+    manifest = load_darwin_core_manifest()
+    if not manifest:
+        print(f"{RED}Manifest not found: {DARWIN_CORE_MANIFEST}{RESET}")
+        sys.exit(1)
+
     local_pkgs = RepoCatalog.get_local_packages()
-    results = GitTagScanner.scan_all(local_pkgs)
+    synthetic_lookup = {}
+    for name in manifest:
+        if name in local_pkgs:
+            synthetic_lookup[name] = local_pkgs[name]
+        else:
+            synthetic_lookup[name] = {
+                "name": name,
+                "version": "-",
+                "clean_version": "0",
+                "repo": "missing",
+                "file": None,
+            }
+
+    results = GitTagScanner.scan_all(synthetic_lookup, refresh=args.refresh)
+    by_name = {r["pkgname"]: r for r in results}
+
+    print(f"\n{BOLD}{CYAN}=== Darwin [core] Manifest Audit ({len(manifest)} FOSS Packages) ==={RESET}")
+    print("=" * 105)
+    print(f"{'Package':<20} {'Current Repo':<14} {'Local Version':<16} {'Latest Stable':<16} {'State':<20} {'Upstream Git'}")
+    print("=" * 105)
+
+    in_core = 0
+    in_extra = 0
+    to_build = 0
+    updates = 0
+
+    for name in manifest:
+        r = by_name[name]
+        repo = r["local_repo"]
+        up = r["upstream_tag"]
+        if repo == "core":
+            in_core += 1
+        elif repo == "extra":
+            in_extra += 1
+        else:
+            to_build += 1
+
+        if repo == "missing":
+            state = f"{YELLOW}MISSING_BUILD{RESET}"
+        elif repo == "extra":
+            state = f"{CYAN}MOVE_TO_CORE{RESET}"
+            if r["status"] == "UPDATE_AVAILABLE":
+                updates += 1
+        elif r["status"] == "UPDATE_AVAILABLE":
+            state = f"{YELLOW}UPDATE_AVAIL{RESET}"
+            updates += 1
+        else:
+            state = f"{GREEN}READY_IN_CORE{RESET}"
+
+        if args.missing_only and repo == "core":
+            continue
+
+        print(
+            f"{name:<20} {repo:<14} {r['local_version']:<16} {up:<16} {state:<29} {r['git_url']}"
+        )
+
+    print("=" * 105)
+    print(
+        f"Total Target [core]: {BOLD}{len(manifest)}{RESET} | "
+        f"In [core]: {GREEN}{in_core}{RESET} | "
+        f"In [extra] (relocate to core): {CYAN}{in_extra}{RESET} | "
+        f"Missing (to build from source): {YELLOW}{to_build}{RESET} | "
+        f"Updates Available: {YELLOW}{updates}{RESET}\n"
+    )
+
+
+def cmd_update_all(args):
+    """Scan and update all packages (or core-only) with new upstream stable git tags."""
+    print(f"{BOLD}{CYAN}Checking upstream Git stable tags for updates...{RESET}")
+    local_pkgs = RepoCatalog.get_local_packages()
+    if getattr(args, "core_only", False):
+        core_set = set(load_darwin_core_manifest())
+        local_pkgs = {k: v for k, v in local_pkgs.items() if k in core_set or v["repo"] == "core"}
+
+    results = GitTagScanner.scan_all(local_pkgs, refresh=getattr(args, "refresh", True))
     outdated = [r for r in results if r["status"] == "UPDATE_AVAILABLE"]
 
     if not outdated:
-        print(f"{BOLD}{GREEN}All packages are up to date with upstream git tags!{RESET}")
+        print(f"{BOLD}{GREEN}All scanned packages are up to date with upstream stable git tags!{RESET}")
         return
 
-    print(f"Found {len(outdated)} packages with newer upstream git tags:")
+    print(f"Found {len(outdated)} packages with newer upstream stable git tags:")
     for r in outdated:
-        print(f"  - {r['pkgname']}: {r['local_version']} -> {r['upstream_tag']}")
+        print(f"  - {r['pkgname']} [{r['local_repo']}]: {r['local_version']} -> {r['upstream_tag']}")
 
+    if getattr(args, "dry_run", False):
+        print(f"\n{YELLOW}Dry-run mode enabled: skipping rebuild and packaging.{RESET}")
+        return
+
+    built_any = False
+    core_manifest_set = set(load_darwin_core_manifest())
     for r in outdated:
         pkgname = r["pkgname"]
+        new_ver = r["upstream_tag"]
         pkgbuild = PackageBuilder.find_pkgbuild(pkgname)
-        if pkgbuild:
-            print(f"\n{BOLD}{CYAN}>>> Updating {pkgname} to {r['upstream_tag']}...{RESET}")
-            try:
-                pkg_file = PackageBuilder.build_from_pkgbuild(pkgbuild)
-                PackageBuilder.deploy_package(pkg_file, target_repo=r["local_repo"])
-            except Exception as e:
-                print(f"{RED}Failed to build {pkgname}: {e}{RESET}")
+        if not pkgbuild:
+            print(f"{YELLOW}Skipping {pkgname}: no PKGBUILD recipe found yet.{RESET}")
+            continue
+        if not PackageBuilder.is_source_pkgbuild(pkgbuild, pkgname):
+            print(f"{YELLOW}Skipping {pkgname}: PKGBUILD is a legacy stage stub (convert to source recipe first).{RESET}")
+            continue
 
-    update_repository_databases()
-    print(f"{BOLD}{GREEN}✓ All available updates processed.{RESET}")
+        print(f"\n{BOLD}{CYAN}>>> Auto-updating {pkgname}: {r['local_version']} -> {new_ver}...{RESET}")
+        try:
+            PackageBuilder.update_pkgbuild_version(pkgbuild, new_ver)
+            pkg_file = PackageBuilder.build_from_pkgbuild(pkgbuild)
+            target_repo = "core" if (pkgname in core_manifest_set or r["local_repo"] == "core") else "extra"
+            PackageBuilder.deploy_package(pkg_file, target_repo=target_repo)
+            deployed_pkg = (CORE_DIR if target_repo == "core" else EXTRA_DIR) / pkg_file.name
+            if not getattr(args, "no_install", False):
+                PackageBuilder.install_package(deployed_pkg)
+            built_any = True
+        except Exception as e:
+            print(f"{RED}Failed to build {pkgname}: {e}{RESET}")
+        finally:
+            PackageBuilder.cleanup_build_dir(pkgbuild.parent)
+
+    if built_any:
+        update_repository_databases()
+    print(f"{BOLD}{GREEN}✓ Automated update cycle finished.{RESET}")
+
+
+def cmd_daemon(args):
+    """Run continuous periodic update checks every N days (or via launchd/cron)."""
+    interval_sec = max(1, int(args.days * 86400))
+    print(
+        f"{BOLD}{CYAN}Starting Arch Darwin Auto-Updater Daemon "
+        f"(interval: every {args.days} day(s))...{RESET}"
+    )
+    while True:
+        print(f"\n[{time.strftime('%Y-%m-%d %H:%M:%S')}] Running scheduled upstream Git stable scan...")
+        cmd_update_all(args)
+        print(f"Sleeping for {args.days} day(s) ({interval_sec}s)...")
+        time.sleep(interval_sec)
 
 
 def main():
@@ -731,6 +1013,18 @@ def main():
         description="Unified Arch Linux Darwin Build & Packaging Pipeline"
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # core-status
+    p_core = subparsers.add_parser(
+        "core-status", help="Audit darwin_core_packages.txt (built vs missing vs updates)"
+    )
+    p_core.add_argument(
+        "--missing-only", action="store_true", help="Show only missing or misplaced core packages"
+    )
+    p_core.add_argument(
+        "--refresh", action="store_true", help="Bypass cache and re-query upstream git tags"
+    )
+    p_core.set_defaults(func=cmd_core_status)
 
     # scan
     p_scan = subparsers.add_parser("scan", help="Scan local packages against upstream Git tags")
@@ -752,9 +1046,36 @@ def main():
 
     # update-all
     p_update = subparsers.add_parser(
-        "update-all", help="Scan and rebuild all packages with upstream git tag updates"
+        "update-all", help="Scan, bump PKGBUILD, rebuild, sign, and index outdated packages"
+    )
+    p_update.add_argument(
+        "--core-only", action="store_true", help="Only check and rebuild darwin_core_packages.txt packages"
+    )
+    p_update.add_argument(
+        "--dry-run", action="store_true", help="Scan and report updates without building"
+    )
+    p_update.add_argument(
+        "--no-install", action="store_true", help="Build and package without installing locally"
+    )
+    p_update.add_argument(
+        "--refresh", action="store_true", default=True, help="Refresh upstream git tags"
     )
     p_update.set_defaults(func=cmd_update_all)
+
+    # daemon
+    p_daemon = subparsers.add_parser(
+        "daemon", help="Run periodic stable Git tag check and rebuild every N days"
+    )
+    p_daemon.add_argument(
+        "--days", type=float, default=2.0, help="Interval in days between update runs (default: 2)"
+    )
+    p_daemon.add_argument(
+        "--core-only", action="store_true", help="Only monitor and rebuild core manifest packages"
+    )
+    p_daemon.add_argument(
+        "--no-install", action="store_true", help="Skip local installation after packaging"
+    )
+    p_daemon.set_defaults(func=cmd_daemon, dry_run=False, refresh=True)
 
     # index
     p_index = subparsers.add_parser("index", help="Rebuild and sign repository databases")

@@ -1,5 +1,5 @@
 pkgname=utf8proc
-pkgver=2.11.3
+pkgver=2.9.0
 pkgrel=1
 pkgdesc="Clean C library for processing UTF-8 Unicode data"
 

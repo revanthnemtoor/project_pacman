@@ -1,0 +1,27 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=automake
+pkgver=1.20
+pkgrel=1
+pkgdesc="A GNU tool for automatically creating Makefiles"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.gnu.org/software/automake"
+license=('GPL-2.0-or-later')
+depends=('autoconf' 'perl')
+options=('!strip')
+source=("https://ftp.gnu.org/gnu/automake/automake-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/automake-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    ./configure --prefix=/opt/pacman --mandir=/opt/pacman/share/man --infodir=/opt/pacman/share/info
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/automake-${pkgver}"
+    make DESTDIR="$pkgdir" install
+    rm -f "$pkgdir/opt/pacman/share/info/dir"
+    install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

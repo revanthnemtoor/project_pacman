@@ -1,0 +1,38 @@
+pkgname=mpfr
+pkgver=4.2.1
+pkgrel=1
+pkgdesc="C library for multiple-precision floating-point computations"
+
+url="https://www.mpfr.org/"
+arch=(
+    'darwin_arm64'
+    'darwin_x86_64'
+)
+license=(
+    'LGPL-3.0-or-later'
+)
+depends=(
+    'gmp'
+)
+makedepends=(
+    'autoconf'
+    'automake'
+    'libtool'
+    'texinfo'
+)
+options=('!strip')
+source=()
+sha256sums=()
+
+package() {
+    local _stage="$startdir/stage"
+    local _dest="$pkgdir/opt/pacman"
+    mkdir -p "$_dest"
+
+    local _dirs=(bin sbin lib lib64 include share etc var libexec)
+    for _d in "${_dirs[@]}"; do
+        if [ -d "$_stage/$_d" ]; then
+            cp -a "$_stage/$_d" "$_dest/"
+        fi
+    done
+}

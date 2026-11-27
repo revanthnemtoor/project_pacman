@@ -1,0 +1,46 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=coreutils
+pkgver=9.6
+pkgrel=1
+pkgdesc="The basic file, shell and text manipulation utilities of the GNU operating system"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.gnu.org/software/coreutils/"
+license=('GPL-3.0-or-later')
+depends=('gmp' 'gettext' 'openssl')
+options=('!strip')
+source=("https://ftpmirror.gnu.org/gnu/coreutils/coreutils-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/coreutils-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/usr/bin:/bin:/opt/pacman/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    ./configure \
+        --prefix=/opt/pacman \
+        --libexecdir=/opt/pacman/lib \
+        --enable-no-install-program=kill,uptime \
+        --with-openssl=yes
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/coreutils-${pkgver}"
+    export PATH="/usr/bin:/bin:/opt/pacman/bin:/usr/sbin:/sbin"
+    make DESTDIR="$pkgdir" install
+    rm -f "$pkgdir/opt/pacman/share/info/dir"
+    mkdir -p "$pkgdir/opt/pacman/share/licenses/$pkgname"
+    cp -f COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

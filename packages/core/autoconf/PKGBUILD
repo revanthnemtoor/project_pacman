@@ -1,0 +1,29 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=autoconf
+pkgver=2.73
+pkgrel=1
+pkgdesc="A GNU tool for automatically configuring source code"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.gnu.org/software/autoconf"
+license=('GPL-3.0-or-later WITH Autoconf-exception-3.0')
+depends=('gawk' 'm4' 'perl')
+options=('!strip')
+source=("https://ftp.gnu.org/gnu/autoconf/autoconf-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/autoconf-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    ./configure --prefix=/opt/pacman --mandir=/opt/pacman/share/man --infodir=/opt/pacman/share/info
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/autoconf-${pkgver}"
+    make DESTDIR="$pkgdir" install
+    rm -f "$pkgdir/opt/pacman/share/info/dir"
+    rm -f "$pkgdir/opt/pacman/share/info/standards.info"* 2>/dev/null || true
+    install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/COPYING"
+    install -Dm644 COPYING.EXCEPTION "$pkgdir/opt/pacman/share/licenses/$pkgname/COPYING.EXCEPTION"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

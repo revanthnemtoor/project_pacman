@@ -1,5 +1,5 @@
 pkgname=fd
-pkgver=10.4.2
+pkgver=10.5.0
 pkgrel=1
 pkgdesc="Simple, fast and user-friendly alternative to find"
 

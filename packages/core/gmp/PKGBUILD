@@ -1,0 +1,89 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=gmp
+pkgver=6.3.0
+pkgrel=3
+pkgdesc="GNU multiple precision arithmetic library"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://gmplib.org/"
+license=('LGPL-3.0-or-later OR GPL-2.0-or-later')
+options=('!strip')
+source=("https://ftpmirror.gnu.org/gnu/gmp/gmp-${pkgver}.tar.xz")
+sha256sums=('a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898')
+
+build() {
+    cd "$srcdir/gmp-${pkgver}"
+    local _arch="x86_64"
+    local _ldflag="-Wl,-ld_classic"
+    local _host="x86_64-apple-darwin"
+    if [[ "$CARCH" == "darwin_arm64" ]]; then
+        _arch="arm64"
+        _ldflag=""
+        _host="aarch64-apple-darwin"
+    fi
+    local _sdk="$(xcrun --show-sdk-path)"
+    # Put /usr/bin:/bin first while building gmp itself so bootstrap tools (like /bin/expr)
+    # never depend on an older/broken libgmp.10.dylib in /opt/pacman/lib.
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CONFIG_SHELL="/opt/pacman/bin/bash"
+    export CC="/usr/bin/clang ${_ldflag}"
+    export CXX="/usr/bin/clang++ ${_ldflag}"
+    export ABI=64
+    export CPPFLAGS="-isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -isysroot ${_sdk}"
+    export CXXFLAGS="-O2 -arch ${_arch} -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} ${_ldflag} -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    if [ ! -f Makefile ]; then
+        PATH="/usr/bin:/bin:/opt/pacman/bin:/usr/sbin:/sbin" /opt/pacman/bin/bash ./configure \
+            --prefix=/opt/pacman \
+            --infodir=/opt/pacman/share/info \
+            --build="${_host}" \
+            --host="${_host}" \
+            --enable-cxx \
+            --enable-shared \
+            --disable-static
+    fi
+
+    make -j"$(sysctl -n hw.ncpu)"
+
+    # Smoke-test newly built .libs/libgmp.10.dylib across 1-limb, 2-limb, and 800-limb integers
+    /usr/bin/clang -I. -x c - -L.libs -lgmp -o gmp_smoke_test <<'EOF'
+#include <stdio.h>
+#include <string.h>
+#include <gmp.h>
+int main(void) {
+    mpz_t a, b, g;
+    mpz_inits(a, b, g, NULL);
+    mpz_set_ui(a, 512UL);
+    char *s0 = mpz_get_str(NULL, 10, a);
+    if (strcmp(s0, "512") != 0) return 10;
+    mpz_ui_pow_ui(a, 2UL, 100UL);
+    char *s1 = mpz_get_str(NULL, 10, a);
+    if (strcmp(s1, "1267650600228229401496703205376") != 0) return 1;
+    mpz_ui_pow_ui(a, 10UL, 20000UL);
+    mpz_add_ui(b, a, 123456UL);
+    mpz_gcd(g, a, b);
+    char *s2 = mpz_get_str(NULL, 10, a);
+    if (strlen(s2) != 20001) return 2;
+    printf("GMP smoke test PASSED: 512=%s, 2^100=%s, len(10^20000)=%zu\n", s0, s1, strlen(s2));
+    return 0;
+}
+EOF
+    DYLD_LIBRARY_PATH="$PWD/.libs" ./gmp_smoke_test
+    rm -f gmp_smoke_test
+}
+
+package() {
+    cd "$srcdir/gmp-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    make DESTDIR="$pkgdir" install
+    rm -f "$pkgdir/opt/pacman/share/info/dir"
+    find "$pkgdir/opt/pacman/lib" -name '*.la' -delete 2>/dev/null || true
+    /opt/pacman/bin/install -Dm644 COPYING.LESSERv3 "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

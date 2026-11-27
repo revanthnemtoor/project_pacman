@@ -1,5 +1,5 @@
 pkgname=tmux
-pkgver=3.7b
+pkgver=3.8
 pkgrel=1
 pkgdesc="Terminal multiplexer"
 

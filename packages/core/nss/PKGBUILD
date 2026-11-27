@@ -1,0 +1,95 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=nss
+pkgver=3.109
+pkgrel=1
+pkgdesc="Network Security Services cryptographic library and tools"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS"
+license=('MPL-2.0')
+depends=('nspr' 'sqlite' 'zlib')
+provides=('libnss3.dylib' 'libsmime3.dylib' 'libssl3.dylib' 'libnssutil3.dylib')
+options=('!strip' '!libtool')
+source=("https://archive.mozilla.org/pub/security/nss/releases/NSS_3_109_RTM/src/nss-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/nss-${pkgver}/nss"
+    local _arch="x86_64"
+    local _cpu="i386"
+    if [[ "$CARCH" == "darwin_arm64" ]]; then
+        _arch="arm64"
+        _cpu="arm"
+    fi
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CXX="/usr/bin/clang++"
+    export CCC="$CXX"
+
+    make -j1 \
+        BUILD_OPT=1 \
+        USE_64=1 \
+        CPU_ARCH="${_cpu}" \
+        MACOS_SDK_DIR="${_sdk}" \
+        NSS_USE_SYSTEM_SQLITE=1 \
+        USE_SYSTEM_ZLIB=1 \
+        ZLIB_LIBS="-L/opt/pacman/lib -lz" \
+        SQLITE_INCLUDE_DIR="/opt/pacman/include" \
+        SQLITE_LIB_DIR="/opt/pacman/lib" \
+        NSPR_INCLUDE_DIR="/opt/pacman/include/nspr" \
+        NSPR_LIB_DIR="/opt/pacman/lib" \
+        NSS_DISABLE_GTESTS=1 \
+        NSS_ENABLE_WERROR=0 \
+        all
+}
+
+package() {
+    cd "$srcdir/nss-${pkgver}"
+    local _dist
+    _dist="$(ls -d dist/Darwin*OPT.OBJ | head -n1)"
+
+    install -dm755 "$pkgdir/opt/pacman/"{bin,lib,lib/pkgconfig,include/nss}
+    cp -L "${_dist}/lib/"*.dylib "$pkgdir/opt/pacman/lib/"
+    for b in certutil cmsutil crlutil modutil pk12util signtool signver ssltap; do
+        if [[ -x "${_dist}/bin/${b}" ]]; then
+            install -Dm755 "${_dist}/bin/${b}" "$pkgdir/opt/pacman/bin/${b}"
+        fi
+    done
+    cp -L dist/public/nss/*.h "$pkgdir/opt/pacman/include/nss/"
+
+    # Rewrite @executable_path references to /opt/pacman/lib
+    for f in "$pkgdir/opt/pacman/lib/"*.dylib "$pkgdir/opt/pacman/bin/"*; do
+        [[ -f "$f" && ! -L "$f" ]] || continue
+        if [[ "$f" == *.dylib ]]; then
+            install_name_tool -id "/opt/pacman/lib/$(basename "$f")" "$f" 2>/dev/null || true
+        else
+            install_name_tool -add_rpath "/opt/pacman/lib" "$f" 2>/dev/null || true
+        fi
+        otool -L "$f" | awk '/@executable_path\// {print $1}' | while read -r dep; do
+            dep_base="$(basename "$dep")"
+            install_name_tool -change "$dep" "/opt/pacman/lib/${dep_base}" "$f" 2>/dev/null || true
+        done
+    done
+
+    cat << EOF > "$pkgdir/opt/pacman/lib/pkgconfig/nss.pc"
+prefix=/opt/pacman
+exec_prefix=\${prefix}
+libdir=\${prefix}/lib
+includedir=\${prefix}/include/nss
+
+Name: NSS
+Description: Network Security Services
+Version: ${pkgver}
+Requires: nspr >= 4.36
+Libs: -L\${libdir} -lnss3 -lnssutil3 -lsmime3 -lssl3
+Cflags: -I\${includedir}
+EOF
+
+    install -Dm644 nss/COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

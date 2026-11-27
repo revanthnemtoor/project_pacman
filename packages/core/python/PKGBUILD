@@ -1,0 +1,56 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=python
+pkgver=3.13.2
+pkgrel=1
+pkgdesc="The Python programming language"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.python.org/"
+license=('PSF-2.0')
+depends=('bzip2' 'expat' 'gdbm' 'libffi' 'mpdecimal' 'ncurses' 'openssl' 'readline' 'sqlite' 'xz' 'zlib')
+provides=('python3')
+options=('!strip' '!libtool')
+source=("https://www.python.org/ftp/python/${pkgver}/Python-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/Python-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CXX="/usr/bin/clang++"
+    export PKG_CONFIG="/opt/pacman/bin/pkg-config"
+    export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export PKG_CONFIG_LIBDIR="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export CPPFLAGS="-I/opt/pacman/include -I/opt/pacman/include/ncursesw -isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -I/opt/pacman/include/ncursesw -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    ./configure \
+        --prefix=/opt/pacman \
+        --mandir=/opt/pacman/share/man \
+        --enable-shared \
+        --with-openssl=/opt/pacman \
+        --with-system-expat \
+        --with-system-libmpdec \
+        --with-readline=readline \
+        --without-ensurepip
+
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/Python-${pkgver}"
+    make DESTDIR="$pkgdir" install
+    ln -sf python3 "$pkgdir/opt/pacman/bin/python"
+    ln -sf python3-config "$pkgdir/opt/pacman/bin/python-config"
+    ln -sf pydoc3 "$pkgdir/opt/pacman/bin/pydoc"
+    install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

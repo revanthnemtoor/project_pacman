@@ -1,0 +1,58 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=glib2
+pkgver=2.84.0
+pkgrel=1
+pkgdesc="Low level core library for C data structures, portability wrappers, and event loop"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://wiki.gnome.org/Projects/GLib"
+license=('LGPL-2.1-or-later')
+depends=('gettext' 'libffi' 'pcre2' 'zlib')
+provides=('libglib-2.0.dylib=0' 'libgio-2.0.dylib=0' 'libgobject-2.0.dylib=0' 'libgmodule-2.0.dylib=0')
+options=('!strip' '!libtool')
+source=("https://download.gnome.org/sources/glib/2.84/glib-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/glib-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CXX="/usr/bin/clang++"
+    export OBJC="/usr/bin/clang"
+    export PKG_CONFIG="/opt/pacman/bin/pkg-config"
+    export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export PKG_CONFIG_LIBDIR="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export OBJCFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    /usr/local/bin/meson setup build \
+        --prefix=/opt/pacman \
+        --libdir=lib \
+        --buildtype=release \
+        --default-library=shared \
+        -Dselinux=disabled \
+        -Dxattr=true \
+        -Dlibmount=disabled \
+        -Dtests=false \
+        -Dglib_debug=disabled \
+        -Dintrospection=disabled \
+        -Ddocumentation=false \
+        -Dman-pages=disabled
+
+    /usr/local/bin/ninja -C build
+}
+
+package() {
+    cd "$srcdir/glib-${pkgver}"
+    DESTDIR="$pkgdir" /usr/local/bin/ninja -C build install
+    install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}
