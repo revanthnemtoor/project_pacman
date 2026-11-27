@@ -1,0 +1,35 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=pigz
+pkgver=2.8
+pkgrel=1
+pkgdesc="Parallel implementation of the gzip file compressor"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://zlib.net/pigz/"
+license=('Zlib')
+depends=('zlib')
+options=('!strip')
+source=("https://github.com/madler/pigz/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/pigz-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    make CC="/usr/bin/clang" \
+        CFLAGS="-O3 -Wall -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}" \
+        LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}" \
+        -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/pigz-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    /opt/pacman/bin/install -Dm755 pigz "$pkgdir/opt/pacman/bin/pigz"
+    ln -sf pigz "$pkgdir/opt/pacman/bin/unpigz"
+    /opt/pacman/bin/install -Dm644 pigz.1 "$pkgdir/opt/pacman/share/man/man1/pigz.1"
+    ln -sf pigz.1 "$pkgdir/opt/pacman/share/man/man1/unpigz.1"
+    /usr/bin/codesign --force --sign - "$pkgdir/opt/pacman/bin/pigz"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

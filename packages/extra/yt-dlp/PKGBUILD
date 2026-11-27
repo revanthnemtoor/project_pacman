@@ -1,0 +1,40 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=yt-dlp
+pkgver=2026.11.23
+pkgrel=1
+pkgdesc="A youtube-dl fork with additional features and fixes"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/yt-dlp/yt-dlp"
+license=('Unlicense')
+depends=('python')
+optdepends=('ffmpeg: for video post-processing')
+options=('!strip')
+source=("https://github.com/yt-dlp/yt-dlp/releases/download/${pkgver}/yt-dlp.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+    cd "$srcdir/yt-dlp"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    local _pyver="$(/opt/pacman/bin/python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+    local _sitedir="$pkgdir/opt/pacman/lib/python${_pyver}/site-packages"
+    mkdir -p "$_sitedir" "$pkgdir/opt/pacman/bin"
+
+    cp -R yt_dlp "$_sitedir/"
+    /opt/pacman/bin/python3 -m compileall -q "$_sitedir/yt_dlp"
+
+    cat > "$pkgdir/opt/pacman/bin/yt-dlp" <<'EOF'
+#!/opt/pacman/bin/python3
+import sys
+import yt_dlp
+if __name__ == '__main__':
+    sys.exit(yt_dlp.main())
+EOF
+    chmod 755 "$pkgdir/opt/pacman/bin/yt-dlp"
+
+    [ -f yt-dlp.1 ] && /opt/pacman/bin/install -Dm644 yt-dlp.1 "$pkgdir/opt/pacman/share/man/man1/yt-dlp.1" || true
+    [ -f completions/bash/yt-dlp ] && /opt/pacman/bin/install -Dm644 completions/bash/yt-dlp "$pkgdir/opt/pacman/share/bash-completion/completions/yt-dlp" || true
+    [ -f completions/zsh/_yt-dlp ] && /opt/pacman/bin/install -Dm644 completions/zsh/_yt-dlp "$pkgdir/opt/pacman/share/zsh/site-functions/_yt-dlp" || true
+    [ -f completions/fish/yt-dlp.fish ] && /opt/pacman/bin/install -Dm644 completions/fish/yt-dlp.fish "$pkgdir/opt/pacman/share/fish/vendor_completions.d/yt-dlp.fish" || true
+    [ -f LICENSE ] && /opt/pacman/bin/install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE" || true
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

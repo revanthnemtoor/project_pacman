@@ -184,8 +184,11 @@ project_pacman/
 * **Compression, Databases & Core Libraries**: `zlib`, `bzip2`, `lz4`, `lzo`, `xz`, `zstd`, `brotli`, `libarchive`, `sqlite`, `gdbm`, `unixodbc`, `icu`, `glib2`, `libsecret`, `libxml2`, `expat`, `jansson`, `json-c`, `gmp`, `mpfr`, `libmpc`, `libisl`, `mpdecimal`, `gc`, `libffi`, `ncurses`, `pcre2`, `popt`, `libpipeline`, `libinih`, `libevent`, `libverto`, `libunistring`, `libtasn1`, `libusb`, `libxcrypt`
 
 ### Extended Utilities, Codecs & GUI (`[extra]`)
-* **CLI & Productivity Tools**: `fzf`, `yazi`, `gh`, `git`, `fastfetch`, `fd`, `fish`, `jq`, `yq`, `ripgrep`, `rsync`, `tmux`, `tree`, `vim`, `wget`, `xxhash`
-* **Image & Media Codecs**: `imagemagick` (full `rw+` codec stack), `libheif`, `aom`, `dav1d`, `libde265`, `kvazaar`, `libwebp`, `openjpeg2`, `libraw`, `libjpeg-turbo`, `libpng`, `libtiff`, `freetype2`, `lcms2`, `exiv2`
+* **Build Systems & Compilers**: `cmake`, `ninja`, `meson`, `ccache`, `extra-cmake-modules`
+* **Editors, Shells & Multiplexers**: `neovim`, `vim`, `fish`, `tmux`, `yazi`, `tig`
+* **Modern CLI Power Tools**: `bat`, `eza`, `fzf`, `ripgrep`, `fd`, `zoxide`, `starship`, `git-delta`, `hyperfine`, `just`, `procs`, `dust`, `sd`, `tealdeer`, `tokei`, `bottom`, `htop`, `entr`, `fastfetch`, `tree`, `jq`, `yq`, `7zip`, `pigz`, `xxhash`
+* **Networking & Downloaders**: `gh`, `git`, `xh`, `aria2`, `wget`, `rsync`, `mtr`, `tcpdump`, `yt-dlp`
+* **Image, PDF & Media Codecs**: `imagemagick` (full `rw+` codec stack), `qpdf`, `chafa`, `libheif`, `aom`, `dav1d`, `libde265`, `kvazaar`, `libwebp`, `openjpeg2`, `libraw`, `libjpeg-turbo`, `libpng`, `libtiff`, `freetype2`, `lcms2`, `exiv2`
 * **Qt 6 Framework**: 16 native modules (`qt6-base`, `qt6-declarative`, `qt6-svg`, `qt6-tools`, `qt6-multimedia`, etc.)
 * **KDE Frameworks 6**: 34 native frameworks (`karchive`, `kcoreaddons`, `kconfig`, `kio`, `kxmlgui`, `solid`, `sonnet`, `breeze-icons`, etc.)
 * **Applications**: Gwenview image viewer (`gwenview 26.08.2`)

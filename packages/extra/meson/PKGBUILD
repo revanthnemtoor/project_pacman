@@ -1,0 +1,36 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=meson
+pkgver=1.12.1
+pkgrel=1
+pkgdesc="High productivity build system"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://mesonbuild.com/"
+license=('Apache-2.0')
+depends=('python' 'ninja')
+options=('!strip')
+source=("https://github.com/mesonbuild/meson/releases/download/${pkgver}/meson-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+    cd "$srcdir/meson-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    local _pyver="$(/opt/pacman/bin/python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+    local _sitedir="$pkgdir/opt/pacman/lib/python${_pyver}/site-packages"
+    mkdir -p "$_sitedir" "$pkgdir/opt/pacman/bin" "$pkgdir/opt/pacman/share/man/man1"
+
+    cp -R mesonbuild "$_sitedir/"
+    /opt/pacman/bin/python3 -m compileall -q "$_sitedir/mesonbuild"
+
+    cat > "$pkgdir/opt/pacman/bin/meson" <<'EOF'
+#!/opt/pacman/bin/python3
+import sys
+from mesonbuild.mesonmain import main
+if __name__ == '__main__':
+    sys.exit(main())
+EOF
+    chmod 755 "$pkgdir/opt/pacman/bin/meson"
+
+    /opt/pacman/bin/install -Dm644 man/meson.1 "$pkgdir/opt/pacman/share/man/man1/meson.1"
+    /opt/pacman/bin/install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

@@ -1,0 +1,39 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=xh
+pkgver=0.26.3
+pkgrel=1
+pkgdesc="Friendly and fast tool for sending HTTP requests"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/ducaale/xh"
+license=('MIT')
+options=('!strip')
+source=("https://github.com/ducaale/xh/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/xh-${pkgver}"
+    local _sdk="$(xcrun --show-sdk-path)"
+    local _cargo="/opt/pacman/bin/cargo"
+    [[ ! -x "$_cargo" ]] && _cargo="/opt/local/bin/cargo"
+    export PATH="/opt/pacman/bin:/opt/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export PKG_CONFIG="/opt/pacman/bin/pkg-config"
+    export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export PKG_CONFIG_LIBDIR="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export CC="/usr/bin/clang"
+    export SDKROOT="${_sdk}"
+    export RUSTFLAGS="-C link-arg=-Wl,-rpath,/opt/pacman/lib -C link-arg=-L/opt/pacman/lib"
+
+    "$_cargo" build --release --locked
+}
+
+package() {
+    cd "$srcdir/xh-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    /opt/pacman/bin/install -Dm755 target/release/xh "$pkgdir/opt/pacman/bin/xh"
+    ln -sf xh "$pkgdir/opt/pacman/bin/xhs"
+    /usr/bin/strip -x "$pkgdir/opt/pacman/bin/xh" 2>/dev/null || true
+    /usr/bin/codesign --force --sign - "$pkgdir/opt/pacman/bin/xh"
+    [ -f doc/xh.1 ] && /opt/pacman/bin/install -Dm644 doc/xh.1 "$pkgdir/opt/pacman/share/man/man1/xh.1" || true
+    /opt/pacman/bin/install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

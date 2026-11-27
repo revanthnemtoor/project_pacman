@@ -1,0 +1,35 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=tokei
+pkgver=15.0.0
+pkgrel=1
+pkgdesc="A blazingly fast code statistics (CLOC) tool"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/XAMPPRocky/tokei"
+license=('MIT OR Apache-2.0')
+options=('!strip')
+source=("https://github.com/XAMPPRocky/tokei/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/tokei-${pkgver}"
+    local _sdk="$(xcrun --show-sdk-path)"
+    local _cargo="/opt/pacman/bin/cargo"
+    [[ ! -x "$_cargo" ]] && _cargo="/opt/local/bin/cargo"
+    export PATH="/opt/pacman/bin:/opt/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export SDKROOT="${_sdk}"
+    export RUSTFLAGS="-C link-arg=-Wl,-rpath,/opt/pacman/lib -C link-arg=-L/opt/pacman/lib"
+
+    "$_cargo" build --release --locked
+}
+
+package() {
+    cd "$srcdir/tokei-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    /opt/pacman/bin/install -Dm755 target/release/tokei "$pkgdir/opt/pacman/bin/tokei"
+    /usr/bin/strip -x "$pkgdir/opt/pacman/bin/tokei" 2>/dev/null || true
+    /usr/bin/codesign --force --sign - "$pkgdir/opt/pacman/bin/tokei"
+    [ -f LICENCE-MIT ] && /opt/pacman/bin/install -Dm644 LICENCE-MIT "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE" || true
+    [ -f LICENSE-MIT ] && /opt/pacman/bin/install -Dm644 LICENSE-MIT "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE" || true
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

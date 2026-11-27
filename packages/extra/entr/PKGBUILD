@@ -1,0 +1,33 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=entr
+pkgver=5.9
+pkgrel=1
+pkgdesc="Run arbitrary commands when files change"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://eradman.com/entrproject/"
+license=('ISC')
+options=('!strip')
+source=("https://github.com/eradman/entr/archive/refs/tags/${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/entr-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CFLAGS="-O2 -arch ${_arch} -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -isysroot ${_sdk}"
+    ./configure
+    make PREFIX=/opt/pacman -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/entr-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    make PREFIX=/opt/pacman DESTDIR="$pkgdir" install
+    /opt/pacman/bin/install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    /usr/bin/codesign --force --sign - "$pkgdir/opt/pacman/bin/entr"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

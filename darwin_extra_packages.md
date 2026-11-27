@@ -13,15 +13,16 @@ This document curates the most popular **100% open-source** packages from Arch L
 
 | Package | Category | Description |
 | :--- | :--- | :--- |
-| `git`, `gh` | Git & VCS | Distributed version control and official GitHub CLI |
-| `fzf`, `ripgrep`, `fd`, `tree` | Search & Navigation | Fuzzy finder, fast regex search (`rg`), fast `find`, directory tree |
-| `yazi` | File Manager | Blazing-fast terminal file manager written in Rust |
-| `fish`, `tmux` | Shell & Multiplexer | Friendly interactive shell and terminal multiplexer |
-| `vim` | Editor | Vi Improved text editor |
-| `jq`, `yq`, `yyjson` | JSON / YAML | Command-line JSON, YAML, XML, and TOML processors |
-| `wget`, `rsync` | Networking & Sync | Network downloader and incremental file transfer utility |
-| `fastfetch` | System Info | Fast neofetch-style macOS/Darwin system information tool |
-| `imagemagick`, `libheif`, `aom`, `dav1d`, `libwebp`, `libraw`, `openjpeg2` | Media & Codecs | Full source-built image processing and AVIF/HEIC/WebP/RAW/JP2 codecs |
+| `cmake`, `ninja`, `meson`, `ccache` | Build Systems | Self-hosted C/C++/Python build generators and compiler cache |
+| `git`, `gh`, `tig` | Git & VCS | Distributed version control, official GitHub CLI, and ncurses Git TUI |
+| `neovim`, `vim` | Editors | Neovim (`nvim`) and Vi Improved text editors |
+| `bat`, `eza`, `fzf`, `ripgrep`, `fd`, `zoxide`, `starship`, `git-delta` | Modern CLI | Syntax-highlighted `cat`, modern `ls`, fuzzy finder, `rg`, `fd`, smart `cd`, prompt, and diff pager |
+| `hyperfine`, `just`, `procs`, `dust`, `sd`, `tealdeer`, `tokei`, `entr`, `tree` | Productivity | Benchmarking, command runner, modern `ps`/`du`/`sed`, `tldr`, CLOC counter, and file watcher |
+| `htop`, `bottom`, `fastfetch` | System Monitors | Interactive process/system monitors (`htop`, `btm`) and Darwin hardware info |
+| `yazi`, `fish`, `tmux` | Shell & TUI | Rust terminal file manager, friendly shell, and terminal multiplexer |
+| `jq`, `yq`, `yyjson`, `7zip`, `pigz`, `xxhash` | Data & Archives | JSON/YAML processors, official `7zz`, parallel `pigz`, and fast hashing |
+| `xh`, `aria2`, `wget`, `rsync`, `mtr`, `tcpdump`, `yt-dlp` | Network & Media DL | Friendly HTTP client, multi-source downloader, traceroute/ping, packet capture, and video downloader |
+| `imagemagick`, `qpdf`, `chafa`, `libheif`, `aom`, `dav1d`, `libwebp`, `libraw`, `openjpeg2` | Media, PDF & Codecs | Full source-built image/PDF/terminal-graphics stack and AVIF/HEIC/WebP/RAW/JP2 codecs |
 | `qt6-*` (15 modules), `kf6` (34 frameworks), `gwenview` | Desktop / GUI | Native macOS Cocoa Qt 6 + KDE Frameworks 6 + Gwenview image viewer |
 
 ---

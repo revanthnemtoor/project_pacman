@@ -1,0 +1,73 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=cmake
+pkgver=4.5.1
+pkgrel=1
+pkgdesc="A cross-platform open-source make system"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.cmake.org/"
+license=('BSD-3-Clause')
+depends=('curl' 'expat' 'libarchive' 'libnghttp2' 'ncurses' 'openssl' 'zlib' 'zstd' 'bzip2' 'xz')
+options=('!strip')
+source=("https://github.com/Kitware/CMake/releases/download/v${pkgver}/cmake-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    local _cmake="/opt/pacman/bin/cmake"
+    [[ ! -x "$_cmake" ]] && _cmake="/opt/local/bin/cmake"
+    [[ ! -x "$_cmake" ]] && _cmake="/usr/local/bin/cmake"
+
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export PKG_CONFIG="/opt/pacman/bin/pkg-config"
+    export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export PKG_CONFIG_LIBDIR="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+
+    "$_cmake" -B build -S "cmake-${pkgver}" -G Ninja \
+        -DCMAKE_MAKE_PROGRAM=/opt/pacman/bin/ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/opt/pacman \
+        -DCMAKE_INSTALL_RPATH=/opt/pacman/lib \
+        -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
+        -DCMAKE_OSX_ARCHITECTURES="${_arch}" \
+        -DCMAKE_OSX_SYSROOT="${_sdk}" \
+        -DCMAKE_PREFIX_PATH=/opt/pacman \
+        -DCMAKE_SYSTEM_PREFIX_PATH="/opt/pacman;${_sdk}/usr" \
+        -DCMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH=OFF \
+        -DCMAKE_C_COMPILER=/usr/bin/clang \
+        -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
+        -DCMAKE_USE_SYSTEM_CURL=ON \
+        -DCMAKE_USE_SYSTEM_EXPAT=ON \
+        -DCMAKE_USE_SYSTEM_ZLIB=ON \
+        -DCMAKE_USE_SYSTEM_BZIP2=ON \
+        -DCMAKE_USE_SYSTEM_LIBLZMA=ON \
+        -DCMAKE_USE_SYSTEM_ZSTD=ON \
+        -DCMAKE_USE_SYSTEM_LIBARCHIVE=ON \
+        -DCMAKE_USE_SYSTEM_NGHTTP2=ON \
+        -DBUILD_QtDialog=OFF \
+        -DBUILD_CursesDialog=ON \
+        -DBUILD_TESTING=OFF
+
+    "$_cmake" --build build -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    local _cmake="/opt/pacman/bin/cmake"
+    [[ ! -x "$_cmake" ]] && _cmake="/opt/local/bin/cmake"
+    [[ ! -x "$_cmake" ]] && _cmake="/usr/local/bin/cmake"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    DESTDIR="$pkgdir" "$_cmake" --install build
+    # Strip debug symbols from large CMake executables to keep package compact (< 25MB)
+    for b in cmake ctest cpack ccmake; do
+        [ -f "$pkgdir/opt/pacman/bin/$b" ] && /usr/bin/strip -x "$pkgdir/opt/pacman/bin/$b" 2>/dev/null || true
+    done
+    /opt/pacman/bin/install -Dm644 "$srcdir/cmake-${pkgver}/LICENSE.rst" \
+        "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

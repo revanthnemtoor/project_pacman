@@ -1,0 +1,40 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=tcpdump
+pkgver=4.99.7
+pkgrel=1
+pkgdesc="Powerful command-line packet analyzer"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.tcpdump.org/"
+license=('BSD-3-Clause')
+depends=('libpcap' 'openssl')
+options=('!strip')
+source=("https://www.tcpdump.org/release/tcpdump-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/tcpdump-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export PKG_CONFIG="/opt/pacman/bin/pkg-config"
+    export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export PKG_CONFIG_LIBDIR="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export CC="/usr/bin/clang"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+
+    ./configure --prefix=/opt/pacman --sbindir=/opt/pacman/bin --with-crypto=/opt/pacman
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/tcpdump-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    make DESTDIR="$pkgdir" install
+    rm -f "$pkgdir/opt/pacman/bin/tcpdump.${pkgver}"
+    /opt/pacman/bin/install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    /usr/bin/codesign --force --sign - "$pkgdir/opt/pacman/bin/tcpdump"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

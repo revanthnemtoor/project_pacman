@@ -1,0 +1,54 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=aria2
+pkgver=1.37.0
+pkgrel=1
+pkgdesc="Download utility that supports HTTP(S), FTP, SFTP, BitTorrent, and Metalink"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://aria2.github.io/"
+license=('GPL-2.0-or-later')
+depends=('ca-certificates' 'libssh2' 'libxml2' 'openssl' 'sqlite' 'zlib')
+options=('!strip')
+source=("https://github.com/aria2/aria2/releases/download/release-${pkgver}/aria2-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/aria2-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export PKG_CONFIG="/opt/pacman/bin/pkg-config"
+    export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export PKG_CONFIG_LIBDIR="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export CC="/usr/bin/clang"
+    export CXX="/usr/bin/clang++"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export CXXFLAGS="-O2 -std=c++14 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -framework Security -framework CoreFoundation -isysroot ${_sdk}"
+
+    ./configure \
+        --prefix=/opt/pacman \
+        --with-ca-bundle=/opt/pacman/etc/ssl/cert.pem \
+        --without-appletls \
+        --without-gnutls \
+        --with-openssl \
+        --with-libxml2 \
+        --without-expat \
+        --with-sqlite3 \
+        --with-libssh2 \
+        --with-libz \
+        --without-libcares \
+        --disable-nls
+    make -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/aria2-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    make DESTDIR="$pkgdir" install
+    /usr/bin/strip -x "$pkgdir/opt/pacman/bin/aria2c" 2>/dev/null || true
+    /usr/bin/codesign --force --sign - "$pkgdir/opt/pacman/bin/aria2c"
+    /opt/pacman/bin/install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

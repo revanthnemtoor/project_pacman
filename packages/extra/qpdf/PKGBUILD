@@ -1,0 +1,56 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=qpdf
+pkgver=12.4.2
+pkgrel=1
+pkgdesc="QPDF: A Content-Preserving PDF Transformation System"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/qpdf/qpdf"
+license=('Apache-2.0')
+depends=('libjpeg-turbo' 'openssl' 'zlib')
+options=('!strip')
+source=("https://github.com/qpdf/qpdf/releases/download/v${pkgver}/qpdf-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export PKG_CONFIG="/opt/pacman/bin/pkg-config"
+    export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export PKG_CONFIG_LIBDIR="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+
+    /opt/pacman/bin/cmake -B build -S "qpdf-${pkgver}" -G Ninja \
+        -DCMAKE_MAKE_PROGRAM=/opt/pacman/bin/ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/opt/pacman \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_INSTALL_NAME_DIR=/opt/pacman/lib \
+        -DCMAKE_INSTALL_RPATH=/opt/pacman/lib \
+        -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
+        -DCMAKE_OSX_ARCHITECTURES="${_arch}" \
+        -DCMAKE_OSX_SYSROOT="${_sdk}" \
+        -DCMAKE_PREFIX_PATH=/opt/pacman \
+        -DCMAKE_SYSTEM_PREFIX_PATH="/opt/pacman;${_sdk}/usr" \
+        -DCMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH=OFF \
+        -DCMAKE_C_COMPILER=/usr/bin/clang \
+        -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
+        -DBUILD_SHARED_LIBS=ON \
+        -DBUILD_DOC=OFF \
+        -DBUILD_TESTING=OFF
+
+    /opt/pacman/bin/cmake --build build -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    DESTDIR="$pkgdir" /opt/pacman/bin/cmake --install build
+    /opt/pacman/bin/install -Dm644 "$srcdir/qpdf-${pkgver}/LICENSE.txt" \
+        "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

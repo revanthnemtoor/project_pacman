@@ -1,0 +1,50 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=neovim
+pkgver=0.12.6
+pkgrel=1
+pkgdesc="Fork of Vim aiming to improve user experience, plugins, and GUIs"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://neovim.io/"
+license=('Apache-2.0')
+depends=('gettext' 'libiconv')
+options=('!strip')
+source=("https://github.com/neovim/neovim/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/neovim-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export PKG_CONFIG="/opt/pacman/bin/pkg-config"
+    export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export PKG_CONFIG_LIBDIR="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export CC="/usr/bin/clang"
+    export CXX="/usr/bin/clang++"
+    export SDKROOT="${_sdk}"
+    export MACOSX_DEPLOYMENT_TARGET="12.0"
+
+    # Rewrite github.com/neovim/deps/raw/ redirect URLs to raw.githubusercontent.com CDN to avoid GitHub 504s
+    /opt/pacman/bin/sed -i 's|https://github.com/neovim/deps/raw/|https://raw.githubusercontent.com/neovim/deps/|g' cmake.deps/deps.txt .deps/CMakeCache.txt .deps/build/src/*-stamp/*.cmake 2>/dev/null || true
+
+    make CMAKE_BUILD_TYPE=Release \
+        CMAKE_INSTALL_PREFIX=/opt/pacman \
+        DEPS_CMAKE_FLAGS="-DCMAKE_OSX_ARCHITECTURES=${_arch} -DCMAKE_OSX_SYSROOT=${_sdk} -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_SYSTEM_PREFIX_PATH='/opt/pacman;${_sdk}/usr' -DCMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH=OFF" \
+        CMAKE_EXTRA_FLAGS="-DCMAKE_OSX_ARCHITECTURES=${_arch} -DCMAKE_OSX_SYSROOT=${_sdk} -DCMAKE_INSTALL_RPATH=/opt/pacman/lib -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON -DCMAKE_PREFIX_PATH=/opt/pacman -DCMAKE_SYSTEM_PREFIX_PATH='/opt/pacman;${_sdk}/usr' -DCMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH=OFF" \
+        -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/neovim-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    DESTDIR="$pkgdir" /opt/pacman/bin/cmake --install build
+    /usr/bin/strip -x "$pkgdir/opt/pacman/bin/nvim" 2>/dev/null || true
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
+        fi
+    done
+    /opt/pacman/bin/install -Dm644 LICENSE.txt "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

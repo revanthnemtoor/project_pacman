@@ -1,0 +1,31 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=7zip
+pkgver=26.06
+pkgrel=1
+pkgdesc="File archiver with a high compression ratio (official 7zz)"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.7-zip.org/"
+license=('LGPL-2.1-or-later AND BSD-3-Clause')
+options=('!strip')
+source=("https://github.com/ip7z/7zip/archive/refs/tags/${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/7zip-${pkgver}/CPP/7zip/Bundles/Alone2"
+    local _mak="../../cmpl_mac_x64.mak"
+    [[ "$CARCH" == "darwin_arm64" ]] && _mak="../../cmpl_mac_arm64.mak"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    make -f "$_mak" CC="/usr/bin/clang" CXX="/usr/bin/clang++" -j"$(sysctl -n hw.ncpu)"
+}
+
+package() {
+    cd "$srcdir/7zip-${pkgver}"
+    local _bdir="b/m_x64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _bdir="b/m_arm64"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    /opt/pacman/bin/install -Dm755 "CPP/7zip/Bundles/Alone2/${_bdir}/7zz" "$pkgdir/opt/pacman/bin/7zz"
+    ln -sf 7zz "$pkgdir/opt/pacman/bin/7z"
+    /opt/pacman/bin/install -Dm644 DOC/License.txt "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    /usr/bin/codesign --force --sign - "$pkgdir/opt/pacman/bin/7zz"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

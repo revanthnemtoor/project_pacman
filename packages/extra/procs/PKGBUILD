@@ -1,0 +1,34 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=procs
+pkgver=0.14.12
+pkgrel=1
+pkgdesc="A modern replacement for ps written in Rust"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/dalance/procs"
+license=('MIT')
+options=('!strip')
+source=("https://github.com/dalance/procs/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/procs-${pkgver}"
+    local _sdk="$(xcrun --show-sdk-path)"
+    local _cargo="/opt/pacman/bin/cargo"
+    [[ ! -x "$_cargo" ]] && _cargo="/opt/local/bin/cargo"
+    export PATH="/opt/pacman/bin:/opt/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export SDKROOT="${_sdk}"
+    export RUSTFLAGS="-C link-arg=-Wl,-rpath,/opt/pacman/lib -C link-arg=-L/opt/pacman/lib"
+
+    "$_cargo" build --release --locked
+}
+
+package() {
+    cd "$srcdir/procs-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    /opt/pacman/bin/install -Dm755 target/release/procs "$pkgdir/opt/pacman/bin/procs"
+    /usr/bin/strip -x "$pkgdir/opt/pacman/bin/procs" 2>/dev/null || true
+    /usr/bin/codesign --force --sign - "$pkgdir/opt/pacman/bin/procs"
+    /opt/pacman/bin/install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}

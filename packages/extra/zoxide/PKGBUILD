@@ -1,0 +1,43 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
+pkgname=zoxide
+pkgver=0.10.0
+pkgrel=1
+pkgdesc="A smarter cd command inspired by z and autojump"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://github.com/ajeetdsouza/zoxide"
+license=('MIT')
+options=('!strip')
+source=("https://github.com/ajeetdsouza/zoxide/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/zoxide-${pkgver}"
+    local _sdk="$(xcrun --show-sdk-path)"
+    local _cargo="/opt/pacman/bin/cargo"
+    [[ ! -x "$_cargo" ]] && _cargo="/opt/local/bin/cargo"
+    export PATH="/opt/pacman/bin:/opt/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export PKG_CONFIG="/opt/pacman/bin/pkg-config"
+    export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export PKG_CONFIG_LIBDIR="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+    export CC="/usr/bin/clang"
+    export SDKROOT="${_sdk}"
+    export RUSTFLAGS="-C link-arg=-Wl,-rpath,/opt/pacman/lib -C link-arg=-L/opt/pacman/lib"
+
+    "$_cargo" build --release --locked
+}
+
+package() {
+    cd "$srcdir/zoxide-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    /opt/pacman/bin/install -Dm755 target/release/zoxide "$pkgdir/opt/pacman/bin/zoxide"
+    /usr/bin/strip -x "$pkgdir/opt/pacman/bin/zoxide" 2>/dev/null || true
+    /usr/bin/codesign --force --sign - "$pkgdir/opt/pacman/bin/zoxide"
+    for m in man/man1/*.1; do
+        [ -f "$m" ] && /opt/pacman/bin/install -Dm644 "$m" "$pkgdir/opt/pacman/share/man/man1/$(basename "$m")"
+    done
+    [ -f contrib/completions/zoxide.bash ] && /opt/pacman/bin/install -Dm644 contrib/completions/zoxide.bash "$pkgdir/opt/pacman/share/bash-completion/completions/zoxide" || true
+    [ -f contrib/completions/_zoxide ] && /opt/pacman/bin/install -Dm644 contrib/completions/_zoxide "$pkgdir/opt/pacman/share/zsh/site-functions/_zoxide" || true
+    [ -f contrib/completions/zoxide.fish ] && /opt/pacman/bin/install -Dm644 contrib/completions/zoxide.fish "$pkgdir/opt/pacman/share/fish/vendor_completions.d/zoxide.fish" || true
+    /opt/pacman/bin/install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
+}
