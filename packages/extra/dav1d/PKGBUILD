@@ -26,7 +26,7 @@ build() {
     export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
     export PKG_CONFIG_LIBDIR="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
 
-    /usr/local/bin/meson setup build \
+    meson setup build \
         --prefix=/opt/pacman \
         --libdir=lib \
         --buildtype=release \
@@ -35,12 +35,13 @@ build() {
         -Denable_tools=false \
         -Denable_docs=false
 
-    /usr/local/bin/ninja -C build
+    ninja -C build
 }
 
 package() {
+    export PATH="/opt/pacman/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     cd "$srcdir/dav1d-${pkgver}"
-    DESTDIR="$pkgdir" /usr/local/bin/ninja -C build install
+    DESTDIR="$pkgdir" ninja -C build install
     install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
 
     find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do

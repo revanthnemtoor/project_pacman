@@ -1,29 +1,39 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=jemalloc
-pkgver=5.4.0
+pkgver=5.3.0
 pkgrel=1
-pkgdesc="Implementation of malloc emphasizing fragmentation avoidance"
-
+pkgdesc="General-purpose scalable concurrent malloc implementation"
+arch=('darwin_x86_64' 'darwin_arm64')
 url="https://jemalloc.net/"
-arch=(
-    'darwin_arm64'
-    'darwin_x86_64'
-)
-license=(
-    'BSD-2-Clause'
-)
+license=('BSD-2-Clause')
 options=('!strip')
-source=()
-sha256sums=()
+source=("https://github.com/jemalloc/jemalloc/releases/download/${pkgver}/jemalloc-${pkgver}.tar.bz2")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/jemalloc-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CXX="/usr/bin/clang++"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export CXXFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+    ./configure --prefix=/opt/pacman --disable-static --enable-shared --disable-doc
+    make -j"$(sysctl -n hw.ncpu)"
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir/opt/pacman"
-    mkdir -p "$_dest"
-
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
+    cd "$srcdir/jemalloc-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    make DESTDIR="$pkgdir" install_bin install_include install_lib_shared install_lib_pc
+    /opt/pacman/bin/install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
         fi
     done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
 }

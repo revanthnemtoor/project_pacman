@@ -16,8 +16,7 @@ build() {
     [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
     local _sdk="$(xcrun --show-sdk-path)"
     local _cmake="/opt/pacman/bin/cmake"
-    [[ ! -x "$_cmake" ]] && _cmake="/opt/local/bin/cmake"
-    [[ ! -x "$_cmake" ]] && _cmake="/usr/local/bin/cmake"
+    for _c in /opt/pacman/bin/cmake /opt/homebrew/bin/cmake /usr/local/bin/cmake /opt/local/bin/cmake "$(command -v cmake 2>/dev/null)"; do [[ -x "$_c" ]] && { _cmake="$_c"; break; }; done
 
     export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     export PKG_CONFIG="/opt/pacman/bin/pkg-config"
@@ -54,8 +53,7 @@ build() {
 
 package() {
     local _cmake="/opt/pacman/bin/cmake"
-    [[ ! -x "$_cmake" ]] && _cmake="/opt/local/bin/cmake"
-    [[ ! -x "$_cmake" ]] && _cmake="/usr/local/bin/cmake"
+    for _c in /opt/pacman/bin/cmake /opt/homebrew/bin/cmake /usr/local/bin/cmake /opt/local/bin/cmake "$(command -v cmake 2>/dev/null)"; do [[ -x "$_c" ]] && { _cmake="$_c"; break; }; done
     export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     DESTDIR="$pkgdir" "$_cmake" --install build
     # Strip debug symbols from large CMake executables to keep package compact (< 25MB)

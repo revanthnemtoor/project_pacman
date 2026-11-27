@@ -1,32 +1,44 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=libgcrypt
 pkgver=1.11.0
 pkgrel=1
-pkgdesc="Cryptographic library based on the code from GnuPG"
-
-url="https://gnupg.org/related_software/libgcrypt/"
-arch=(
-    'darwin_arm64'
-    'darwin_x86_64'
-)
-license=(
-    'LGPL-2.1-or-later AND GPL-2.0-or-later'
-)
-depends=(
-    'libgpg-error'
-)
+pkgdesc="General purpose cryptographic library based on the code from GnuPG"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.gnupg.org"
+license=('LGPL-2.1-or-later')
+depends=('libgpg-error')
 options=('!strip')
-source=()
-sha256sums=()
+source=("https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-${pkgver}.tar.bz2")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/libgcrypt-${pkgver}"
+    local _arch="x86_64"
+    local _asm=""
+    if [[ "$CARCH" == "darwin_arm64" ]]; then
+        _arch="arm64"
+        _asm="--disable-asm"
+    fi
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+    ./configure --prefix=/opt/pacman --with-libgpg-error-prefix=/opt/pacman --disable-static --enable-shared --disable-doc ${_asm}
+    make -j"$(sysctl -n hw.ncpu)"
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir/opt/pacman"
-    mkdir -p "$_dest"
-
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
+    cd "$srcdir/libgcrypt-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    make DESTDIR="$pkgdir" install
+    rm -f "$pkgdir/opt/pacman/share/info/dir"
+    find "$pkgdir/opt/pacman/lib" -name '*.la' -delete 2>/dev/null || true
+    /opt/pacman/bin/install -Dm644 COPYING.LIB "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
         fi
     done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
 }

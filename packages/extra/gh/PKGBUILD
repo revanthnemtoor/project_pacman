@@ -1,32 +1,32 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=gh
-pkgver=2.103.3
+pkgver=2.67.0
 pkgrel=1
-pkgdesc="GitHub command-line tool"
-
+pkgdesc="The GitHub CLI"
+arch=('darwin_x86_64' 'darwin_arm64')
 url="https://cli.github.com/"
-arch=(
-    'darwin_arm64'
-    'darwin_x86_64'
-)
-license=(
-    'MIT'
-)
-makedepends=(
-    'go'
-)
+license=('MIT')
+depends=('git')
 options=('!strip')
-source=()
-sha256sums=()
+source=("https://github.com/cli/cli/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/cli-${pkgver}"
+    local _goarch="amd64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _goarch="arm64"
+    export PATH="/opt/pacman/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    local _go="$(command -v go)"
+    CGO_ENABLED=0 GOOS=darwin GOARCH="${_goarch}" \
+        "$_go" build -trimpath -ldflags="-s -w -X github.com/cli/cli/v2/internal/build.Version=v${pkgver}" \
+        -o bin/gh ./cmd/gh
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir/opt/pacman"
-    mkdir -p "$_dest"
-
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
-        fi
-    done
+    cd "$srcdir/cli-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    /opt/pacman/bin/install -Dm755 bin/gh "$pkgdir/opt/pacman/bin/gh"
+    /usr/bin/codesign --force --sign - "$pkgdir/opt/pacman/bin/gh"
+    /opt/pacman/bin/install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
 }

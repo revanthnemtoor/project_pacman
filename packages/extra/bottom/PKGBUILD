@@ -14,8 +14,8 @@ build() {
     cd "$srcdir/bottom-${pkgver}"
     local _sdk="$(xcrun --show-sdk-path)"
     local _cargo="/opt/pacman/bin/cargo"
-    [[ ! -x "$_cargo" ]] && _cargo="/opt/local/bin/cargo"
-    export PATH="/opt/pacman/bin:/opt/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    for _cg in /opt/pacman/bin/cargo "$HOME/.cargo/bin/cargo" /opt/homebrew/bin/cargo /usr/local/bin/cargo /opt/local/bin/cargo "$(command -v cargo 2>/dev/null)"; do [[ -x "$_cg" ]] && { _cargo="$_cg"; break; }; done
+    export PATH="/opt/pacman/bin:$HOME/.cargo/bin:/opt/homebrew/bin:/usr/local/bin:/opt/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     export CC="/usr/bin/clang"
     export SDKROOT="${_sdk}"
     export RUSTFLAGS="-C link-arg=-Wl,-rpath,/opt/pacman/lib -C link-arg=-L/opt/pacman/lib"

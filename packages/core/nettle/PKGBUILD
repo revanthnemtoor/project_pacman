@@ -1,32 +1,39 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=nettle
 pkgver=3.10
 pkgrel=1
-pkgdesc="Low-level cryptographic library"
-
-url="https://www.lysator.liu.se/~nisse/nettle/"
-arch=(
-    'darwin_arm64'
-    'darwin_x86_64'
-)
-license=(
-    'GPL-2.0-or-later OR LGPL-3.0-or-later'
-)
-depends=(
-    'gmp'
-)
+pkgdesc="A low-level cryptographic library"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.lysator.liu.se/~nisse/nettle"
+license=('GPL-2.0-or-later OR LGPL-3.0-or-later')
+depends=('gmp')
 options=('!strip')
-source=()
-sha256sums=()
+source=("https://ftpmirror.gnu.org/gnu/nettle/nettle-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/nettle-${pkgver}"
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _sdk="$(xcrun --show-sdk-path)"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    export CC="/usr/bin/clang"
+    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
+    export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+    ./configure --prefix=/opt/pacman --libdir=/opt/pacman/lib --enable-shared --disable-static --disable-documentation
+    make -j"$(sysctl -n hw.ncpu)"
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir/opt/pacman"
-    mkdir -p "$_dest"
-
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
+    cd "$srcdir/nettle-${pkgver}"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    make DESTDIR="$pkgdir" install
+    /opt/pacman/bin/install -Dm644 COPYING.LESSERv3 "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
+    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f"
         fi
     done
+    chgrp -R admin "$pkgdir" 2>/dev/null || true
 }

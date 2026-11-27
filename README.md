@@ -1,44 +1,54 @@
 # Pacman for macOS (Darwin Native Port)
 
-[![Pacman](https://img.shields.io/badge/pacman-v7.1.0-blue.svg)](https://gitlab.archlinux.org/pacman/pacman)
-[![Platform](https://img.shields.io/badge/platform-macOS%20(Darwin)-black.svg)](https://apple.com/macos)
-[![Architecture](https://img.shields.io/badge/arch-arm64%20%7C%20x86__64-orange.svg)](#architecture-support)
-[![Build](https://img.shields.io/badge/build-100%25%20source--built-green.svg)](#native-toolchain)
+[![Pacman](https://img.shields.io/badge/pacman-v7.1.0-1793d1.svg)](https://gitlab.archlinux.org/pacman/pacman)
+[![libalpm](https://img.shields.io/badge/libalpm-v16.0-1793d1.svg)](https://gitlab.archlinux.org/pacman/pacman)
+[![Packages](https://img.shields.io/badge/packages-224%20(112%20core%20%2B%20112%20extra)-brightgreen.svg)](#included-packages)
+[![Platform](https://img.shields.io/badge/platform-macOS%20(Darwin)-black.svg)](#architecture-support)
+[![Architecture](https://img.shields.io/badge/arch-darwin__x86__64%20%7C%20darwin__arm64-orange.svg)](#architecture-support)
 [![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
 
-A fully native, rootless port of Arch Linux's **Pacman (v7.1.0)** and **libalpm (v16.0)** package manager to **macOS (Darwin)**.
+A fully native, rootless port of Arch Linux's **Pacman (v7.1.0)** and **libalpm (v16.0)** package manager to **macOS (Darwin)**, complete with **224 open-source packages** (**112 `[core]` + 112 `[extra]`**) and a single-file upstream Git-tag build & auto-update orchestrator (`arch_builder.py`).
 
-Every package in the core repository is compiled directly from upstream source with Apple Clang, Meson, and Ninja. There are **zero Homebrew runtime bottles or dependencies**. All binaries and shared libraries are native Darwin Mach-O executables signed with ad-hoc codesigning (`codesign --sign -`) and operate inside a self-contained `/opt/pacman` prefix.
+Every package is 100% Free & Open-Source Software compiled natively to Darwin Mach-O binaries and `.dylib` shared libraries inside a self-contained, user-owned `/opt/pacman` prefix — with **zero `/opt/local` (MacPorts) or `/usr/local` (Homebrew) runtime library leaks**, full ad-hoc Mach-O codesigning (`codesign --sign -`), and detached PGP signatures (`.sig`) on every package archive and sync database.
 
 ---
 
 ## Table of Contents
 
+- [Repository Package Counts](#repository-package-counts)
 - [Features](#features)
 - [Architecture Support](#architecture-support)
 - [Quick Start Installation](#quick-start-installation)
-  - [One-Line Installer (Recommended)](#one-line-installer-recommended)
-  - [From Local Git Clone](#from-local-git-clone)
-  - [Non-Interactive / CI Mode](#non-interactive--ci-mode)
 - [Interactive Installer Options](#interactive-installer-options)
 - [Pacman Quick Reference](#pacman-quick-reference)
+- [Unified Build & Auto-Update Pipeline (`arch_builder.py`)](#unified-build--auto-update-pipeline-arch_builderpy)
+- [Included Packages (`112 [core]` + `112 [extra]`)](#included-packages)
 - [Repository Structure](#repository-structure)
-- [Included Packages](#included-packages)
-- [Configuration (`pacman.conf`)](#configuration-pacmanconf)
+- [Configuration (`pacman.conf` & `mirrorlist`)](#configuration-pacmanconf--mirrorlist)
 - [Security & Verification](#security--verification)
 - [Maintainer & License](#maintainer--license)
 
 ---
 
+## Repository Package Counts
+
+| Repository | `darwin_x86_64` Built | `darwin_arm64` Built | Total Signed Archives | Scope |
+| :--- | :---: | :---: | :---: | :--- |
+| **`[core]`** | **112** | **53** | **165** | Complete POSIX/GNU userspace, `base-devel` toolchain, shells, TLS/crypto, networking, Python/Perl/Guile runtimes |
+| **`[extra]`** | **112** | **70** | **182** | Self-hosted CMake/Ninja/Meson/ccache, Neovim/Vim, modern Rust/C CLI suite, codecs/ImageMagick, Qt 6 (16 modules), KDE Frameworks 6, Gwenview |
+| **Total** | **224** | **123** | **347** | 100% open-source, PGP-signed (`CEC5B78775CA4628`), SHA-256 indexed |
+
+---
+
 ## Features
 
-* **Real Arch Linux Pacman 7.1.0**: Native `pacman`, `pacman-conf`, `makepkg`, `vercmp`, and `repo-add` powered by `libalpm 16.0`.
-* **Rootless Operation**: All binaries, libraries, configs, and caches live under `/opt/pacman`, fully owned by your macOS user. No `sudo` is required for package installations or upgrades.
-* **100% Source-Built Base**: Pure upstream releases (Bash 5.3, Readline 8.3, Coreutils 9.6, OpenSSL 3.4.1, Libarchive 3.7.7, etc.) linking strictly against system libraries and native pacman dependencies.
-* **Native HTTP/HTTPS Downloader**: Built with native `libcurl` support and configured with `XferCommand` fallback for fast, parallel multi-stream downloads (`ParallelDownloads = 5`).
-* **Qt 6 & KDE Frameworks 6**: Includes 16 native Qt 6.12 modules and 34 KDE Frameworks 6 packages, including the Gwenview image viewer.
-* **Dual Architecture Awareness**: Automatically serves `darwin_arm64` for Apple Silicon (M1/M2/M3/M4) and `darwin_x86_64` for Intel Macs.
-* **SHA-256 Checksum Validation**: Every package downloaded is cryptographically checked against the SHA-256 digest recorded in `core.db` and `extra.db`.
+- **Real Arch Linux Pacman 7.1.0**: Native `pacman`, `pacman-conf`, `makepkg`, `vercmp`, and `repo-add` powered by `libalpm 16.0`.
+- **Rootless `/opt/pacman` Hierarchy**: All binaries, libraries, headers, configs, and ALPM databases live under `/opt/pacman`, owned by your macOS user — **no `sudo` required**.
+- **Self-Contained & Zero External Dylib Leaks**: Built against the Apple macOS SDK sysroot and `/opt/pacman/lib` (`-Wl,-rpath,/opt/pacman/lib`), verified clean with zero `/opt/local` or `/usr/local` dynamic library links.
+- **Self-Hosted Build Stack**: Includes native `gcc`, `binutils`, `make`, `autoconf`, `automake`, `libtool`, `bison`, `flex`, `pkgconf`, `fakeroot`, `cmake`, `ninja`, `meson`, and `ccache`.
+- **Full Media & Image Codec Stack**: Source-built `imagemagick` with `rw+` support for `AVIF`, `HEIC`, `WEBP`, `JP2`, `RAW`, `TIFF`, `PNG`, `JPEG`, and `FreeType`.
+- **Native macOS Qt 6 & KDE Frameworks 6**: Ships 16 Qt 6 Cocoa modules, 27 KDE Frameworks 6 libraries (+ `extra-cmake-modules`), and the `gwenview` desktop image viewer.
+- **Automated Upstream Git-Tag Builder**: `arch_builder.py` concurrently scans authoritative upstream Git repositories (not Linux Arch databases) for new stable tags, bumps `PKGBUILD` versions, builds from source, signs, indexes, and installs.
 
 ---
 
@@ -46,16 +56,14 @@ Every package in the core repository is compiled directly from upstream source w
 
 | Architecture | Platform String | macOS Target | Status |
 | :--- | :--- | :--- | :--- |
-| **Apple Silicon** | `darwin_arm64` | macOS 12+ (M1 / M2 / M3 / M4) | Supported |
-| **Intel x86_64** | `darwin_x86_64` | macOS 12+ (x86_64 Macs) | Supported |
+| **Intel x86_64** | `darwin_x86_64` | macOS 12+ (64-bit Intel Macs) | **224 packages** (`112 core` + `112 extra`) |
+| **Apple Silicon** | `darwin_arm64` | macOS 12+ (M1 / M2 / M3 / M4) | **123 packages** (`53 core` + `70 extra`) |
 
 ---
 
 ## Quick Start Installation
 
 ### One-Line Installer (Recommended)
-
-Run the universal bootstrap installer in your terminal:
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/install.sh)"
@@ -71,8 +79,6 @@ cd project_pacman
 
 ### Non-Interactive / CI Mode
 
-To install automatically with default settings (Top Priority PATH, no prompt):
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/install.sh | bash -s -- -y
 # or locally:
@@ -83,15 +89,12 @@ curl -fsSL https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/
 
 ## Interactive Installer Options
 
-After displaying the splash screen and detecting your Mac model and architecture, the installer pauses to ask you two configuration questions:
-
 ### 1. Proceed with Installation
 ```text
 Do you want to proceed with the installation?
   [1] Continue with Installation (default)
   [2] Cancel / Exit
 ```
-Pressing **Enter** or typing `1` proceeds with the installation. Selecting `2` safely exits without modifying your system.
 
 ### 2. PATH Configuration & Priority
 ```text
@@ -101,103 +104,129 @@ How would you like to configure /opt/pacman/bin in your PATH?
   [3] Skip PATH     - Do not modify shell profile files
 ```
 
-* **Option 1 (Top Priority)**: Prepends `/opt/pacman/bin` to `PATH` in `~/.zshrc`, `~/.bash_profile`, and `~/.config/fish/config.fish`. Modern GNU utilities (`bash 5.3`, `coreutils 9.6`, `grep 3.12`, `sed 4.10`, etc.) override outdated macOS BSD defaults.
-* **Option 2 (Add to PATH / Standard)**: Appends `/opt/pacman/bin` to `PATH`. macOS system utilities take precedence; pacman tools are available without overriding system defaults.
-* **Option 3 (Skip PATH)**: Leaves your shell config untouched. You can manually export `PATH="/opt/pacman/bin:$PATH"` when needed.
+- **Option 1 (Top Priority)**: Prepends `/opt/pacman/bin` to `PATH` in `~/.zshrc`, `~/.bash_profile`, and `~/.config/fish/config.fish` so modern GNU & CLI tools supersede older macOS BSD defaults.
+- **Option 2 (Add to PATH)**: Appends `/opt/pacman/bin` to `PATH` as a fallback.
+- **Option 3 (Skip PATH)**: Leaves shell profiles untouched.
 
 ---
 
 ## Pacman Quick Reference
 
 ```bash
-# Synchronize package databases and perform a full system upgrade
+# Synchronize package databases and upgrade all installed packages
 pacman -Syu
 
-# Synchronize and align with repository package versions (permits downgrade from old placeholders)
-pacman -Syuu
+# Install packages from [core] or [extra]
+pacman -S neovim bat eza zoxide starship ripgrep fzf yazi
 
-# Install one or more packages
-pacman -S bash coreutils jq
+# Search available packages across [core] and [extra]
+pacman -Ss codec
 
-# Search for packages by keyword
-pacman -Ss python
+# Inspect detailed package metadata
+pacman -Si cmake
 
-# Display detailed package metadata
-pacman -Si bash
-
-# List all installed packages
+# List all locally installed packages
 pacman -Q
 
-# Query information about an installed package
-pacman -Qi bash
+# Query metadata and signature validation of an installed package
+pacman -Qi guile
 
 # Remove a package
 pacman -R <package_name>
 
-# Update the file-search database
+# Refresh file database and locate which package owns a file
 pacman -Fy
-
-# Find which package provides a specific command or file
 pacman -F libalpm.dylib
 ```
 
 ---
 
-## Repository Structure
+## Unified Build & Auto-Update Pipeline (`arch_builder.py`)
 
-The package repositories mirror Arch Linux's official organization:
+`arch_builder.py` manages the complete Darwin packaging lifecycle (`scan -> fetch -> build -> codesign -> package -> PGP sign -> repo-add -> pacman -U`) directly against upstream Git stable tags:
 
-```text
-project_pacman/
-├── core/                                # Core base packages and libraries
-│   ├── core.db                          # Sync database (x86_64 default)
-│   ├── core.files                       # File list database
-│   ├── core-darwin_arm64.db.tar.gz      # Apple Silicon database
-│   ├── core-darwin_x86_64.db.tar.gz     # Intel 64-bit database
-│   └── *.pkg.tar.zst                    # Package archives
-├── extra/                               # Extended CLI tools, GUI libraries, Qt6, KDE
-│   ├── extra.db                         # Extra sync database
-│   ├── extra.files                      # Extra file list database
-│   ├── extra-darwin_arm64.db.tar.gz     # Apple Silicon database
-│   ├── extra-darwin_x86_64.db.tar.gz    # Intel 64-bit database
-│   └── *.pkg.tar.zst                    # Package archives
-├── configs/
-│   └── pacman.conf                      # Reference pacman configuration
-├── packages/
-│   ├── core/                            # All 112 canonical [core] PKGBUILD recipes
-│   └── extra/                           # [extra] CLI, codec, Qt6, and KDE PKGBUILD recipes
-├── darwin_core_packages.txt             # Authoritative 112 FOSS Darwin [core] manifest
-├── arch_builder.py                      # Unified Git-tag scanner, builder, signer & daemon
-├── install.sh                           # Universal interactive installer script
-└── README.md                            # Documentation
+```bash
+# Audit all 112 target FOSS [core] packages in darwin_core_packages.txt
+python3 arch_builder.py core-status
+
+# Concurrently scan all local packages against upstream Git release tags
+python3 arch_builder.py scan --updates-only --refresh
+
+# Build, codesign, package (.pkg.tar.zst), PGP-sign (.sig), index, and install one package
+python3 arch_builder.py build <pkgname>
+
+# Auto-bump PKGBUILDs with newer stable Git tags, rebuild from source, sign, and re-index
+python3 arch_builder.py update-all
+
+# Dry-run check without rebuilding
+python3 arch_builder.py update-all --dry-run
+
+# Re-index and cryptographically sign core.db and extra.db
+python3 arch_builder.py index
 ```
 
 ---
 
 ## Included Packages
 
-### Core System (`[core]` — 112 FOSS Packages)
-* **Base & System Data**: `base`, `base-devel`, `filesystem`, `iana-etc`, `tzdata`, `ca-certificates`, `pacman 7.1.0` (`libalpm 16.0`), `pacman-mirrorlist`
-* **Shells, Editors & Userland**: `bash`, `dash`, `readline`, `libedit`, `coreutils`, `diffutils`, `findutils`, `gawk`, `grep`, `sed`, `tar`, `gzip`, `less`, `which`, `file`, `patch`, `nano`, `links`, `groff`, `man-db`, `texinfo`, `inetutils`, `logrotate`, `s-nail`
-* **Toolchain & Runtimes**: `gcc`, `binutils`, `make`, `autoconf`, `automake`, `libtool`, `m4`, `bison`, `flex`, `pkgconf`, `fakeroot`, `gettext`, `python`, `perl`, `guile`
-* **Networking, Auth & Crypto**: `openssl`, `gnutls`, `gnupg`, `gpgme`, `pinentry`, `curl`, `openssh`, `krb5`, `openldap`, `libsasl`, `nss`, `nspr`, `p11-kit`, `leancrypto`, `nettle`, `libgcrypt`, `libgpg-error`, `libassuan`, `libksba`, `npth`, `libssh2`, `libnghttp2`, `libnghttp3`, `libngtcp2`, `libmicrohttpd`, `libpsl`, `libidn2`, `ldns`, `libpcap`
-* **Compression, Databases & Core Libraries**: `zlib`, `bzip2`, `lz4`, `lzo`, `xz`, `zstd`, `brotli`, `libarchive`, `sqlite`, `gdbm`, `unixodbc`, `icu`, `glib2`, `libsecret`, `libxml2`, `expat`, `jansson`, `json-c`, `gmp`, `mpfr`, `libmpc`, `libisl`, `mpdecimal`, `gc`, `libffi`, `ncurses`, `pcre2`, `popt`, `libpipeline`, `libinih`, `libevent`, `libverto`, `libunistring`, `libtasn1`, `libusb`, `libxcrypt`
+### Core Repository (`[core]` — 112 Built Packages)
 
-### Extended Utilities, Codecs & GUI (`[extra]`)
-* **Build Systems & Compilers**: `cmake`, `ninja`, `meson`, `ccache`, `extra-cmake-modules`
-* **Editors, Shells & Multiplexers**: `neovim`, `vim`, `fish`, `tmux`, `yazi`, `tig`
-* **Modern CLI Power Tools**: `bat`, `eza`, `fzf`, `ripgrep`, `fd`, `zoxide`, `starship`, `git-delta`, `hyperfine`, `just`, `procs`, `dust`, `sd`, `tealdeer`, `tokei`, `bottom`, `htop`, `entr`, `fastfetch`, `tree`, `jq`, `yq`, `7zip`, `pigz`, `xxhash`
-* **Networking & Downloaders**: `gh`, `git`, `xh`, `aria2`, `wget`, `rsync`, `mtr`, `tcpdump`, `yt-dlp`
-* **Image, PDF & Media Codecs**: `imagemagick` (full `rw+` codec stack), `qpdf`, `chafa`, `libheif`, `aom`, `dav1d`, `libde265`, `kvazaar`, `libwebp`, `openjpeg2`, `libraw`, `libjpeg-turbo`, `libpng`, `libtiff`, `freetype2`, `lcms2`, `exiv2`
-* **Qt 6 Framework**: 16 native modules (`qt6-base`, `qt6-declarative`, `qt6-svg`, `qt6-tools`, `qt6-multimedia`, etc.)
-* **KDE Frameworks 6**: 34 native frameworks (`karchive`, `kcoreaddons`, `kconfig`, `kio`, `kxmlgui`, `solid`, `sonnet`, `breeze-icons`, etc.)
-* **Applications**: Gwenview image viewer (`gwenview 26.08.2`)
+- **Meta & System Layout (4)**: `base`, `base-devel`, `filesystem`, `pacman-mirrorlist`
+- **Package Management (3)**: `pacman`, `gpgme`, `libarchive`
+- **Compiler Toolchain & Base-Devel (23)**: `autoconf`, `automake`, `binutils`, `bison`, `diffutils`, `fakeroot`, `file`, `findutils`, `flex`, `gawk`, `gcc`, `gettext`, `groff`, `libisl`, `libmpc`, `libtool`, `m4`, `make`, `patch`, `pkgconf`, `sed`, `texinfo`, `which`
+- **Shells, Editors & POSIX Userspace (13)**: `bash`, `coreutils`, `dash`, `grep`, `gzip`, `inetutils`, `less`, `libedit`, `man-db`, `nano`, `ncurses`, `readline`, `tar`
+- **Compression Libraries & Archivers (7)**: `brotli`, `bzip2`, `lz4`, `lzo`, `xz`, `zlib`, `zstd`
+- **Cryptography, TLS, GnuPG & Auth (17)**: `ca-certificates`, `gnupg`, `gnutls`, `krb5`, `leancrypto`, `libassuan`, `libgcrypt`, `libgpg-error`, `libksba`, `libsecret`, `libtasn1`, `libxcrypt`, `nettle`, `npth`, `openssl`, `p11-kit`, `pinentry`
+- **Networking, HTTP/2/3, SSH & Directory Services (14)**: `curl`, `iana-etc`, `ldns`, `libidn2`, `libmicrohttpd`, `libnghttp2`, `libnghttp3`, `libngtcp2`, `libpcap`, `libpsl`, `libsasl`, `libssh2`, `openldap`, `openssh`
+- **Runtimes, Databases & Core System Libraries (31)**: `expat`, `gc`, `gdbm`, `glib2`, `gmp`, `guile`, `icu`, `jansson`, `json-c`, `libevent`, `libffi`, `libinih`, `libpipeline`, `libunistring`, `libusb`, `libverto`, `libxml2`, `links`, `logrotate`, `mpdecimal`, `mpfr`, `nspr`, `nss`, `pcre2`, `perl`, `popt`, `python`, `s-nail`, `sqlite`, `tzdata`, `unixodbc`
+
+### Extra Repository (`[extra]` — 112 Built Packages)
+
+- **Build Systems & Compiler Cache (5)**: `cmake`, `ninja`, `meson`, `ccache`, `extra-cmake-modules`
+- **Editors, Shells, Multiplexers & File Managers (6)**: `neovim`, `vim`, `fish`, `tmux`, `yazi`, `tig`
+- **Modern CLI & System Monitoring Suite (25)**: `bat`, `eza`, `fzf`, `ripgrep`, `fd`, `zoxide`, `starship`, `git-delta`, `hyperfine`, `just`, `procs`, `dust`, `sd`, `tealdeer`, `tokei`, `bottom`, `htop`, `entr`, `fastfetch`, `tree`, `jq`, `yq`, `7zip`, `pigz`, `sitecheck`
+- **Networking, VCS & Downloaders (9)**: `git`, `gh`, `xh`, `aria2`, `wget`, `rsync`, `mtr`, `tcpdump`, `yt-dlp`
+- **Image, PDF, Terminal Graphics & Libraries (23)**: `imagemagick`, `qpdf`, `chafa`, `libheif`, `aom`, `dav1d`, `libde265`, `kvazaar`, `libwebp`, `openjpeg2`, `libraw`, `libjpeg-turbo`, `libpng`, `libtiff`, `freetype2`, `lcms2`, `exiv2`, `jemalloc`, `libsodium`, `oniguruma`, `utf8proc`, `xxhash`, `yyjson`
+- **Qt 6 Native macOS Modules (16)**: `qt6-base`, `qt6-connectivity`, `qt6-declarative`, `qt6-imageformats`, `qt6-languageserver`, `qt6-lottie`, `qt6-multimedia`, `qt6-networkauth`, `qt6-quick3d`, `qt6-quick3dphysics`, `qt6-quicktimeline`, `qt6-serialport`, `qt6-shadertools`, `qt6-svg`, `qt6-tools`, `qt6-websockets`
+- **KDE Frameworks 6 & Desktop Apps (28)**: `breeze-icons`, `karchive`, `kbookmarks`, `kcodecs`, `kcolorscheme`, `kcompletion`, `kconfig`, `kconfigwidgets`, `kcoreaddons`, `kcrash`, `kdbusaddons`, `kguiaddons`, `ki18n`, `kiconthemes`, `kio`, `kitemmodels`, `kitemviews`, `kjobwidgets`, `knotifications`, `kparts`, `kservice`, `ktextwidgets`, `kwidgetsaddons`, `kwindowsystem`, `kxmlgui`, `solid`, `sonnet`, `gwenview`
+
+---
+
+## Repository Structure
+
+```text
+project_pacman/
+├── core/                                # 112 [core] packages + signed ALPM sync databases
+│   ├── core.db / core.db.sig            # Default sync database + PGP signature
+│   ├── core.files / core.files.sig      # File list database + PGP signature
+│   ├── core-darwin_x86_64.db.tar.gz*    # Intel x86_64 database + .sig
+│   ├── core-darwin_arm64.db.tar.gz*     # Apple Silicon arm64 database + .sig
+│   └── *.pkg.tar.zst / *.sig            # Signed binary package archives
+├── extra/                               # 112 [extra] packages + signed ALPM sync databases
+│   ├── extra.db / extra.db.sig          # Extra sync database + PGP signature
+│   ├── extra.files / extra.files.sig    # Extra file list database + PGP signature
+│   ├── extra-darwin_x86_64.db.tar.gz*   # Intel x86_64 database + .sig
+│   ├── extra-darwin_arm64.db.tar.gz*    # Apple Silicon arm64 database + .sig
+│   └── *.pkg.tar.zst / *.sig            # Signed binary package archives
+├── packages/
+│   ├── core/                            # All 112 canonical [core] PKGBUILD recipes
+│   └── extra/                           # Canonical [extra] PKGBUILD recipes
+├── configs/
+│   └── pacman.conf                      # Reference rootless /opt/pacman configuration
+├── darwin_core_packages.txt             # Authoritative 112 FOSS Darwin [core] manifest
+├── darwin_extra_packages.md             # Curated FOSS Darwin [extra] package catalog
+├── arch_builder.py                      # Single-file Git-tag scanner, builder, signer & indexer
+├── env_loader.py                        # Packager environment helper
+├── install.sh                           # Interactive universal macOS bootstrap installer
+├── index.html                           # Project documentation & wiki portal
+└── README.md                            # Complete project documentation
+```
 
 ---
 
 ## Configuration (`pacman.conf` & `mirrorlist`)
 
-The primary configuration file is located at `/opt/pacman/etc/pacman.conf`:
+Primary configuration at `/opt/pacman/etc/pacman.conf`:
 
 ```ini
 [options]
@@ -229,9 +258,7 @@ SigLevel = PackageRequired DatabaseOptional
 Include = /opt/pacman/etc/pacman.d/mirrorlist
 ```
 
-### Mirrorlist (`/opt/pacman/etc/pacman.d/mirrorlist`)
-
-Servers for `core` and `extra` repositories:
+Mirrorlist at `/opt/pacman/etc/pacman.d/mirrorlist`:
 
 ```ini
 # Official project_pacman macOS Mirror List
@@ -243,20 +270,19 @@ Server = https://revanthnemtoor.github.io/project_pacman/$repo
 
 ## Security & Verification
 
-1. **Cryptographic PGP Signatures**: All package archives (`.pkg.tar.zst.sig`) and sync databases (`.db.tar.gz.sig`) are signed with detached PGP signatures using the official release key (`CEC5B78775CA4628`), fully verified by pacman prior to database sync and installation.
-2. **SHA-256 Digest Verification**: Every package is additionally verified against the SHA-256 digest recorded in the signed repository database metadata.
-3. **Codesigning**: All Mach-O executables and `.dylib` shared libraries undergo ad-hoc codesigning (`codesign --sign -`) to satisfy macOS Gatekeeper and security frameworks.
-4. **Integrity Validation**: Query any installed package to verify its validation mechanism:
+1. **Detached PGP Signatures (`.sig`)**: Every `.pkg.tar.zst` archive and `.db.tar.gz` database in `core/` and `extra/` is signed with official PGP key `CEC5B78775CA4628` and verified by `libalpm` prior to installation.
+2. **SHA-256 Digest Verification**: Every downloaded archive is validated against the SHA-256 digest stored inside the signed sync database.
+3. **macOS Gatekeeper Ad-Hoc Codesigning**: Every Mach-O binary executable and `.dylib` shared library is signed via `codesign --force --sign -`.
+4. **Verify Any Installed Package**:
    ```bash
-   pacman -Qi yazi | grep "Validated By"
-   # Output: Validated By : Signature
+   pacman -Qi neovim | grep "Validated By"
+   # Validated By    : Signature
    ```
 
 ---
 
 ## Maintainer & License
 
-* **Maintainer & Packager**: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
-* **Repository**: [https://github.com/revanthnemtoor/project_pacman](https://github.com/revanthnemtoor/project_pacman)
-* **License**: [GPL-3.0-or-later](LICENSE) (GNU General Public License v3.0 or later)
-
+- **Maintainer & Packager**: Revanth Reddy Nemtoor `<developerrevanth123@gmail.com>`
+- **Repository**: [https://github.com/revanthnemtoor/project_pacman](https://github.com/revanthnemtoor/project_pacman)
+- **License**: [GPL-3.0-or-later](LICENSE) (GNU General Public License v3.0 or later)

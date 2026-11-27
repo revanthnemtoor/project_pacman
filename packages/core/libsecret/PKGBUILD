@@ -25,7 +25,7 @@ build() {
     export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
     export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
 
-    /usr/local/bin/meson setup build \
+    meson setup build \
         --prefix=/opt/pacman \
         --libdir=lib \
         --buildtype=release \
@@ -36,12 +36,13 @@ build() {
         -Dmanpage=false \
         -Dbashcompdir=/opt/pacman/share/bash-completion/completions
 
-    /usr/local/bin/ninja -C build
+    ninja -C build
 }
 
 package() {
+    export PATH="/opt/pacman/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     cd "$srcdir/libsecret-${pkgver}"
-    DESTDIR="$pkgdir" /usr/local/bin/ninja -C build install
+    DESTDIR="$pkgdir" ninja -C build install
     install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
     find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
         if /usr/bin/file -b "$f" | grep -q "Mach-O"; then

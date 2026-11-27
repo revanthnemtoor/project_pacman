@@ -23,7 +23,7 @@ build() {
     export CXXFLAGS="-O2 -arch ${_arch} -isysroot ${_sdk}"
     export LDFLAGS="-arch ${_arch} -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
 
-    /usr/local/bin/meson setup build \
+    meson setup build \
         --prefix=/opt/pacman \
         --libdir=lib \
         --buildtype=release \
@@ -31,12 +31,13 @@ build() {
         -Ddistro_install=true \
         -Dwith_INIReader=true
 
-    /usr/local/bin/ninja -C build
+    ninja -C build
 }
 
 package() {
+    export PATH="/opt/pacman/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     cd "$srcdir/inih-r${pkgver}"
-    DESTDIR="$pkgdir" /usr/local/bin/ninja -C build install
+    DESTDIR="$pkgdir" ninja -C build install
     install -Dm644 LICENSE.txt "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
     find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
         if /usr/bin/file -b "$f" | grep -q "Mach-O"; then

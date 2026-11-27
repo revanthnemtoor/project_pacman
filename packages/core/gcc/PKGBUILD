@@ -1,29 +1,31 @@
-# Maintainer: Arch Darwin Pacman Port
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=gcc
 pkgver=14.2.0
 pkgrel=1
-pkgdesc="The GNU Compiler Collection (native x86_64-apple-darwin port for Intel Mac)"
-arch=('darwin_x86_64')
+pkgdesc="The GNU Compiler Collection (native Darwin port for Intel & Apple Silicon)"
+arch=('darwin_x86_64' 'darwin_arm64')
 url="https://gcc.gnu.org"
 license=('GPL-3.0-or-later WITH GCC-exception-3.1')
-depends=('zstd')
+depends=('zstd' 'zlib')
 optdepends=('binutils: for objdump, readelf, and inspection tools')
 provides=('gcc' 'gcc-libs')
 options=('!strip' '!libtool')
-source=("https://ftp.gnu.org/gnu/gcc/gcc-${pkgver}/gcc-${pkgver}.tar.xz")
-sha256sums=('a7b39bc69cbf9e25826c5a60ab26477001f7c08d85cec04bc0e29cabed6f3cc9')
+source_darwin_x86_64=("https://ftp.gnu.org/gnu/gcc/gcc-${pkgver}/gcc-${pkgver}.tar.xz")
+source_darwin_arm64=("https://github.com/iains/gcc-14-branch/archive/refs/tags/gcc-14.2-darwin-r2.tar.gz")
+sha256sums_darwin_x86_64=('a7b39bc69cbf9e25826c5a60ab26477001f7c08d85cec04bc0e29cabed6f3cc9')
+sha256sums_darwin_arm64=('SKIP')
 
 prepare() {
+    if [[ "$CARCH" == "darwin_arm64" ]]; then
+        mv -f "$srcdir/gcc-14-branch-gcc-14.2-darwin-r2" "$srcdir/gcc-$pkgver" 2>/dev/null || true
+    fi
     cd "$srcdir/gcc-$pkgver"
-    # Download in-tree gmp, mpfr, mpc, and isl for self-contained bootstrap
     if [[ ! -d gmp ]]; then
         ./contrib/download_prerequisites
     fi
 
-    # Fix Apple ld-prime / Xcode 16 linker error:
-    # Modern 64-bit Darwin does not export legacy 32-bit frame unwinding symbols
-    # in libSystem. Prune them from darwin-unwind.ver so -reexported_symbols_list succeeds.
-    python3 -c '
+    if [[ -f libgcc/config/darwin-unwind.ver ]]; then
+        python3 -c '
 path = "libgcc/config/darwin-unwind.ver"
 with open(path, "r") as f:
     lines = f.readlines()
@@ -31,48 +33,63 @@ filtered = [l for l in lines if not any(k in l for k in ["_frame_info", "_frame_
 with open(path, "w") as f:
     f.writelines(filtered)
 '
-
+    fi
     mkdir -p "$srcdir/build"
 }
 
 build() {
     cd "$srcdir/build"
-    local _darwin_ver=$(uname -r | cut -d. -f1)
-    local _sdk_path=$(xcrun --show-sdk-path)
+    local _darwin_ver="$(uname -r | cut -d. -f1)"
+    local _sdk_path="$(xcrun --show-sdk-path)"
+    local _triple="x86_64-apple-darwin${_darwin_ver}"
+    local _pkgver_label="Arch Darwin x86_64"
+    if [[ "$CARCH" == "darwin_arm64" ]]; then
+        _triple="aarch64-apple-darwin${_darwin_ver}"
+        _pkgver_label="Arch Darwin arm64"
+    fi
 
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     if [[ ! -f Makefile ]]; then
         "$srcdir/gcc-$pkgver/configure" \
             --prefix=/opt/pacman \
-            --build="x86_64-apple-darwin${_darwin_ver}" \
+            --build="${_triple}" \
+            --host="${_triple}" \
+            --target="${_triple}" \
             --with-sysroot="${_sdk_path}" \
             --with-native-system-header-dir=/usr/include \
             --enable-languages=c,c++,lto \
             --disable-multilib \
             --disable-nls \
+            --disable-bootstrap \
             --enable-checking=release \
-            --with-pkgversion="Arch Darwin x86_64" \
+            --with-pkgversion="${_pkgver_label}" \
             --with-system-zlib
     fi
 
-    make -j$(sysctl -n hw.ncpu)
+    make -j"$(sysctl -n hw.ncpu)"
 }
 
 package() {
     cd "$srcdir/build"
+    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     make DESTDIR="$pkgdir" install
 
-    # Fixincludes trap: prevent stale Apple SDK headers from breaking C++ builds
     find "$pkgdir"/opt/pacman/lib/gcc/*/*/include-fixed -maxdepth 1 -mindepth 1 \
         ! -name 'limits.h' ! -name 'syslimits.h' -exec rm -rf {} + 2>/dev/null || true
 
-    # Link standard cc and c++
     ln -sf gcc "$pkgdir/opt/pacman/bin/cc"
     ln -sf g++ "$pkgdir/opt/pacman/bin/c++"
 
-    # Sign Mach-O binaries for Darwin
-    find "$pkgdir/opt/pacman" -type f -perm -u+x | while read -r f; do
-        if file "$f" 2>/dev/null | grep -q "Mach-O"; then
-            codesign -f -s - "$f" 2>/dev/null || true
+    # Strip debug sections on huge compiler backend binaries so archive stays < 70 MB
+    find "$pkgdir/opt/pacman/libexec/gcc" "$pkgdir/opt/pacman/bin" -type f -perm -u+x 2>/dev/null | while read -r f; do
+        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
+            /usr/bin/strip -x "$f" 2>/dev/null || true
+        fi
+    done
+
+    find "$pkgdir/opt/pacman" -type f ! -type l | while read -r f; do
+        if /usr/bin/file -b "$f" 2>/dev/null | grep -q "Mach-O"; then
+            /usr/bin/codesign --force --sign - "$f" 2>/dev/null || true
         fi
     done
 }

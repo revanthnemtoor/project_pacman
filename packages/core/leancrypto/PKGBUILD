@@ -31,19 +31,20 @@ build() {
     export CFLAGS="-O2 -arch ${_arch} -isysroot ${_sdk}"
     export LDFLAGS="-arch ${_arch} -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
 
-    /usr/local/bin/meson setup build \
+    meson setup build \
         --prefix=/opt/pacman \
         --libdir=lib \
         --buildtype=release \
         --default-library=shared \
         -Dapps=disabled
 
-    /usr/local/bin/ninja -C build
+    ninja -C build
 }
 
 package() {
+    export PATH="/opt/pacman/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     cd "$srcdir/leancrypto-${pkgver}"
-    DESTDIR="$pkgdir" /usr/local/bin/ninja -C build install
+    DESTDIR="$pkgdir" ninja -C build install
     install -Dm644 LICENSE.bsd "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE" 2>/dev/null || \
         install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE" 2>/dev/null || true
     find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do

@@ -16,8 +16,8 @@ build() {
     local _arch="x86_64"
     [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
     local _sdk="$(xcrun --show-sdk-path)"
-    local _cmake="/usr/local/bin/cmake"
-    [[ ! -x "$_cmake" ]] && _cmake="/opt/local/bin/cmake"
+    local _cmake="/opt/pacman/bin/cmake"
+    for _c in /opt/pacman/bin/cmake /opt/homebrew/bin/cmake /usr/local/bin/cmake /opt/local/bin/cmake "$(command -v cmake 2>/dev/null)"; do [[ -x "$_c" ]] && { _cmake="$_c"; break; }; done
 
     export PATH="/opt/pacman/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     export PKG_CONFIG="/opt/pacman/bin/pkg-config"
@@ -47,8 +47,8 @@ build() {
 }
 
 package() {
-    local _cmake="/usr/local/bin/cmake"
-    [[ ! -x "$_cmake" ]] && _cmake="/opt/local/bin/cmake"
+    local _cmake="/opt/pacman/bin/cmake"
+    for _c in /opt/pacman/bin/cmake /opt/homebrew/bin/cmake /usr/local/bin/cmake /opt/local/bin/cmake "$(command -v cmake 2>/dev/null)"; do [[ -x "$_c" ]] && { _cmake="$_c"; break; }; done
     DESTDIR="$pkgdir" "$_cmake" --install build
     install -Dm644 "$srcdir/libde265-${pkgver}/COPYING" \
         "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"

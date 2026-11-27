@@ -70,6 +70,7 @@ dist/
 !extra/*.pkg.tar.zst.sig
 !core/*.sig
 !extra/*.sig
+/pacman/
 pacman/build/
 *.src.tar.gz
 
