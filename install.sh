@@ -207,10 +207,44 @@ if util_c.exists():
         )
         util_c.write_text(txt)
 
-# 2. src/pacman/conf.c: auto-detect darwin_<arch> & allow running without gpgme
+# 2. src/pacman/conf.c: auto-detect darwin_<arch>, strip -darwin_<arch> on xfercommand & allow running without gpgme
 conf_c = src / "src/pacman/conf.c"
 if conf_c.exists():
     txt = conf_c.read_text()
+    old_xfer = """\tfilename = get_filename(url);
+\tif(!filename) {
+\t\treturn -1;
+\t}"""
+    new_xfer = """\tfilename = get_filename(url);
+\tif(!filename) {
+\t\treturn -1;
+\t}
+
+#ifdef __APPLE__
+\tchar clean_filename[PATH_MAX];
+\tint is_sig = (strstr(filename, ".sig") != NULL);
+\tconst char *sig_suffix = is_sig ? ".sig" : "";
+
+\tif (strstr(filename, "-darwin_x86_64.db.tar.gz")) {
+\t\tsnprintf(clean_filename, sizeof(clean_filename), "%.*s.db%s",
+\t\t\t(int)(strstr(filename, "-darwin_x86_64.db.tar.gz") - filename), filename, sig_suffix);
+\t\tfilename = clean_filename;
+\t} else if (strstr(filename, "-darwin_arm64.db.tar.gz")) {
+\t\tsnprintf(clean_filename, sizeof(clean_filename), "%.*s.db%s",
+\t\t\t(int)(strstr(filename, "-darwin_arm64.db.tar.gz") - filename), filename, sig_suffix);
+\t\tfilename = clean_filename;
+\t} else if (strstr(filename, "-darwin_x86_64.files.tar.gz")) {
+\t\tsnprintf(clean_filename, sizeof(clean_filename), "%.*s.files%s",
+\t\t\t(int)(strstr(filename, "-darwin_x86_64.files.tar.gz") - filename), filename, sig_suffix);
+\t\tfilename = clean_filename;
+\t} else if (strstr(filename, "-darwin_arm64.files.tar.gz")) {
+\t\tsnprintf(clean_filename, sizeof(clean_filename), "%.*s.files%s",
+\t\t\t(int)(strstr(filename, "-darwin_arm64.files.tar.gz") - filename), filename, sig_suffix);
+\t\tfilename = clean_filename;
+\t}
+#endif"""
+    if "clean_filename" not in txt and old_xfer in txt:
+        txt = txt.replace(old_xfer, new_xfer, 1)
     if "darwin_%s" not in txt and 'strcmp(arch, "auto") == 0' in txt:
         txt = txt.replace(
             "\t\tarch = newarch;\n\t}",
@@ -278,7 +312,69 @@ if repoadd.exists():
     txt = txt.replace('sha256sum=$(sha256sum "$pkgfile")', 'sha256sum=$(sha256sum "$pkgfile" 2>/dev/null || shasum -a 256 "$pkgfile")')
     repoadd.write_text(txt)
 
-# 6. scripts/libmakepkg/executable/fakeroot.sh.in: optional fakeroot on Darwin
+# 6. scripts/makepkg.sh.in & scripts/libmakepkg/executable/fakeroot.sh.in: rootless Darwin builds & shasum fallback
+mkpkg = src / "scripts/makepkg.sh.in"
+if mkpkg.exists():
+    txt = mkpkg.read_text()
+    old_enter = """enter_fakeroot() {
+\tmsg "$(gettext "Entering %s environment...")" "fakeroot"
+\tfakeroot -- bash -$- "${BASH_SOURCE[0]}" -F "${ARGLIST[@]}" || exit $?
+}"""
+    new_enter = """enter_fakeroot() {
+\tif [[ "$(uname -s)" != "Darwin" ]] && type -p fakeroot >/dev/null; then
+\t\tmsg "$(gettext "Entering %s environment...")" "fakeroot"
+\t\tfakeroot -- bash -$- "${BASH_SOURCE[0]}" -F "${ARGLIST[@]}" || exit $?
+\telse
+\t\tmsg "$(gettext "Entering %s environment...")" "rootless-macos"
+\t\tFAKEROOTKEY=1 bash -$- "${BASH_SOURCE[0]}" -F "${ARGLIST[@]}" || exit $?
+\tfi
+}"""
+    if "rootless-macos" not in txt and old_enter in txt:
+        txt = txt.replace(old_enter, new_enter, 1)
+    txt = txt.replace(
+        'printf "# using %s\\n" "$(fakeroot -v)"',
+        'printf "# using %s\\n" "$(fakeroot -v 2>/dev/null || echo \'rootless-macos\')"',
+    )
+    txt = txt.replace(
+        'local sum="$(sha256sum "${BUILDFILE}")"',
+        'local sum="$(sha256sum "${BUILDFILE}" 2>/dev/null || shasum -a 256 "${BUILDFILE}")"',
+    )
+    old_touch = """\t# ensure all elements of the package have the same mtime
+\tfind . -exec touch -h -d @$SOURCE_DATE_EPOCH {} +
+
+\tmsg2 "$(gettext "Generating .MTREE file...")"
+\tlist_package_files | LANG=C bsdtar -cnf - --format=mtree \\
+\t\t--options='!all,use-set,type,uid,gid,mode,time,size,sha256,link' \\
+\t\t--null --files-from - --exclude .MTREE | gzip -c -f -n > .MTREE
+\ttouch -d @$SOURCE_DATE_EPOCH .MTREE"""
+    new_touch = """\t# ensure all elements of the package have the same mtime (macOS BSD touch + GNU touch compatible)
+\tlocal _touch_time=$(date -u -r "$SOURCE_DATE_EPOCH" +%Y%m%d%H%M.%S 2>/dev/null || date -u -d "@$SOURCE_DATE_EPOCH" +%Y%m%d%H%M.%S 2>/dev/null)
+\tif [[ -n $_touch_time ]]; then
+\t\tfind . -exec touch -h -t "$_touch_time" {} + 2>/dev/null || true
+\tfi
+
+\tmsg2 "$(gettext "Generating .MTREE file...")"
+\tlist_package_files | LANG=C bsdtar -cnf - --format=mtree \\
+\t\t--options='!all,use-set,type,uid,gid,mode,time,size,sha256,link' \\
+\t\t--null --files-from - --exclude .MTREE | gzip -c -f -n > .MTREE
+\tif [[ -n $_touch_time ]]; then
+\t\ttouch -t "$_touch_time" .MTREE 2>/dev/null || true
+\tfi"""
+    if "_touch_time" not in txt and old_touch in txt:
+        txt = txt.replace(old_touch, new_touch, 1)
+    mkpkg.write_text(txt)
+
+meson_b = src / "meson.build"
+if meson_b.exists():
+    txt = meson_b.read_text()
+    if "carch = 'darwin_' + carch" not in txt:
+        txt = txt.replace(
+            "carch = chost.split('-')[0]",
+            "carch = chost.split('-')[0]\nif os.startswith('darwin')\n  carch = 'darwin_' + carch\nendif",
+            1,
+        )
+        meson_b.write_text(txt)
+
 froot = src / "scripts/libmakepkg/executable/fakeroot.sh.in"
 if froot.exists():
     txt = froot.read_text()
@@ -416,8 +512,25 @@ activate_prebuilt_db "$PROJECT_DIR/core" "core"
 activate_prebuilt_db "$PROJECT_DIR/extra" "extra"
 
 # -----------------------------------------------------------------------------
-# 7. Configure pacman.conf & makepkg.conf Exclusively for Current Architecture
+# 7. Configure mirrorlist, pacman.conf & makepkg.conf Exclusively for Current Arch
 # -----------------------------------------------------------------------------
+mkdir -p "$PACMAN_PREFIX/etc/pacman.d"
+if [ ! -f "$PACMAN_PREFIX/etc/pacman.d/mirrorlist" ]; then
+    if [ -f "$PROJECT_DIR/configs/mirrorlist" ]; then
+        cp "$PROJECT_DIR/configs/mirrorlist" "$PACMAN_PREFIX/etc/pacman.d/mirrorlist"
+    else
+        cat << 'EOF' > "$PACMAN_PREFIX/etc/pacman.d/mirrorlist"
+#
+# /opt/pacman/etc/pacman.d/mirrorlist
+# Official project_pacman macOS Mirror List
+#
+
+Server = https://raw.githubusercontent.com/revanthnemtoor/project_pacman/main/$repo
+Server = https://revanthnemtoor.github.io/project_pacman/$repo
+EOF
+    fi
+fi
+
 echo "-> Writing $PACMAN_PREFIX/etc/pacman.conf (Architecture = $DARWIN_ARCH $HOST_ARCH any)..."
 cat << EOF > "$PACMAN_PREFIX/etc/pacman.conf"
 #
@@ -578,8 +691,10 @@ fi
 # -----------------------------------------------------------------------------
 # 9. Sync Package Databases & Register Pacman Package
 # -----------------------------------------------------------------------------
-echo "-> Synchronizing package databases..."
-"$PACMAN_PREFIX/bin/pacman" -Sy
+if [ "${SKIP_INITIAL_SYNC:-0}" != "1" ]; then
+    echo "-> Synchronizing package databases..."
+    "$PACMAN_PREFIX/bin/pacman" -Sy || echo "   (Note: initial sync skipped or deferred until keyring setup)"
+fi
 
 PACMAN_PKG="$(ls "$PROJECT_DIR/core/pacman-"*"-$DARWIN_ARCH.pkg.tar.zst" 2>/dev/null | head -n1 || true)"
 if [ -n "$PACMAN_PKG" ] && [ -f "$PACMAN_PKG" ]; then

@@ -37,8 +37,8 @@ META_PACKAGES = {"base", "base-devel", "pacman-mirrorlist", "filesystem"}
 # Topological build order across [core] and [extra] so dependencies install into /opt/pacman
 # before downstream consumers compile against them.
 ORDERED_TIERS: list[str] = [
-    # Tier 1: readline first (unlocks core/bash), pure data, autotools, GnuPG crypto libs & build tools
-    "readline", "iana-etc", "filesystem", "tzdata",
+    # Tier 1: bzip2, xz & readline first (unlocks core/libarchive & core/bash), pure data, autotools, GnuPG libs & build tools
+    "bzip2", "xz", "readline", "iana-etc", "filesystem", "tzdata",
     "m4", "autoconf", "libtool", "bison", "flex", "patch", "file", "which", "fakeroot",
     "npth", "libgpg-error", "libassuan", "libgcrypt", "libksba",
     "pinentry", "libedit", "dash",
@@ -59,7 +59,7 @@ ORDERED_TIERS: list[str] = [
     "libde265", "kvazaar", "dav1d", "aom", "libheif", "libraw",
     "imagemagick", "qpdf", "chafa",
     # Tier 5: C/C++/Go/Python/Rust CLI & Editor Suite
-    "htop", "entr", "yt-dlp", "mtr", "tcpdump", "tig", "aria2", "neovim", "gh",
+    "git", "htop", "entr", "yt-dlp", "mtr", "tcpdump", "tig", "aria2", "neovim", "gh",
     "bat", "eza", "zoxide", "starship", "git-delta", "hyperfine",
     "just", "procs", "dust", "sd", "tealdeer", "tokei", "bottom", "xh",
     # Tier 6: Heavy Toolchain (GCC last so all 101 other packages checkpoint first)
@@ -299,13 +299,28 @@ def main() -> None:
                 check=True,
                 env=env,
             )
-            if pkgname == "readline":
+            if pkgname == "xz":
+                for la_pkg in CORE_DIR.glob("libarchive-*-darwin_arm64.pkg.tar.zst"):
+                    subprocess.run(
+                        [str(PACMAN_BIN), "-U", "-dd", "--overwrite", "*", "--noconfirm", str(la_pkg)],
+                        check=False,
+                        env=env,
+                    )
+            elif pkgname == "readline":
                 for bash_pkg in CORE_DIR.glob("bash-*-darwin_arm64.pkg.tar.zst"):
                     subprocess.run(
                         [str(PACMAN_BIN), "-U", "-dd", "--overwrite", "*", "--noconfirm", str(bash_pkg)],
                         check=False,
                         env=env,
                     )
+            elif pkgname == "pinentry":
+                for gp_glob in ("gpgme-*-darwin_arm64.pkg.tar.zst", "gnupg-*-darwin_arm64.pkg.tar.zst"):
+                    for gp_pkg in CORE_DIR.glob(gp_glob):
+                        subprocess.run(
+                            [str(PACMAN_BIN), "-U", "-dd", "--overwrite", "*", "--noconfirm", str(gp_pkg)],
+                            check=False,
+                            env=env,
+                        )
             all_succeeded.append(pkgname)
             batch_built.append(pkgname)
             print(f"✓ Built, signed & installed {target_pkg.name} ({sz / 1024:.1f} KB)", flush=True)

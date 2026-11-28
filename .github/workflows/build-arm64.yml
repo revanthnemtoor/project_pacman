@@ -92,7 +92,7 @@ jobs:
           chmod 755 /opt/pacman/bin/bash
 
           # 1. Build native darwin_arm64 pacman, makepkg & repo-add
-          NONINTERACTIVE=1 PATH_PRIORITY=skip bash ./install.sh -y
+          SKIP_INITIAL_SYNC=1 NONINTERACTIVE=1 PATH_PRIORITY=skip bash ./install.sh -y
 
           # 2. Initialize ALPM keyring and trust CEC5B78775CA4628
           export PATH="/opt/pacman/bin:/opt/homebrew/bin:$PATH"
@@ -102,13 +102,13 @@ jobs:
           /opt/pacman/bin/pacman-key --lsign-key CEC5B78775CA4628
           rm -f /tmp/packager.asc
 
-          # 3. Seed /opt/pacman with all existing darwin_arm64 packages in core/ & extra/
+          # 3. Seed /opt/pacman with existing darwin_arm64 packages (deferring packages whose Tier 1 libs build first)
           shopt -s nullglob
           CORE_PKGS=()
           for p in core/*-darwin_arm64.pkg.tar.zst; do
             base="$(basename "$p")"
             case "$base" in
-              base-[0-9]*|base-devel-[0-9]*) continue ;;
+              base-[0-9]*|base-devel-[0-9]*|bash-[0-9]*|libarchive-[0-9]*|gnupg-[0-9]*|gpgme-[0-9]*|pacman-[0-9]*) continue ;;
             esac
             CORE_PKGS+=("$p")
           done
@@ -116,20 +116,24 @@ jobs:
             /opt/pacman/bin/pacman -U -dd --overwrite '*' --noconfirm "${CORE_PKGS[@]}"
           fi
 
-          EXTRA_PKGS=(extra/*-darwin_arm64.pkg.tar.zst)
+          EXTRA_PKGS=()
+          for p in extra/*-darwin_arm64.pkg.tar.zst; do
+            EXTRA_PKGS+=("$p")
+          done
           if [ "${#EXTRA_PKGS[@]}" -gt 0 ]; then
             /opt/pacman/bin/pacman -U -dd --overwrite '*' --noconfirm "${EXTRA_PKGS[@]}"
           fi
 
-          # 4. Re-install patched pacman/makepkg/repo-add over seeded prebuilt pacman so all latest Darwin makepkg fixes are active
+          # 4. Re-install patched pacman/makepkg/repo-add so all Darwin rootless fixes are active
           ninja -C pacman/build install
-          # Keep working arm64 bash at /opt/pacman/bin/bash until Tier 1 builds core/readline
-          if ! /opt/pacman/bin/bash --version >/dev/null 2>&1; then
-            cp -f /opt/homebrew/bin/bash /opt/pacman/bin/bash
-            chmod 755 /opt/pacman/bin/bash
+          # Keep working arm64 bash & bsdtar & gpg available until Tier 1 builds bzip2, xz, readline & pinentry
+          cp -f /opt/homebrew/bin/bash /opt/pacman/bin/bash
+          chmod 755 /opt/pacman/bin/bash
+          if [ ! -x /opt/pacman/bin/bsdtar ]; then
+            ln -sf /opt/homebrew/opt/libarchive/bin/bsdtar /opt/pacman/bin/bsdtar
           fi
           if [ ! -x /opt/pacman/bin/gpg ] || ! /opt/pacman/bin/gpg --version >/dev/null 2>&1; then
-            ln -sf "$(command -v gpg)" /opt/pacman/bin/gpg
+            ln -sf /opt/homebrew/bin/gpg /opt/pacman/bin/gpg
           fi
 
           sed -i '' 's/^CARCH=.*/CARCH="darwin_arm64"/' /opt/pacman/etc/makepkg.conf
