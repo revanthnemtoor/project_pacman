@@ -39,8 +39,8 @@ META_PACKAGES = {"base", "base-devel", "pacman-mirrorlist", "filesystem"}
 
 # Full topological build order across [core] and [extra]
 ORDERED_TIERS: list[str] = [
-    # Tier 0A: Zero-dep compression, FFI, XML/JSON & hashing libraries
-    "zlib", "bzip2", "xz", "lz4", "lzo", "brotli", "zstd",
+    # Tier 0A: Zero-dep compression, curses, FFI, XML/JSON & hashing libraries
+    "ncurses", "zlib", "bzip2", "xz", "lz4", "lzo", "brotli", "zstd",
     "expat", "libffi", "libxcrypt", "popt", "xxhash", "yyjson", "utf8proc", "libsodium", "oniguruma", "json-c",
     # Tier 0B: Unicode, i18n, regex, readline, pkg-config, bignum math & OpenSSL (needed before coreutils)
     "libunistring", "libxml2", "gettext", "pcre2", "readline", "pkgconf",
@@ -48,22 +48,22 @@ ORDERED_TIERS: list[str] = [
     # Tier 0C: Core UNIX shell, autotools & userland utilities
     "bash", "coreutils", "sed", "grep", "gawk", "diffutils", "findutils",
     "patch", "tar", "gzip", "make", "m4", "autoconf", "libtool", "bison", "flex",
-    "file", "which", "fakeroot", "less", "nano", "texinfo", "tree",
+    "file", "which", "fakeroot", "less", "nano", "texinfo", "tree", "groff",
     # Tier 0D: TLS, HTTP, Kerberos, SQLite, Libevent & GnuPG crypto stack
-    "libidn2", "libpsl", "krb5", "libssh2", "libnghttp2", "libnghttp3", "libngtcp2",
+    "libidn2", "libpsl", "krb5", "libssh2", "libnghttp2", "libnghttp3",
     "curl", "sqlite", "libevent", "libusb", "libpipeline",
     "npth", "libgpg-error", "libassuan", "libgcrypt", "libksba", "pinentry", "gnupg",
     # Tier 1: Pure data, shells & modern build tools
     "iana-etc", "filesystem", "tzdata", "libedit", "dash",
     "ninja", "meson", "p11-kit", "ccache", "cmake", "pigz", "7zip",
     # Tier 2: ASN.1, TLS, DB/Network & System Libraries
-    "nettle", "libtasn1", "gnutls",
+    "nettle", "libtasn1", "gnutls", "libngtcp2",
     "gc", "gdbm", "jansson", "libinih", "libverto", "mpdecimal", "unixodbc",
     "libpcap", "ldns", "leancrypto", "libmicrohttpd",
     "libsasl", "openldap", "openssh",
     "nspr", "icu", "glib2", "libsecret", "nss",
     # Tier 3: Man/Doc Pipeline, Binutils & Language Runtimes
-    "groff", "man-db", "inetutils", "logrotate", "s-nail",
+    "man-db", "inetutils", "logrotate", "s-nail",
     "binutils", "perl", "python", "guile",
     # Tier 4: Media Codec Stack & Image/PDF/Terminal Graphics
     "jemalloc", "freetype2", "libwebp", "openjpeg2",
@@ -125,11 +125,14 @@ def list_arch_packages(repo_dir: Path, arch: str) -> dict[str, Path]:
     return out
 
 
-def archive_minos_exceeds_15(pkg_path: Path) -> bool:
-    """Return True if Mach-O binaries inside pkg_path target macOS > 15.0 (e.g. 26.0/27.0)."""
+def archive_needs_rebuild(pkg_path: Path) -> bool:
+    """Return True if Mach-O binaries target macOS > 15.0 or config scripts leak x86_64 flags."""
     bsdtar = "/opt/pacman/bin/bsdtar" if os.path.exists("/opt/pacman/bin/bsdtar") else "bsdtar"
     with tempfile.TemporaryDirectory() as td:
         subprocess.run([bsdtar, "-xf", str(pkg_path), "-C", td], check=False, capture_output=True)
+        cfg = Path(td) / "opt/pacman/bin/ncursesw6-config"
+        if cfg.is_file() and "x86_64" in cfg.read_text(errors="ignore"):
+            return True
         for sub in ("opt/pacman/bin", "opt/pacman/lib"):
             d = Path(td) / sub
             if not d.exists():
@@ -164,7 +167,7 @@ def compute_missing_arm64(only_pkg: str = "") -> list[tuple[str, str, Path]]:
             pb = PACKAGES_DIR / repo_name / name / "PKGBUILD"
             if not pb.is_file():
                 continue
-            if name not in arm_map or archive_minos_exceeds_15(arm_map[name]):
+            if name not in arm_map or archive_needs_rebuild(arm_map[name]):
                 missing_map[name] = (repo_name, pb)
 
     ordered: list[tuple[str, str, Path]] = []
@@ -201,10 +204,12 @@ def sign_archive(pkg_path: Path, gpg_bin: str, env: dict[str, str]) -> Path:
     """Create detached PGP .sig signature for pkg_path."""
     sig_path = pkg_path.with_name(pkg_path.name + ".sig")
     sig_path.unlink(missing_ok=True)
+    gpg_env = env.copy()
+    gpg_env["PATH"] = f"/opt/homebrew/bin:{env['PATH']}"
     subprocess.run(
         [gpg_bin, "--detach-sign", "--batch", "--yes", "--pinentry-mode", "loopback", "-u", GPG_KEYID, str(pkg_path)],
         check=True,
-        env=env,
+        env=gpg_env,
     )
     return sig_path
 
@@ -212,6 +217,8 @@ def sign_archive(pkg_path: Path, gpg_bin: str, env: dict[str, str]) -> Path:
 def reindex_arm64_dbs(env: dict[str, str]) -> None:
     """Rebuild and sign core-darwin_arm64.db.tar.gz and extra-darwin_arm64.db.tar.gz."""
     print("\n=== Re-indexing & signing darwin_arm64 repository databases ===", flush=True)
+    gpg_env = env.copy()
+    gpg_env["PATH"] = f"/opt/homebrew/bin:{env['PATH']}"
     for repo_dir, repo_name in [(CORE_DIR, "core"), (EXTRA_DIR, "extra")]:
         for p in list(repo_dir.glob(f"{repo_name}-darwin_arm64.db*")) + list(
             repo_dir.glob(f"{repo_name}-darwin_arm64.files*")
@@ -232,7 +239,7 @@ def reindex_arm64_dbs(env: dict[str, str]) -> None:
             "--include-sigs",
             str(db_arm),
         ] + arm_pkgs
-        subprocess.run(cmd, check=True, env=env)
+        subprocess.run(cmd, check=True, env=gpg_env)
 
         for p in list(repo_dir.glob(f"{repo_name}-darwin_arm64.db*")) + list(
             repo_dir.glob(f"{repo_name}-darwin_arm64.files*")

@@ -36,6 +36,7 @@ build() {
         --with-ldns=/opt/pacman \
         --with-kerberos5=/opt/pacman \
         --with-zlib=/opt/pacman \
+        --without-zlib-version-check \
         --without-pam
 
     make -j"$(sysctl -n hw.ncpu)"

@@ -20,7 +20,7 @@ build() {
   local _jobs
   _jobs="$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
   cd "${srcdir}/libevent-${pkgver}-stable"
-  ./configure --prefix=/opt/pacman --disable-samples --disable-libevent-regress --disable-static
+  ac_cv_func_arc4random_addrandom=no ./configure --prefix=/opt/pacman --disable-samples --disable-libevent-regress --disable-static
   make -j"${_jobs}"
 }
 

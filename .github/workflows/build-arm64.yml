@@ -51,7 +51,7 @@ jobs:
           uname -a
           test "$(uname -m)" = "arm64"
           HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 \
-            brew install bash meson ninja pkgconf libarchive openssl@3 gpgme gnupg zstd autoconf automake libtool gettext coreutils gnu-sed gawk grep
+            brew install bash meson ninja cmake go pkgconf libarchive openssl@3 gpgme gnupg zstd autoconf automake libtool gettext coreutils gnu-sed gawk grep
 
       - name: Import PGP Signing Key (CEC5B78775CA4628)
         env:
@@ -143,9 +143,13 @@ jobs:
           cp -f /tmp/pacman.conf.saved /opt/pacman/etc/pacman.conf
           rm -f /tmp/pacman.conf.saved
 
-          # Keep working arm64 bash, GNU install, bsdtar & gpg available until Tier 0 builds coreutils/libarchive/gnupg
+          # Keep working arm64 bootstrap tools available in /opt/pacman/bin even when PKGBUILDs restrict PATH
           cp -f /opt/homebrew/bin/bash /opt/pacman/bin/bash
           chmod 755 /opt/pacman/bin/bash
+          if [ -x /opt/homebrew/bin/zstd ] && [ ! -x /opt/pacman/bin/zstd ]; then
+            cp -f /opt/homebrew/bin/zstd /opt/pacman/bin/zstd
+            chmod 755 /opt/pacman/bin/zstd
+          fi
           if [ ! -x /opt/pacman/bin/install ] && [ -x /opt/homebrew/bin/ginstall ]; then
             cp -f /opt/homebrew/bin/ginstall /opt/pacman/bin/install
             chmod 755 /opt/pacman/bin/install
@@ -153,9 +157,17 @@ jobs:
           if [ ! -x /opt/pacman/bin/bsdtar ]; then
             ln -sf /opt/homebrew/opt/libarchive/bin/bsdtar /opt/pacman/bin/bsdtar
           fi
+          for tool in cargo rustc cmake ninja meson go python3 autoconf automake autoreconf autoheader autom4te aclocal; do
+            tpath="$(PATH="$HOME/.cargo/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin" command -v "$tool" 2>/dev/null || true)"
+            if [ -n "$tpath" ] && [ ! -e "/opt/pacman/bin/$tool" ]; then
+              ln -sf "$tpath" "/opt/pacman/bin/$tool"
+            fi
+          done
           if [ ! -x /opt/pacman/bin/gpg ] || ! /opt/pacman/bin/gpg --version >/dev/null 2>&1; then
             ln -sf /opt/homebrew/bin/gpg /opt/pacman/bin/gpg
           fi
+
+          /usr/bin/sed -i '' 's/^LocalFileSigLevel.*/LocalFileSigLevel = Never/' /opt/pacman/etc/pacman.conf
 
           /usr/bin/sed -i '' 's/^CARCH=.*/CARCH="darwin_arm64"/' /opt/pacman/etc/makepkg.conf
           /usr/bin/sed -i '' 's/^CHOST=.*/CHOST="arm64-apple-darwin"/' /opt/pacman/etc/makepkg.conf

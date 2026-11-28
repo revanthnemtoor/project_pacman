@@ -33,6 +33,7 @@ build() {
     NO_TCLTK=YesPlease \
     NO_PERL=YesPlease \
     NO_PYTHON=YesPlease \
+    INSTALL_SYMLINKS=1 \
     ICONV_OMITS_BOM=No \
     -j"${_jobs}" all
 }
@@ -49,6 +50,7 @@ package() {
     NO_TCLTK=YesPlease \
     NO_PERL=YesPlease \
     NO_PYTHON=YesPlease \
+    INSTALL_SYMLINKS=1 \
     DESTDIR="${pkgdir}" install
   if [ -d "${pkgdir}/opt/pacman" ]; then
     find "${pkgdir}/opt/pacman" -type f \( -perm -111 -o -name "*.dylib" -o -name "*.so" \) -print0 2>/dev/null | while IFS= read -r -d '' f; do

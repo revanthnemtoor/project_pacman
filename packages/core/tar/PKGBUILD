@@ -20,7 +20,7 @@ build() {
   local _jobs
   _jobs="$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
   cd "${srcdir}/tar-${pkgver}"
-  FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/opt/pacman --without-selinux
+  FORCE_UNSAFE_CONFIGURE=1 LIBS="-lintl -liconv" ./configure --prefix=/opt/pacman --without-selinux
   make -j"${_jobs}"
 }
 

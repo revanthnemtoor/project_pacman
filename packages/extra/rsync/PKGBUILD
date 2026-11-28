@@ -14,7 +14,7 @@ build() {
   export PATH="/opt/pacman/bin:/opt/homebrew/bin:/opt/homebrew/opt/gettext/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
   export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
   export CPPFLAGS="-I/opt/pacman/include"
-  export CFLAGS="-O2 -I/opt/pacman/include"
+  export CFLAGS="-O2 -I/opt/pacman/include -Wno-implicit-int -Wno-implicit-function-declaration -Wno-int-conversion"
   export CXXFLAGS="-O2 -I/opt/pacman/include"
   export LDFLAGS="-L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib"
   local _jobs

@@ -20,7 +20,7 @@ build() {
   local _jobs
   _jobs="$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
   cd "${srcdir}/vim-${pkgver}"
-  ./configure --prefix=/opt/pacman --with-features=huge --enable-multibyte --enable-gui=no --without-x --with-tlib=ncursesw --disable-darwin
+  ./configure --prefix=/opt/pacman --with-features=huge --enable-multibyte --enable-gui=no --without-x --with-tlib=ncursesw --disable-darwin --disable-nls
   make -j"${_jobs}"
 }
 

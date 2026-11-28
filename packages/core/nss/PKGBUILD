@@ -18,7 +18,7 @@ build() {
     local _cpu="i386"
     if [[ "$CARCH" == "darwin_arm64" ]]; then
         _arch="arm64"
-        _cpu="arm"
+        _cpu="aarch64"
     fi
     local _sdk="$(xcrun --show-sdk-path)"
     export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
