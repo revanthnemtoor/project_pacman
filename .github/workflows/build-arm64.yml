@@ -125,7 +125,11 @@ jobs:
           fi
 
           # 4. Re-install patched pacman/makepkg/repo-add so all Darwin rootless fixes are active
+          cp -f /opt/pacman/etc/pacman.conf /tmp/pacman.conf.saved
           ninja -C pacman/build install
+          cp -f /tmp/pacman.conf.saved /opt/pacman/etc/pacman.conf
+          rm -f /tmp/pacman.conf.saved
+
           # Keep working arm64 bash & bsdtar & gpg available until Tier 1 builds bzip2, xz, readline & pinentry
           cp -f /opt/homebrew/bin/bash /opt/pacman/bin/bash
           chmod 755 /opt/pacman/bin/bash
@@ -136,11 +140,11 @@ jobs:
             ln -sf /opt/homebrew/bin/gpg /opt/pacman/bin/gpg
           fi
 
-          sed -i '' 's/^CARCH=.*/CARCH="darwin_arm64"/' /opt/pacman/etc/makepkg.conf
-          sed -i '' 's/^CHOST=.*/CHOST="arm64-apple-darwin"/' /opt/pacman/etc/makepkg.conf
-          sed -i '' 's/^OPTIONS=(strip /OPTIONS=(!strip /' /opt/pacman/etc/makepkg.conf
-          sed -i '' 's/^PKGEXT=.*/PKGEXT=".pkg.tar.zst"/' /opt/pacman/etc/makepkg.conf
-          sed -i '' 's|^#*PACKAGER=.*|PACKAGER="Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"|' /opt/pacman/etc/makepkg.conf
+          /usr/bin/sed -i '' 's/^CARCH=.*/CARCH="darwin_arm64"/' /opt/pacman/etc/makepkg.conf
+          /usr/bin/sed -i '' 's/^CHOST=.*/CHOST="arm64-apple-darwin"/' /opt/pacman/etc/makepkg.conf
+          /usr/bin/sed -i '' 's/^OPTIONS=(strip /OPTIONS=(!strip /' /opt/pacman/etc/makepkg.conf
+          /usr/bin/sed -i '' 's/^PKGEXT=.*/PKGEXT=".pkg.tar.zst"/' /opt/pacman/etc/makepkg.conf
+          /usr/bin/sed -i '' 's|^#*PACKAGER=.*|PACKAGER="Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"|' /opt/pacman/etc/makepkg.conf
 
           # Restore any repo files touched by install.sh so git working tree is clean for checkpoint rebases
           git checkout -- configs/ core/ extra/ || true
