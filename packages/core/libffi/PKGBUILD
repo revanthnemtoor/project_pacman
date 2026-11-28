@@ -1,6 +1,6 @@
 # Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=libffi
-pkgver=3.4.6
+pkgver=3.4.7
 pkgrel=1
 pkgdesc="Portable foreign function interface library"
 arch=('darwin_x86_64' 'darwin_arm64')

@@ -86,9 +86,8 @@ jobs:
           sudo chown -R "$USER:$(id -gn)" /opt/pacman
           export PATH="/opt/pacman/bin:/opt/homebrew/bin:$PATH"
 
-          # Stage working arm64 Bash 5.x at /opt/pacman/bin/bash so meson binds #!/opt/pacman/bin/bash
-          # before core/readline is built in Tier 1
-          cp -f /opt/homebrew/bin/bash /opt/pacman/bin/bash
+          # Stage working arm64 Bash 5.x wrapper at /opt/pacman/bin/bash so meson binds #!/opt/pacman/bin/bash
+          printf '#!/bin/sh\nexec /opt/homebrew/bin/bash "$@"\n' > /opt/pacman/bin/bash
           chmod 755 /opt/pacman/bin/bash
 
           # 1. Build native darwin_arm64 pacman, makepkg & repo-add
@@ -144,14 +143,15 @@ jobs:
           rm -f /tmp/pacman.conf.saved
 
           # Keep working arm64 bootstrap tools available in /opt/pacman/bin even when PKGBUILDs restrict PATH
-          cp -f /opt/homebrew/bin/bash /opt/pacman/bin/bash
+          # (Use exec wrappers rather than cp so @executable_path/../lib in Homebrew Mach-Os still resolves!)
+          printf '#!/bin/sh\nexec /opt/homebrew/bin/bash "$@"\n' > /opt/pacman/bin/bash
           chmod 755 /opt/pacman/bin/bash
-          if [ -x /opt/homebrew/bin/zstd ] && [ ! -x /opt/pacman/bin/zstd ]; then
-            cp -f /opt/homebrew/bin/zstd /opt/pacman/bin/zstd
+          if [ -x /opt/homebrew/bin/zstd ] && [ ! -e /opt/pacman/bin/zstd ]; then
+            printf '#!/bin/sh\nexec /opt/homebrew/bin/zstd "$@"\n' > /opt/pacman/bin/zstd
             chmod 755 /opt/pacman/bin/zstd
           fi
-          if [ ! -x /opt/pacman/bin/install ] && [ -x /opt/homebrew/bin/ginstall ]; then
-            cp -f /opt/homebrew/bin/ginstall /opt/pacman/bin/install
+          if [ ! -e /opt/pacman/bin/install ] && [ -x /opt/homebrew/bin/ginstall ]; then
+            printf '#!/bin/sh\nexec /opt/homebrew/bin/ginstall "$@"\n' > /opt/pacman/bin/install
             chmod 755 /opt/pacman/bin/install
           fi
           if [ ! -x /opt/pacman/bin/bsdtar ]; then
