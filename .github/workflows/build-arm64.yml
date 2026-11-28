@@ -143,9 +143,13 @@ jobs:
           cp -f /tmp/pacman.conf.saved /opt/pacman/etc/pacman.conf
           rm -f /tmp/pacman.conf.saved
 
-          # Keep working arm64 bash & bsdtar & gpg available until Tier 1 builds bzip2, xz, readline & pinentry
+          # Keep working arm64 bash, GNU install, bsdtar & gpg available until Tier 0 builds coreutils/libarchive/gnupg
           cp -f /opt/homebrew/bin/bash /opt/pacman/bin/bash
           chmod 755 /opt/pacman/bin/bash
+          if [ ! -x /opt/pacman/bin/install ] && [ -x /opt/homebrew/bin/ginstall ]; then
+            cp -f /opt/homebrew/bin/ginstall /opt/pacman/bin/install
+            chmod 755 /opt/pacman/bin/install
+          fi
           if [ ! -x /opt/pacman/bin/bsdtar ]; then
             ln -sf /opt/homebrew/opt/libarchive/bin/bsdtar /opt/pacman/bin/bsdtar
           fi

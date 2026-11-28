@@ -42,15 +42,15 @@ ORDERED_TIERS: list[str] = [
     # Tier 0A: Zero-dep compression, FFI, XML/JSON & hashing libraries
     "zlib", "bzip2", "xz", "lz4", "lzo", "brotli", "zstd",
     "expat", "libffi", "libxcrypt", "popt", "xxhash", "yyjson", "utf8proc", "libsodium", "oniguruma", "json-c",
-    # Tier 0B: Unicode, i18n, regex, readline, pkg-config & bignum math
+    # Tier 0B: Unicode, i18n, regex, readline, pkg-config, bignum math & OpenSSL (needed before coreutils)
     "libunistring", "libxml2", "gettext", "pcre2", "readline", "pkgconf",
-    "gmp", "mpfr", "libmpc", "libisl",
+    "gmp", "mpfr", "libmpc", "libisl", "openssl",
     # Tier 0C: Core UNIX shell, autotools & userland utilities
     "bash", "coreutils", "sed", "grep", "gawk", "diffutils", "findutils",
     "patch", "tar", "gzip", "make", "m4", "autoconf", "libtool", "bison", "flex",
     "file", "which", "fakeroot", "less", "nano", "texinfo", "tree",
     # Tier 0D: TLS, HTTP, Kerberos, SQLite, Libevent & GnuPG crypto stack
-    "openssl", "libidn2", "libpsl", "krb5", "libssh2", "libnghttp2", "libnghttp3", "libngtcp2",
+    "libidn2", "libpsl", "krb5", "libssh2", "libnghttp2", "libnghttp3", "libngtcp2",
     "curl", "sqlite", "libevent", "libusb", "libpipeline",
     "npth", "libgpg-error", "libassuan", "libgcrypt", "libksba", "pinentry", "gnupg",
     # Tier 1: Pure data, shells & modern build tools
@@ -106,6 +106,7 @@ def get_arm64_env() -> dict[str, str]:
     env["PACKAGER"] = PACKAGER
     env["SDKROOT"] = sdk
     env["MACOSX_DEPLOYMENT_TARGET"] = "15.0"
+    env["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
     env["PKG_CONFIG_PATH"] = "/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
     env["GPG_TTY"] = ""
     return env

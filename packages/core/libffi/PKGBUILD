@@ -20,7 +20,7 @@ build() {
   local _jobs
   _jobs="$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
   cd "${srcdir}/libffi-${pkgver}"
-  ./configure --prefix=/opt/pacman --disable-static --enable-pax_emutramp
+  ./configure --prefix=/opt/pacman --disable-static
   make -j"${_jobs}"
 }
 
