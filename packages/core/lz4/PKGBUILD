@@ -1,28 +1,28 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=lz4
 pkgver=1.10.0
 pkgrel=1
-pkgdesc="Extremely Fast Compression algorithm"
+pkgdesc="Extremely fast compression algorithm"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://lz4.org/"
+license=('BSD-2-Clause')
+options=('!strip' '!debug' '!libtool')
+source=("https://github.com/lz4/lz4/releases/download/v${pkgver}/lz4-${pkgver}.tar.gz")
+sha256sums=('SKIP')
 
-url="https://lz4.github.io/lz4/"
-arch=(
-    'darwin_arm64'
-)
-license=(
-    'BSD-2-Clause'
-)
-options=('!strip')
-source=()
-sha256sums=()
+build() {
+  cd "${srcdir}/lz4-${pkgver}"
+  make PREFIX=/opt/pacman -j"$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir"
-    mkdir -p "$_dest"
-
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
-        fi
+  cd "${srcdir}/lz4-${pkgver}"
+  make PREFIX=/opt/pacman DESTDIR="${pkgdir}" install
+  if [ -d "${pkgdir}/opt/pacman" ]; then
+    find "${pkgdir}/opt/pacman" -type f \( -perm -111 -o -name "*.dylib" -o -name "*.so" \) -print0 2>/dev/null | while IFS= read -r -d '' f; do
+      if /usr/bin/file "$f" 2>/dev/null | grep -q "Mach-O"; then
+        /usr/bin/codesign --force --sign - "$f" 2>/dev/null || true
+      fi
     done
+  fi
 }

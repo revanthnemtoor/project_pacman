@@ -1,36 +1,30 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=ripgrep
-pkgver=15.2.0
+pkgver=14.1.1
 pkgrel=1
-pkgdesc="Search tool like grep and The Silver Searcher"
-
+pkgdesc="Fast line-oriented regex search tool"
+arch=('darwin_x86_64' 'darwin_arm64')
 url="https://github.com/BurntSushi/ripgrep"
-arch=(
-    'darwin_arm64'
-)
-license=(
-    'Unlicense'
-)
-depends=(
-    'pcre2'
-)
-makedepends=(
-    'asciidoctor'
-    'pkgconf'
-    'rust'
-)
-options=('!strip')
-source=()
-sha256sums=()
+license=('MIT' 'Unlicense')
+options=('!strip' '!debug')
+source=("https://github.com/BurntSushi/ripgrep/archive/refs/tags/${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  local _cargo
+  _cargo="$(PATH="/opt/pacman/bin:$HOME/.cargo/bin:/opt/homebrew/bin:/usr/local/bin:$PATH" command -v cargo)"
+  cd "${srcdir}/ripgrep-${pkgver}"
+  "${_cargo}" build --release --locked
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir"
-    mkdir -p "$_dest"
-
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
-        fi
+  cd "${srcdir}/ripgrep-${pkgver}"
+  install -Dm755 target/release/rg "${pkgdir}/opt/pacman/bin/rg"
+  if [ -d "${pkgdir}/opt/pacman" ]; then
+    find "${pkgdir}/opt/pacman" -type f \( -perm -111 -o -name "*.dylib" -o -name "*.so" \) -print0 2>/dev/null | while IFS= read -r -d '' f; do
+      if /usr/bin/file "$f" 2>/dev/null | grep -q "Mach-O"; then
+        /usr/bin/codesign --force --sign - "$f" 2>/dev/null || true
+      fi
     done
+  fi
 }

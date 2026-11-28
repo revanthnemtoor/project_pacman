@@ -1,32 +1,39 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=gettext
 pkgver=0.22.5
 pkgrel=1
-pkgdesc="GNU internationalization (i18n) and localization (l10n) library"
-
+pkgdesc="GNU internationalization library and tools"
+arch=('darwin_x86_64' 'darwin_arm64')
 url="https://www.gnu.org/software/gettext/"
-arch=(
-    'darwin_arm64'
-)
-license=(
-    'GPL-3.0-or-later AND LGPL-2.1-or-later'
-)
-depends=(
-    'json-c'
-    'libunistring'
-)
-options=('!strip')
-source=()
-sha256sums=()
+license=('GPL-3.0-or-later')
+options=('!strip' '!debug' '!libtool')
+source=("https://ftpmirror.gnu.org/gnu/gettext/gettext-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  export PATH="/opt/pacman/bin:/opt/homebrew/bin:/opt/homebrew/opt/gettext/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+  export CPPFLAGS="-I/opt/pacman/include"
+  export CFLAGS="-O2 -I/opt/pacman/include"
+  export CXXFLAGS="-O2 -I/opt/pacman/include"
+  export LDFLAGS="-L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib"
+  local _jobs
+  _jobs="$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
+  cd "${srcdir}/gettext-${pkgver}"
+  ./configure --prefix=/opt/pacman --with-included-gettext --with-included-glib --with-included-libcroco --with-included-libunistring --disable-java --disable-csharp --without-emacs --without-git --without-cvs --without-xz --disable-static
+  make -j"${_jobs}"
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir"
-    mkdir -p "$_dest"
+  cd "${srcdir}/gettext-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  rm -f "${pkgdir}/opt/pacman/share/info/dir" "${pkgdir}"/opt/pacman/lib/*.la
 
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
-        fi
+  if [ -d "${pkgdir}/opt/pacman" ]; then
+    find "${pkgdir}/opt/pacman" -type f \( -perm -111 -o -name "*.dylib" -o -name "*.so" \) -print0 2>/dev/null | while IFS= read -r -d '' f; do
+      if /usr/bin/file "$f" 2>/dev/null | grep -q "Mach-O"; then
+        /usr/bin/codesign --force --sign - "$f" 2>/dev/null || true
+      fi
     done
+  fi
 }

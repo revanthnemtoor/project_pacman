@@ -2,8 +2,8 @@
 pkgname=nano
 pkgver=9.1
 pkgrel=1
-pkgdesc="Free (GNU) replacement for the Pico text editor (native x86_64-apple-darwin port for Intel Mac)"
-arch=('darwin_x86_64')
+pkgdesc="Free (GNU) replacement for the Pico text editor"
+arch=('darwin_x86_64' 'darwin_arm64')
 url="https://www.nano-editor.org/"
 license=('GPL-3.0-or-later')
 depends=('ncurses' 'gettext')

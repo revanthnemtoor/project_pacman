@@ -102,27 +102,40 @@ jobs:
           /opt/pacman/bin/pacman-key --lsign-key CEC5B78775CA4628
           rm -f /tmp/packager.asc
 
-          # 3. Seed /opt/pacman with existing darwin_arm64 packages (deferring packages whose Tier 1 libs build first)
-          shopt -s nullglob
-          CORE_PKGS=()
-          for p in core/*-darwin_arm64.pkg.tar.zst; do
-            base="$(basename "$p")"
-            case "$base" in
-              base-[0-9]*|base-devel-[0-9]*|bash-[0-9]*|libarchive-[0-9]*|gnupg-[0-9]*|gpgme-[0-9]*|pacman-[0-9]*) continue ;;
-            esac
-            CORE_PKGS+=("$p")
-          done
-          if [ "${#CORE_PKGS[@]}" -gt 0 ]; then
-            /opt/pacman/bin/pacman -U -dd --overwrite '*' --noconfirm "${CORE_PKGS[@]}"
-          fi
+          # 3. Seed /opt/pacman ONLY with existing darwin_arm64 packages targeting macOS <= 15.0
+          #    (Packages built on macOS 26/27 have _pipe2 ABI incompatibility on macos-15 and are rebuilt in Tier 0)
+          python3 - <<'PYEOF'
+          import re, subprocess, tempfile
+          from pathlib import Path
 
-          EXTRA_PKGS=()
-          for p in extra/*-darwin_arm64.pkg.tar.zst; do
-            EXTRA_PKGS+=("$p")
-          done
-          if [ "${#EXTRA_PKGS[@]}" -gt 0 ]; then
-            /opt/pacman/bin/pacman -U -dd --overwrite '*' --noconfirm "${EXTRA_PKGS[@]}"
-          fi
+          SKIP = {"base", "base-devel", "libarchive", "gpgme", "pacman"}
+
+          def is_macos15_compatible(pkg: Path) -> bool:
+              raw = pkg.name[:-len("-darwin_arm64.pkg.tar.zst")]
+              name = "-".join(raw.split("-")[:-2])
+              if name in SKIP:
+                  return False
+              with tempfile.TemporaryDirectory() as td:
+                  subprocess.run(["/opt/homebrew/opt/libarchive/bin/bsdtar", "-xf", str(pkg), "-C", td], check=False, capture_output=True)
+                  for sub in ("opt/pacman/bin", "opt/pacman/lib"):
+                      d = Path(td) / sub
+                      if not d.exists():
+                          continue
+                      for f in sorted(d.iterdir())[:8]:
+                          if f.is_symlink() or not f.is_file():
+                              continue
+                          out = subprocess.run(["/usr/bin/otool", "-l", str(f)], capture_output=True, text=True)
+                          for m in re.finditer(r"minos\s+([0-9.]+)", out.stdout):
+                              if float(m.group(1).split(".")[0]) > 15.0:
+                                  return False
+              return True
+
+          for repo in ("core", "extra"):
+              pkgs = [str(p) for p in sorted(Path(repo).glob("*-darwin_arm64.pkg.tar.zst")) if is_macos15_compatible(p)]
+              print(f"Seeding {len(pkgs)} macos-15-compatible {repo} packages...")
+              if pkgs:
+                  subprocess.run(["/opt/pacman/bin/pacman", "-U", "-dd", "--overwrite", "*", "--noconfirm"] + pkgs, check=True)
+          PYEOF
 
           # 4. Re-install patched pacman/makepkg/repo-add so all Darwin rootless fixes are active
           cp -f /opt/pacman/etc/pacman.conf /tmp/pacman.conf.saved
@@ -163,4 +176,4 @@ jobs:
           python3 scripts/ci_build_arm64.py \
             --package "$PKG_ARG" \
             --max-packages "$MAX_ARG" \
-            --checkpoint-every 12
+            --checkpoint-every 10

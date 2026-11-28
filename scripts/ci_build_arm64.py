@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Automated Apple Silicon (darwin_arm64) Source Builder, Signer & Checkpointer for GitHub Actions.
 
-Detects all packages present for darwin_x86_64 in core/ and extra/ that do not yet have a
-built darwin_arm64 archive, compiles them natively on Apple Silicon runners in topological
-dependency order, signs them with PGP key CEC5B78775CA4628, updates *-darwin_arm64.db.tar.gz,
-and checkpoints signed packages back to origin/main periodically so progress is never lost.
+Detects all packages present for darwin_x86_64 in core/ and extra/ that either:
+  1. Do not yet have a built darwin_arm64 archive, OR
+  2. Have an older darwin_arm64 archive compiled for macOS > 15.0 (e.g. 26.0/27.0 _pipe2 ABI),
+and compiles them natively on Apple Silicon macos-15 runners (MACOSX_DEPLOYMENT_TARGET=15.0)
+in topological dependency order, signs them with PGP key CEC5B78775CA4628, updates
+*-darwin_arm64.db.tar.gz, and checkpoints signed batches back to origin/main periodically.
 """
 
 from __future__ import annotations
@@ -15,6 +17,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -34,21 +37,29 @@ PACKAGER = os.environ.get(
 )
 META_PACKAGES = {"base", "base-devel", "pacman-mirrorlist", "filesystem"}
 
-# Topological build order across [core] and [extra] so dependencies install into /opt/pacman
-# before downstream consumers compile against them.
+# Full topological build order across [core] and [extra]
 ORDERED_TIERS: list[str] = [
-    # Tier 1: bzip2, xz & readline first (unlocks core/libarchive & core/bash), pure data, autotools, GnuPG libs & build tools
-    "bzip2", "xz", "readline", "iana-etc", "filesystem", "tzdata",
-    "m4", "autoconf", "libtool", "bison", "flex", "patch", "file", "which", "fakeroot",
-    "npth", "libgpg-error", "libassuan", "libgcrypt", "libksba",
-    "pinentry", "libedit", "dash",
-    "mpfr", "libmpc", "libisl",
-    "ninja", "meson", "ccache", "cmake", "pigz", "7zip",
-    # Tier 2: ASN.1, TLS, Compression/DB/JSON/Network & System Libraries
+    # Tier 0A: Zero-dep compression, FFI, XML/JSON & hashing libraries
+    "zlib", "bzip2", "xz", "lz4", "lzo", "brotli", "zstd",
+    "expat", "libffi", "libxcrypt", "popt", "xxhash", "yyjson", "utf8proc", "libsodium", "oniguruma", "json-c",
+    # Tier 0B: Unicode, i18n, regex, readline, pkg-config & bignum math
+    "libunistring", "libxml2", "gettext", "pcre2", "readline", "pkgconf",
+    "gmp", "mpfr", "libmpc", "libisl",
+    # Tier 0C: Core UNIX shell, autotools & userland utilities
+    "bash", "coreutils", "sed", "grep", "gawk", "diffutils", "findutils",
+    "patch", "tar", "gzip", "make", "m4", "autoconf", "libtool", "bison", "flex",
+    "file", "which", "fakeroot", "less", "nano", "texinfo", "tree",
+    # Tier 0D: TLS, HTTP, Kerberos, SQLite, Libevent & GnuPG crypto stack
+    "openssl", "libidn2", "libpsl", "krb5", "libssh2", "libnghttp2", "libnghttp3", "libngtcp2",
+    "curl", "sqlite", "libevent", "libusb", "libpipeline",
+    "npth", "libgpg-error", "libassuan", "libgcrypt", "libksba", "pinentry", "gnupg",
+    # Tier 1: Pure data, shells & modern build tools
+    "iana-etc", "filesystem", "tzdata", "libedit", "dash",
+    "ninja", "meson", "p11-kit", "ccache", "cmake", "pigz", "7zip",
+    # Tier 2: ASN.1, TLS, DB/Network & System Libraries
     "nettle", "libtasn1", "gnutls",
     "gc", "gdbm", "jansson", "libinih", "libverto", "mpdecimal", "unixodbc",
     "libpcap", "ldns", "leancrypto", "libmicrohttpd",
-    "libnghttp2", "libnghttp3", "libngtcp2", "libssh2",
     "libsasl", "openldap", "openssh",
     "nspr", "icu", "glib2", "libsecret", "nss",
     # Tier 3: Man/Doc Pipeline, Binutils & Language Runtimes
@@ -59,10 +70,11 @@ ORDERED_TIERS: list[str] = [
     "libde265", "kvazaar", "dav1d", "aom", "libheif", "libraw",
     "imagemagick", "qpdf", "chafa",
     # Tier 5: C/C++/Go/Python/Rust CLI & Editor Suite
-    "git", "htop", "entr", "yt-dlp", "mtr", "tcpdump", "tig", "aria2", "neovim", "gh",
+    "git", "vim", "tmux", "wget", "jq", "rsync", "fastfetch", "links",
+    "htop", "entr", "yt-dlp", "mtr", "tcpdump", "tig", "aria2", "neovim", "gh",
     "bat", "eza", "zoxide", "starship", "git-delta", "hyperfine",
     "just", "procs", "dust", "sd", "tealdeer", "tokei", "bottom", "xh",
-    # Tier 6: Heavy Toolchain (GCC last so all 101 other packages checkpoint first)
+    # Tier 6: Heavy Toolchain (GCC last so all other packages checkpoint first)
     "gcc",
 ]
 
@@ -80,17 +92,20 @@ def resolve_gpg() -> str:
 
 
 def get_arm64_env() -> dict[str, str]:
-    """Build clean Apple Silicon darwin_arm64 environment."""
+    """Build clean Apple Silicon darwin_arm64 environment targeting macOS 15.0+."""
     sdk = subprocess.check_output(["xcrun", "--show-sdk-path"], text=True).strip()
     cargo_bin = str(Path.home() / ".cargo" / "bin")
     env = os.environ.copy()
-    env["PATH"] = f"/opt/pacman/bin:{cargo_bin}:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    env["PATH"] = (
+        f"/opt/pacman/bin:{cargo_bin}:/opt/homebrew/bin:/opt/homebrew/opt/gettext/bin:"
+        "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    )
     env["CARCH"] = "darwin_arm64"
     env["CHOST"] = "arm64-apple-darwin"
     env["PKGEXT"] = ".pkg.tar.zst"
     env["PACKAGER"] = PACKAGER
     env["SDKROOT"] = sdk
-    env["MACOSX_DEPLOYMENT_TARGET"] = "12.0"
+    env["MACOSX_DEPLOYMENT_TARGET"] = "15.0"
     env["PKG_CONFIG_PATH"] = "/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
     env["GPG_TTY"] = ""
     return env
@@ -109,29 +124,47 @@ def list_arch_packages(repo_dir: Path, arch: str) -> dict[str, Path]:
     return out
 
 
+def archive_minos_exceeds_15(pkg_path: Path) -> bool:
+    """Return True if Mach-O binaries inside pkg_path target macOS > 15.0 (e.g. 26.0/27.0)."""
+    bsdtar = "/opt/pacman/bin/bsdtar" if os.path.exists("/opt/pacman/bin/bsdtar") else "bsdtar"
+    with tempfile.TemporaryDirectory() as td:
+        subprocess.run([bsdtar, "-xf", str(pkg_path), "-C", td], check=False, capture_output=True)
+        for sub in ("opt/pacman/bin", "opt/pacman/lib"):
+            d = Path(td) / sub
+            if not d.exists():
+                continue
+            for f in sorted(d.iterdir())[:8]:
+                if f.is_symlink() or not f.is_file():
+                    continue
+                out = subprocess.run(["/usr/bin/otool", "-l", str(f)], capture_output=True, text=True)
+                for m in re.finditer(r"minos\s+([0-9.]+)", out.stdout):
+                    if float(m.group(1).split(".")[0]) > 15.0:
+                        return True
+    return False
+
+
 def compute_missing_arm64(only_pkg: str = "") -> list[tuple[str, str, Path]]:
-    """Return ordered list of (repo, pkgname, pkgbuild_path) missing darwin_arm64 builds."""
-    core_x86 = list_arch_packages(CORE_DIR, "darwin_x86_64")
-    core_arm = list_arch_packages(CORE_DIR, "darwin_arm64")
-    extra_x86 = list_arch_packages(EXTRA_DIR, "darwin_x86_64")
-    extra_arm = list_arch_packages(EXTRA_DIR, "darwin_arm64")
-
-    missing_map: dict[str, tuple[str, Path]] = {}
-    for name in sorted(set(core_x86) - set(core_arm)):
-        pb = PACKAGES_DIR / "core" / name / "PKGBUILD"
-        if pb.is_file():
-            missing_map[name] = ("core", pb)
-    for name in sorted(set(extra_x86) - set(extra_arm)):
-        pb = PACKAGES_DIR / "extra" / name / "PKGBUILD"
-        if pb.is_file():
-            missing_map[name] = ("extra", pb)
-
+    """Return ordered list of (repo, pkgname, pkgbuild_path) needing darwin_arm64 builds."""
     if only_pkg and only_pkg != "all":
         for repo in ("core", "extra"):
             pb = PACKAGES_DIR / repo / only_pkg / "PKGBUILD"
             if pb.is_file():
                 return [(repo, only_pkg, pb)]
         raise SystemExit(f"No PKGBUILD found for requested package '{only_pkg}'")
+
+    core_x86 = list_arch_packages(CORE_DIR, "darwin_x86_64")
+    core_arm = list_arch_packages(CORE_DIR, "darwin_arm64")
+    extra_x86 = list_arch_packages(EXTRA_DIR, "darwin_x86_64")
+    extra_arm = list_arch_packages(EXTRA_DIR, "darwin_arm64")
+
+    missing_map: dict[str, tuple[str, Path]] = {}
+    for repo_name, x86_map, arm_map in [("core", core_x86, core_arm), ("extra", extra_x86, extra_arm)]:
+        for name in sorted(x86_map):
+            pb = PACKAGES_DIR / repo_name / name / "PKGBUILD"
+            if not pb.is_file():
+                continue
+            if name not in arm_map or archive_minos_exceeds_15(arm_map[name]):
+                missing_map[name] = (repo_name, pb)
 
     ordered: list[tuple[str, str, Path]] = []
     seen = set()
@@ -153,7 +186,7 @@ def cleanup_dir(pkg_dir: Path) -> None:
     for item in pkg_dir.iterdir():
         if item.name in keep or item.suffix in (".c", ".h", ".1", ".install", ".patch", ".diff"):
             continue
-        if item.name in ("src", "pkg", "build", "target", ".deps", "stage", "logs") or item.name.endswith(
+        if item.name in ("src", "pkg", "build", "_build", "target", ".deps", "stage", "logs") or item.name.endswith(
             (".pkg.tar.zst", ".pkg.tar.zst.sig", ".tar.gz", ".tar.xz", ".tar.bz2", ".tar.lz", ".tgz", ".zip")
         ):
             subprocess.run(["chmod", "-R", "u+rwx", str(item)], check=False, capture_output=True)
@@ -214,7 +247,7 @@ def checkpoint_push(built_names: list[str], env: dict[str, str]) -> None:
     if not built_names:
         return
     reindex_arm64_dbs(env)
-    subprocess.run(["git", "add", "core/", "extra/"], cwd=PROJECT_DIR, check=True)
+    subprocess.run(["git", "add", "-A", "core/", "extra/"], cwd=PROJECT_DIR, check=True)
     diff = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=PROJECT_DIR)
     if diff.returncode == 0:
         return
@@ -238,7 +271,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="CI builder for darwin_arm64 packages")
     parser.add_argument("--package", default="all", help="Specific package name or 'all'")
     parser.add_argument("--max-packages", type=int, default=0, help="Max packages to build in this run (0 = all)")
-    parser.add_argument("--checkpoint-every", type=int, default=12, help="Commit & push every N built packages")
+    parser.add_argument("--checkpoint-every", type=int, default=10, help="Commit & push every N built packages")
     parser.add_argument("--no-push", action="store_true", help="Build locally without git commit/push")
     args = parser.parse_args()
 
@@ -258,7 +291,6 @@ def main() -> None:
     start_ts = time.time()
 
     for idx, (repo, pkgname, pkgbuild) in enumerate(queue, 1):
-        # Stop gracefully with 25 minutes buffer before GitHub Actions' 6h job limit
         elapsed_min = (time.time() - start_ts) / 60.0
         if elapsed_min > 325:
             print(f"Reached {elapsed_min:.1f}m runtime safety mark; checkpointing and stopping cleanly.", flush=True)
@@ -276,10 +308,15 @@ def main() -> None:
             if res.returncode != 0:
                 raise RuntimeError(f"makepkg exited with {res.returncode}")
 
-            built = sorted(pkg_dir.glob("*-darwin_arm64.pkg.tar.zst"), key=lambda p: p.stat().st_mtime)
+            built = sorted(
+                list(pkg_dir.glob("*-darwin_arm64.pkg.tar.zst")) + list(pkg_dir.glob("*-any.pkg.tar.zst")),
+                key=lambda p: p.stat().st_mtime,
+            )
             if not built:
-                raise FileNotFoundError(f"No *-darwin_arm64.pkg.tar.zst produced in {pkg_dir}")
+                raise FileNotFoundError(f"No .pkg.tar.zst produced in {pkg_dir}")
             pkg_file = built[-1]
+            # Normalize -any.pkg.tar.zst to -darwin_arm64.pkg.tar.zst if needed so repo layout stays uniform
+            final_name = pkg_file.name.replace("-any.pkg.tar.zst", "-darwin_arm64.pkg.tar.zst")
             sz = pkg_file.stat().st_size
             if pkgname not in META_PACKAGES and sz < 4096:
                 raise RuntimeError(f"Archive too small ({sz} bytes)")
@@ -290,7 +327,7 @@ def main() -> None:
             for old in dest_dir.glob(f"{pkgname}-[0-9]*-darwin_arm64.pkg.tar.zst*"):
                 old.unlink(missing_ok=True)
 
-            target_pkg = dest_dir / pkg_file.name
+            target_pkg = dest_dir / final_name
             shutil.copyfile(pkg_file, target_pkg)
             sign_archive(target_pkg, gpg_bin, env)
 
@@ -299,28 +336,21 @@ def main() -> None:
                 check=True,
                 env=env,
             )
-            if pkgname == "xz":
+            if pkgname == "expat":
                 for la_pkg in CORE_DIR.glob("libarchive-*-darwin_arm64.pkg.tar.zst"):
                     subprocess.run(
                         [str(PACMAN_BIN), "-U", "-dd", "--overwrite", "*", "--noconfirm", str(la_pkg)],
                         check=False,
                         env=env,
                     )
-            elif pkgname == "readline":
-                for bash_pkg in CORE_DIR.glob("bash-*-darwin_arm64.pkg.tar.zst"):
+            elif pkgname == "gnupg":
+                for gp_pkg in CORE_DIR.glob("gpgme-*-darwin_arm64.pkg.tar.zst"):
                     subprocess.run(
-                        [str(PACMAN_BIN), "-U", "-dd", "--overwrite", "*", "--noconfirm", str(bash_pkg)],
+                        [str(PACMAN_BIN), "-U", "-dd", "--overwrite", "*", "--noconfirm", str(gp_pkg)],
                         check=False,
                         env=env,
                     )
-            elif pkgname == "pinentry":
-                for gp_glob in ("gpgme-*-darwin_arm64.pkg.tar.zst", "gnupg-*-darwin_arm64.pkg.tar.zst"):
-                    for gp_pkg in CORE_DIR.glob(gp_glob):
-                        subprocess.run(
-                            [str(PACMAN_BIN), "-U", "-dd", "--overwrite", "*", "--noconfirm", str(gp_pkg)],
-                            check=False,
-                            env=env,
-                        )
+
             all_succeeded.append(pkgname)
             batch_built.append(pkgname)
             print(f"✓ Built, signed & installed {target_pkg.name} ({sz / 1024:.1f} KB)", flush=True)

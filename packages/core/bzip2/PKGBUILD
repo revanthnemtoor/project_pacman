@@ -1,29 +1,59 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=bzip2
 pkgver=1.0.8
 pkgrel=1
-pkgdesc="Freely available high-quality data compressor"
-
+pkgdesc="High-quality data compression program and shared library"
+arch=('darwin_x86_64' 'darwin_arm64')
 url="https://sourceware.org/bzip2/"
-arch=(
-    'darwin_arm64'
-    'darwin_x86_64'
-)
-license=(
-    'bzip2-1.0.6'
-)
-options=('!strip')
-source=()
-sha256sums=()
+license=('BSD')
+options=('!strip' '!debug' '!libtool')
+source=("https://sourceware.org/pub/bzip2/bzip2-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${srcdir}/bzip2-${pkgver}"
+  local _cc="${CC:-/usr/bin/clang}"
+  make -j"$(sysctl -n hw.ncpu 2>/dev/null || echo 4)" CC="${_cc}" CFLAGS="-fPIC -O2 -Wall -D_FILE_OFFSET_BITS=64" libbz2.a bzip2 bzip2recover
+  "${_cc}" -dynamiclib \
+    -Wl,-install_name,/opt/pacman/lib/libbz2.1.0.dylib \
+    -current_version 1.0.8 -compatibility_version 1.0 \
+    -fPIC -O2 -D_FILE_OFFSET_BITS=64 \
+    blocksort.c huffman.c crctable.c randtable.c compress.c decompress.c bzlib.c \
+    -o libbz2.1.0.8.dylib
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir/opt/pacman"
-    mkdir -p "$_dest"
+  cd "${srcdir}/bzip2-${pkgver}"
+  make PREFIX="${pkgdir}/opt/pacman" install
+  install -m755 libbz2.1.0.8.dylib "${pkgdir}/opt/pacman/lib/libbz2.1.0.8.dylib"
+  ln -sf libbz2.1.0.8.dylib "${pkgdir}/opt/pacman/lib/libbz2.1.0.dylib"
+  ln -sf libbz2.1.0.8.dylib "${pkgdir}/opt/pacman/lib/libbz2.1.dylib"
+  ln -sf libbz2.1.0.8.dylib "${pkgdir}/opt/pacman/lib/libbz2.dylib"
+  ln -sf bzip2 "${pkgdir}/opt/pacman/bin/bunzip2"
+  ln -sf bzip2 "${pkgdir}/opt/pacman/bin/bzcat"
+  ln -sf bzdiff "${pkgdir}/opt/pacman/bin/bzcmp"
+  ln -sf bzmore "${pkgdir}/opt/pacman/bin/bzless"
+  ln -sf bzgrep "${pkgdir}/opt/pacman/bin/bzegrep"
+  ln -sf bzgrep "${pkgdir}/opt/pacman/bin/bzfgrep"
+  install -dm755 "${pkgdir}/opt/pacman/lib/pkgconfig"
+  cat > "${pkgdir}/opt/pacman/lib/pkgconfig/bzip2.pc" <<EOF
+prefix=/opt/pacman
+exec_prefix=\${prefix}
+bindir=\${exec_prefix}/bin
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
 
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
-        fi
+Name: bzip2
+Description: Lossless, block-sorting data compression
+Version: ${pkgver}
+Libs: -L\${libdir} -lbz2
+Cflags: -I\${includedir}
+EOF
+  if [ -d "${pkgdir}/opt/pacman" ]; then
+    find "${pkgdir}/opt/pacman" -type f \( -perm -111 -o -name "*.dylib" -o -name "*.so" \) -print0 2>/dev/null | while IFS= read -r -d '' f; do
+      if /usr/bin/file "$f" 2>/dev/null | grep -q "Mach-O"; then
+        /usr/bin/codesign --force --sign - "$f" 2>/dev/null || true
+      fi
     done
+  fi
 }

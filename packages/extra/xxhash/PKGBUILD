@@ -1,34 +1,28 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=xxhash
-pkgver=0.8.2
+pkgver=0.8.3
 pkgrel=1
 pkgdesc="Extremely fast non-cryptographic hash algorithm"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://xxhash.com/"
+license=('BSD-2-Clause')
+options=('!strip' '!debug' '!libtool')
+source=("https://github.com/Cyan4973/xxHash/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
 
-url="https://xxhash.com"
-arch=(
-    'darwin_arm64'
-)
-license=(
-    'BSD-2-Clause AND GPL-2.0-or-later'
-)
-makedepends=(
-    'cmake'
-)
-checkdepends=(
-    'cmake'
-)
-options=('!strip')
-source=()
-sha256sums=()
+build() {
+  cd "${srcdir}/xxHash-${pkgver}"
+  make PREFIX=/opt/pacman DISPATCH=0 -j"$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir"
-    mkdir -p "$_dest"
-
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
-        fi
+  cd "${srcdir}/xxHash-${pkgver}"
+  make PREFIX=/opt/pacman DISPATCH=0 DESTDIR="${pkgdir}" install
+  if [ -d "${pkgdir}/opt/pacman" ]; then
+    find "${pkgdir}/opt/pacman" -type f \( -perm -111 -o -name "*.dylib" -o -name "*.so" \) -print0 2>/dev/null | while IFS= read -r -d '' f; do
+      if /usr/bin/file "$f" 2>/dev/null | grep -q "Mach-O"; then
+        /usr/bin/codesign --force --sign - "$f" 2>/dev/null || true
+      fi
     done
+  fi
 }

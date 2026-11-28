@@ -1,29 +1,41 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=ncurses
 pkgver=6.5
 pkgrel=1
-pkgdesc="Text-based UI library"
+pkgdesc="System V Release 4.0 curses emulation library"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://invisible-island.net/ncurses/"
+license=('MIT')
+options=('!strip' '!debug' '!libtool')
+source=("https://ftpmirror.gnu.org/gnu/ncurses/ncurses-${pkgver}.tar.gz")
+sha256sums=('SKIP')
 
-url="https://invisible-island.net/ncurses/announce.html"
-arch=(
-    'darwin_arm64'
-    'darwin_x86_64'
-)
-license=(
-    'X11-distribute-modifications-variant'
-)
-options=('!strip')
-source=()
-sha256sums=()
+build() {
+  cd "${srcdir}/ncurses-${pkgver}"
+  ./configure \
+    --prefix=/opt/pacman \
+    --with-shared \
+    --without-debug \
+    --without-ada \
+    --enable-widec \
+    --enable-pc-files \
+    --with-pkg-config-libdir=/opt/pacman/lib/pkgconfig
+  make -j"$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir/opt/pacman"
-    mkdir -p "$_dest"
-
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
-        fi
+  cd "${srcdir}/ncurses-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  for lib in ncurses ncurses++ form panel menu; do
+    ln -sf "lib${lib}w.dylib" "${pkgdir}/opt/pacman/lib/lib${lib}.dylib"
+    ln -sf "${lib}w.pc" "${pkgdir}/opt/pacman/lib/pkgconfig/${lib}.pc"
+  done
+  ln -sf libncursesw.dylib "${pkgdir}/opt/pacman/lib/libcurses.dylib"
+  if [ -d "${pkgdir}/opt/pacman" ]; then
+    find "${pkgdir}/opt/pacman" -type f \( -perm -111 -o -name "*.dylib" -o -name "*.so" \) -print0 2>/dev/null | while IFS= read -r -d '' f; do
+      if /usr/bin/file "$f" 2>/dev/null | grep -q "Mach-O"; then
+        /usr/bin/codesign --force --sign - "$f" 2>/dev/null || true
+      fi
     done
+  fi
 }

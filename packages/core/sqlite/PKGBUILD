@@ -1,32 +1,40 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=sqlite
 pkgver=3.47.0
 pkgrel=1
-pkgdesc="Command-line interface for SQLite"
+pkgdesc="A C library that implements an SQL database engine"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://www.sqlite.org/"
+license=('blessing')
+options=('!strip' '!debug' '!libtool')
+source=("https://www.sqlite.org/2024/sqlite-autoconf-3470000.tar.gz")
+sha256sums=('SKIP')
 
-url="https://sqlite.org/index.html"
-arch=(
-    'darwin_arm64'
-    'darwin_x86_64'
-)
-license=(
-    'blessing'
-)
-depends=(
-    'readline'
-)
-options=('!strip')
-source=()
-sha256sums=()
+build() {
+  export PATH="/opt/pacman/bin:/opt/homebrew/bin:/opt/homebrew/opt/gettext/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+  export CPPFLAGS="-I/opt/pacman/include"
+  export CFLAGS="-O2 -I/opt/pacman/include"
+  export CXXFLAGS="-O2 -I/opt/pacman/include"
+  export LDFLAGS="-L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib"
+  local _jobs
+  _jobs="$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
+  cd "${srcdir}/sqlite-autoconf-3470000"
+  export CPPFLAGS="$CPPFLAGS -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_ENABLE_UNLOCK_NOTIFY -DSQLITE_ENABLE_DBSTAT_VTAB=1"
+  ./configure --prefix=/opt/pacman --enable-fts5 --enable-rtree --disable-static
+  make -j"${_jobs}"
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir/opt/pacman"
-    mkdir -p "$_dest"
+  cd "${srcdir}/sqlite-autoconf-3470000"
+  make DESTDIR="${pkgdir}" install
+  rm -f "${pkgdir}/opt/pacman/share/info/dir" "${pkgdir}"/opt/pacman/lib/*.la
 
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
-        fi
+  if [ -d "${pkgdir}/opt/pacman" ]; then
+    find "${pkgdir}/opt/pacman" -type f \( -perm -111 -o -name "*.dylib" -o -name "*.so" \) -print0 2>/dev/null | while IFS= read -r -d '' f; do
+      if /usr/bin/file "$f" 2>/dev/null | grep -q "Mach-O"; then
+        /usr/bin/codesign --force --sign - "$f" 2>/dev/null || true
+      fi
     done
+  fi
 }

@@ -1,35 +1,30 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=yq
-pkgver=4.54.1
+pkgver=4.45.1
 pkgrel=1
-pkgdesc="Process YAML, JSON, XML, CSV and properties documents from the CLI"
-
+pkgdesc="Portable command-line YAML, JSON and XML processor"
+arch=('darwin_x86_64' 'darwin_arm64')
 url="https://github.com/mikefarah/yq"
-arch=(
-    'darwin_arm64'
-)
-license=(
-    'MIT'
-)
-makedepends=(
-    'go'
-    'pandoc'
-)
-conflicts=(
-    'python-yq'
-)
-options=('!strip')
-source=()
-sha256sums=()
+license=('MIT')
+options=('!strip' '!debug')
+source=("https://github.com/mikefarah/yq/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  local _go
+  _go="$(PATH="/opt/pacman/bin:/opt/homebrew/bin:/usr/local/bin:$PATH" command -v go)"
+  cd "${srcdir}/yq-${pkgver}"
+  CGO_ENABLED=0 "${_go}" build -trimpath -ldflags="-s -w" -o yq .
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir"
-    mkdir -p "$_dest"
-
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
-        fi
+  cd "${srcdir}/yq-${pkgver}"
+  install -Dm755 yq "${pkgdir}/opt/pacman/bin/yq"
+  if [ -d "${pkgdir}/opt/pacman" ]; then
+    find "${pkgdir}/opt/pacman" -type f \( -perm -111 -o -name "*.dylib" -o -name "*.so" \) -print0 2>/dev/null | while IFS= read -r -d '' f; do
+      if /usr/bin/file "$f" 2>/dev/null | grep -q "Mach-O"; then
+        /usr/bin/codesign --force --sign - "$f" 2>/dev/null || true
+      fi
     done
+  fi
 }

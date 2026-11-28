@@ -1,38 +1,39 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=libxml2
 pkgver=2.13.4
 pkgrel=1
-pkgdesc="GNOME XML library"
+pkgdesc="XML C parser and toolkit"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://gitlab.gnome.org/GNOME/libxml2"
+license=('MIT')
+options=('!strip' '!debug' '!libtool')
+source=("https://download.gnome.org/sources/libxml2/2.13/libxml2-${pkgver}.tar.xz")
+sha256sums=('SKIP')
 
-url="http://xmlsoft.org/"
-arch=(
-    'darwin_arm64'
-    'darwin_x86_64'
-)
-license=(
-    'MIT'
-)
-depends=(
-    'readline'
-)
-makedepends=(
-    'pkgconf'
-)
-checkdepends=(
-    'pkgconf'
-)
-options=('!strip')
-source=()
-sha256sums=()
+build() {
+  export PATH="/opt/pacman/bin:/opt/homebrew/bin:/opt/homebrew/opt/gettext/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+  export CPPFLAGS="-I/opt/pacman/include"
+  export CFLAGS="-O2 -I/opt/pacman/include"
+  export CXXFLAGS="-O2 -I/opt/pacman/include"
+  export LDFLAGS="-L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib"
+  local _jobs
+  _jobs="$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
+  cd "${srcdir}/libxml2-${pkgver}"
+  ./configure --prefix=/opt/pacman --without-python --with-zlib=/opt/pacman --with-lzma=/opt/pacman --disable-static
+  make -j"${_jobs}"
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir/opt/pacman"
-    mkdir -p "$_dest"
+  cd "${srcdir}/libxml2-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  rm -f "${pkgdir}/opt/pacman/share/info/dir" "${pkgdir}"/opt/pacman/lib/*.la
 
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
-        fi
+  if [ -d "${pkgdir}/opt/pacman" ]; then
+    find "${pkgdir}/opt/pacman" -type f \( -perm -111 -o -name "*.dylib" -o -name "*.so" \) -print0 2>/dev/null | while IFS= read -r -d '' f; do
+      if /usr/bin/file "$f" 2>/dev/null | grep -q "Mach-O"; then
+        /usr/bin/codesign --force --sign - "$f" 2>/dev/null || true
+      fi
     done
+  fi
 }

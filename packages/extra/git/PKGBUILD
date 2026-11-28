@@ -1,36 +1,60 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=git
-pkgver=2.56.0
-pkgrel=3
-pkgdesc="Distributed revision control system"
+pkgver=2.49.0
+pkgrel=1
+pkgdesc="Fast distributed version control system"
+arch=('darwin_x86_64' 'darwin_arm64')
+url="https://git-scm.com/"
+license=('GPL-2.0-only')
+options=('!strip' '!debug' '!libtool')
+source=("https://www.kernel.org/pub/software/scm/git/git-${pkgver}.tar.xz")
+sha256sums=('SKIP')
 
-url="https://git-scm.com"
-arch=(
-    'darwin_arm64'
-)
-license=(
-    'GPL-2.0-only AND GPL-2.0-or-later AND LGPL-2.1-or-later AND BSD-3-Clause AND MIT'
-)
-depends=(
-    'gettext'
-    'pcre2'
-)
-makedepends=(
-    'gettext'
-    'pkgconf'
-)
-options=('!strip')
-source=()
-sha256sums=()
+build() {
+  export PATH="/opt/pacman/bin:/opt/homebrew/bin:/opt/homebrew/opt/gettext/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+  export CPPFLAGS="-I/opt/pacman/include"
+  export CFLAGS="-O2 -I/opt/pacman/include"
+  export CXXFLAGS="-O2 -I/opt/pacman/include"
+  export LDFLAGS="-L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib"
+  local _jobs
+  _jobs="$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
+  cd "${srcdir}/git-${pkgver}"
+  make prefix=/opt/pacman \
+    CC="${CC:-/usr/bin/clang}" \
+    CFLAGS="-O2 -I/opt/pacman/include" \
+    LDFLAGS="-L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -lintl -liconv" \
+    CURLDIR=/opt/pacman \
+    OPENSSLDIR=/opt/pacman \
+    EXPATDIR=/opt/pacman \
+    ZLIB_PATH=/opt/pacman \
+    USE_LIBPCRE2=YesPlease \
+    LIBPCREDIR=/opt/pacman \
+    NO_TCLTK=YesPlease \
+    NO_PERL=YesPlease \
+    NO_PYTHON=YesPlease \
+    ICONV_OMITS_BOM=No \
+    -j"${_jobs}" all
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir"
-    mkdir -p "$_dest"
-
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
-        fi
+  cd "${srcdir}/git-${pkgver}"
+  make prefix=/opt/pacman \
+    CURLDIR=/opt/pacman \
+    OPENSSLDIR=/opt/pacman \
+    EXPATDIR=/opt/pacman \
+    ZLIB_PATH=/opt/pacman \
+    USE_LIBPCRE2=YesPlease \
+    LIBPCREDIR=/opt/pacman \
+    NO_TCLTK=YesPlease \
+    NO_PERL=YesPlease \
+    NO_PYTHON=YesPlease \
+    DESTDIR="${pkgdir}" install
+  if [ -d "${pkgdir}/opt/pacman" ]; then
+    find "${pkgdir}/opt/pacman" -type f \( -perm -111 -o -name "*.dylib" -o -name "*.so" \) -print0 2>/dev/null | while IFS= read -r -d '' f; do
+      if /usr/bin/file "$f" 2>/dev/null | grep -q "Mach-O"; then
+        /usr/bin/codesign --force --sign - "$f" 2>/dev/null || true
+      fi
     done
+  fi
 }

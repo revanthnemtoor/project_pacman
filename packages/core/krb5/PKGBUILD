@@ -1,32 +1,39 @@
+# Maintainer: Revanth Reddy Nemtoor <developerrevanth123@gmail.com>
 pkgname=krb5
-pkgver=1.22.2
-pkgrel=3
-pkgdesc="Network authentication protocol"
-
+pkgver=1.21.3
+pkgrel=1
+pkgdesc="The Kerberos network authentication system"
+arch=('darwin_x86_64' 'darwin_arm64')
 url="https://web.mit.edu/kerberos/"
-arch=(
-    'darwin_arm64'
-    'darwin_x86_64'
-)
-license=(
-    'BSD-2-Clause AND BSD-2-Clause-first-lines AND BSD-3-Clause AND BSD-4-Clause AND Brian-Gladman-2-Clause AND CMU-Mach-nodoc AND FSFULLRWD AND HPND AND HPND-export2-US AND HPND-export-US AND HPND-export-US-acknowledgement AND HPND-export-US-modify AND ISC AND MIT AND MIT-CMU AND OLDAP-2.8 AND OpenVision AND (BSD-2-Clause OR GPL-2.0-or-later)'
-)
-depends=(
-    'openssl'
-)
-options=('!strip')
-source=()
-sha256sums=()
+license=('MIT')
+options=('!strip' '!debug' '!libtool')
+source=("https://kerberos.org/dist/krb5/1.21/krb5-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  export PATH="/opt/pacman/bin:/opt/homebrew/bin:/opt/homebrew/opt/gettext/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  export PKG_CONFIG_PATH="/opt/pacman/lib/pkgconfig:/opt/pacman/share/pkgconfig"
+  export CPPFLAGS="-I/opt/pacman/include"
+  export CFLAGS="-O2 -I/opt/pacman/include"
+  export CXXFLAGS="-O2 -I/opt/pacman/include"
+  export LDFLAGS="-L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib"
+  local _jobs
+  _jobs="$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
+  cd "${srcdir}/krb5-${pkgver}/src"
+  ./configure --prefix=/opt/pacman --sysconfdir=/opt/pacman/etc --localstatedir=/opt/pacman/var/lib --without-system-verto --without-ldap --disable-nls
+  make -j"${_jobs}"
+}
 
 package() {
-    local _stage="$startdir/stage"
-    local _dest="$pkgdir/opt/pacman"
-    mkdir -p "$_dest"
+  cd "${srcdir}/krb5-${pkgver}/src"
+  make DESTDIR="${pkgdir}" install
+  rm -f "${pkgdir}/opt/pacman/share/info/dir" "${pkgdir}"/opt/pacman/lib/*.la
 
-    local _dirs=(bin sbin lib lib64 include share etc var libexec)
-    for _d in "${_dirs[@]}"; do
-        if [ -d "$_stage/$_d" ]; then
-            cp -a "$_stage/$_d" "$_dest/"
-        fi
+  if [ -d "${pkgdir}/opt/pacman" ]; then
+    find "${pkgdir}/opt/pacman" -type f \( -perm -111 -o -name "*.dylib" -o -name "*.so" \) -print0 2>/dev/null | while IFS= read -r -d '' f; do
+      if /usr/bin/file "$f" 2>/dev/null | grep -q "Mach-O"; then
+        /usr/bin/codesign --force --sign - "$f" 2>/dev/null || true
+      fi
     done
+  fi
 }
