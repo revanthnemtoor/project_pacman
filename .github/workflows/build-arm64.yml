@@ -172,6 +172,7 @@ jobs:
           /usr/bin/sed -i '' 's/^CHOST=.*/CHOST="arm64-apple-darwin"/' /opt/pacman/etc/makepkg.conf
           /usr/bin/sed -i '' 's/^OPTIONS=(strip /OPTIONS=(!strip /' /opt/pacman/etc/makepkg.conf
           /usr/bin/sed -i '' 's/^PKGEXT=.*/PKGEXT=".pkg.tar.zst"/' /opt/pacman/etc/makepkg.conf
+          /usr/bin/sed -i '' 's|^COMPRESSZST=.*|COMPRESSZST=(/opt/homebrew/bin/zstd -c -z -q -)|' /opt/pacman/etc/makepkg.conf
           /usr/bin/sed -i '' 's|^#*PACKAGER=.*|PACKAGER="Revanth Reddy Nemtoor <developerrevanth123@gmail.com>"|' /opt/pacman/etc/makepkg.conf
 
           # Restore any repo files touched by install.sh so git working tree is clean for checkpoint rebases

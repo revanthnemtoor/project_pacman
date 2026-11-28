@@ -20,12 +20,14 @@ build() {
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/opt/pacman \
     -DCMAKE_INSTALL_LIBDIR=lib \
+    -DCMAKE_BUILD_WITH_INSTALL_NAME_DIR=ON \
     -DCMAKE_INSTALL_NAME_DIR=/opt/pacman/lib \
+    -DCMAKE_INSTALL_RPATH=/opt/pacman/lib \
     -DCMAKE_PREFIX_PATH=/opt/pacman \
     -DZSTD_BUILD_PROGRAMS=ON \
     -DZSTD_BUILD_SHARED=ON \
-    -DZSTD_BUILD_STATIC=OFF \
-    -DZSTD_PROGRAMS_LINK_SHARED=ON \
+    -DZSTD_BUILD_STATIC=ON \
+    -DZSTD_PROGRAMS_LINK_SHARED=OFF \
     -DZSTD_ZLIB_SUPPORT=ON \
     -DZSTD_LZMA_SUPPORT=ON \
     -DZSTD_LZ4_SUPPORT=ON
@@ -38,6 +40,7 @@ package() {
   _cmake="$(command -v cmake)"
   cd "${srcdir}/zstd-${pkgver}"
   DESTDIR="${pkgdir}" "${_cmake}" --install _build
+  rm -f "${pkgdir}/opt/pacman/lib/libzstd.a"
   mkdir -p "${pkgdir}/opt/pacman/share/licenses/${pkgname}"
   cp -f LICENSE "${pkgdir}/opt/pacman/share/licenses/${pkgname}/LICENSE"
   if [ -d "${pkgdir}/opt/pacman" ]; then
