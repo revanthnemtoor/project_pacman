@@ -5,46 +5,46 @@ pkgrel=2
 pkgdesc="Zstandard - fast real-time compression algorithm"
 arch=('darwin_x86_64' 'darwin_arm64')
 url="https://facebook.github.io/zstd/"
-license=('BSD-3-Clause AND GPL-2.0-only')
+license=('BSD-3-Clause' 'GPL-2.0-only')
 depends=('zlib' 'xz' 'lz4')
-options=('!strip')
+options=('!strip' '!debug' '!libtool')
 source=("https://github.com/facebook/zstd/releases/download/v${pkgver}/zstd-${pkgver}.tar.gz")
 sha256sums=('SKIP')
 
 build() {
-    cd "$srcdir/zstd-${pkgver}"
-    local _arch="x86_64"
-    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
-    local _sdk="$(xcrun --show-sdk-path)"
-    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    export CC="/usr/bin/clang"
-    export CXX="/usr/bin/clang++"
-    export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
-    export CFLAGS="-O3 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
-    export CXXFLAGS="-O3 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
-    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
-
-    make -C lib prefix=/opt/pacman lib-mt -j"$(sysctl -n hw.ncpu)"
-    make -C programs prefix=/opt/pacman HAVE_ZLIB=1 HAVE_LZMA=1 HAVE_LZ4=1 -j"$(sysctl -n hw.ncpu)"
+  export PATH="/opt/pacman/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  local _cmake
+  _cmake="$(command -v cmake)"
+  cd "${srcdir}/zstd-${pkgver}"
+  "${_cmake}" -S build/cmake -B _build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/opt/pacman \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DCMAKE_INSTALL_NAME_DIR=/opt/pacman/lib \
+    -DCMAKE_PREFIX_PATH=/opt/pacman \
+    -DZSTD_BUILD_PROGRAMS=ON \
+    -DZSTD_BUILD_SHARED=ON \
+    -DZSTD_BUILD_STATIC=OFF \
+    -DZSTD_PROGRAMS_LINK_SHARED=ON \
+    -DZSTD_ZLIB_SUPPORT=ON \
+    -DZSTD_LZMA_SUPPORT=ON \
+    -DZSTD_LZ4_SUPPORT=ON
+  "${_cmake}" --build _build -j "$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
 }
 
 package() {
-    cd "$srcdir/zstd-${pkgver}"
-    export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    make prefix=/opt/pacman DESTDIR="$pkgdir" install
-    rm -f "$pkgdir/opt/pacman/lib/libzstd.a"
-    # Ensure install_name is /opt/pacman/lib/libzstd.1.dylib
-    for dylib in "$pkgdir"/opt/pacman/lib/libzstd.*.dylib; do
-        [ -f "$dylib" ] && [ ! -L "$dylib" ] && /usr/bin/install_name_tool -id "/opt/pacman/lib/libzstd.1.dylib" "$dylib" || true
+  export PATH="/opt/pacman/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  local _cmake
+  _cmake="$(command -v cmake)"
+  cd "${srcdir}/zstd-${pkgver}"
+  DESTDIR="${pkgdir}" "${_cmake}" --install _build
+  mkdir -p "${pkgdir}/opt/pacman/share/licenses/${pkgname}"
+  cp -f LICENSE "${pkgdir}/opt/pacman/share/licenses/${pkgname}/LICENSE"
+  if [ -d "${pkgdir}/opt/pacman" ]; then
+    find "${pkgdir}/opt/pacman" -type f \( -perm -111 -o -name "*.dylib" \) -print0 2>/dev/null | while IFS= read -r -d '' f; do
+      if /usr/bin/file "$f" 2>/dev/null | grep -q "Mach-O"; then
+        /usr/bin/codesign --force --sign - "$f" 2>/dev/null || true
+      fi
     done
-    if [ -f "$pkgdir/opt/pacman/bin/zstd" ]; then
-        /usr/bin/install_name_tool -change "@rpath/libzstd.1.dylib" "/opt/pacman/lib/libzstd.1.dylib" "$pkgdir/opt/pacman/bin/zstd" 2>/dev/null || true
-    fi
-    /opt/pacman/bin/install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
-    find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
-        if /usr/bin/file -b "$f" | grep -q "Mach-O"; then
-            /usr/bin/codesign --force --sign - "$f"
-        fi
-    done
-    chgrp -R admin "$pkgdir" 2>/dev/null || true
+  fi
 }

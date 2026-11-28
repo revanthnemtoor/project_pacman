@@ -26,7 +26,8 @@ build() {
         --prefix=/opt/pacman \
         --libexecdir=/opt/pacman/lib \
         --enable-no-install-program=kill,uptime \
-        --with-openssl=yes
+        --disable-nls \
+        --with-openssl=no
     make -j"$(sysctl -n hw.ncpu)"
 }
 

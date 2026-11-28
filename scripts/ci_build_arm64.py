@@ -363,15 +363,15 @@ def main() -> None:
             batch_built.append(pkgname)
             print(f"✓ Built, signed & installed {target_pkg.name} ({sz / 1024:.1f} KB)", flush=True)
 
-            if not args.no_push and args.checkpoint_every > 0 and len(batch_built) >= args.checkpoint_every:
-                checkpoint_push(batch_built, env)
-                batch_built.clear()
-
         except Exception as exc:
             print(f"✗ FAILED {repo}/{pkgname}: {exc}", flush=True)
             all_failed.append(pkgname)
         finally:
             cleanup_dir(pkg_dir)
+
+        if not args.no_push and args.checkpoint_every > 0 and len(batch_built) >= args.checkpoint_every:
+            checkpoint_push(batch_built, env)
+            batch_built.clear()
 
     if batch_built and not args.no_push:
         checkpoint_push(batch_built, env)
