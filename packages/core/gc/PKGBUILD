@@ -27,6 +27,7 @@ build() {
     ./configure \
         --prefix=/opt/pacman \
         --mandir=/opt/pacman/share/man \
+        --with-libatomic-ops=none \
         --enable-cplusplus \
         --enable-shared \
         --disable-static \

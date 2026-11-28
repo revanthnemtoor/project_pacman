@@ -31,12 +31,23 @@ build() {
         --without-x \
         --without-uchardet
 
-    make -j"$(sysctl -n hw.ncpu)"
+    local _make_cross=()
+    if [[ "$(uname -m)" != "${_arch}" && -x /opt/pacman/bin/groff ]]; then
+        _make_cross=(GROFFBIN=/opt/pacman/bin/groff GROFF_BIN_PATH=/opt/pacman/bin PDFMOMBIN=/opt/pacman/bin/pdfmom)
+    fi
+
+    make -j"$(sysctl -n hw.ncpu)" "${_make_cross[@]}"
 }
 
 package() {
     cd "$srcdir/groff-${pkgver}"
-    make DESTDIR="$pkgdir" install
+    local _arch="x86_64"
+    [[ "$CARCH" == "darwin_arm64" ]] && _arch="arm64"
+    local _make_cross=()
+    if [[ "$(uname -m)" != "${_arch}" && -x /opt/pacman/bin/groff ]]; then
+        _make_cross=(GROFFBIN=/opt/pacman/bin/groff GROFF_BIN_PATH=/opt/pacman/bin PDFMOMBIN=/opt/pacman/bin/pdfmom)
+    fi
+    make DESTDIR="$pkgdir" "${_make_cross[@]}" install
     rm -f "$pkgdir/opt/pacman/share/info/dir"
     install -Dm644 COPYING "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
     find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do

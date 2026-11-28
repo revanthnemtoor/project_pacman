@@ -29,7 +29,14 @@ build() {
     export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
     export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
 
+    local _cross_flags=()
+    if [[ "$(uname -m)" != "${_arch}" && "${_arch}" == "arm64" ]]; then
+        export CC_BUILD="/usr/bin/cc"
+        _cross_flags=(--build=x86_64-apple-darwin24.0.0 --host=aarch64-apple-darwin24.0.0)
+    fi
+
     ./configure \
+        "${_cross_flags[@]}" \
         --prefix=/opt/pacman \
         --enable-freetype-config \
         --enable-shared \

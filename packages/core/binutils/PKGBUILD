@@ -27,7 +27,13 @@ build() {
 
     # Configure with --program-prefix=g and symlinks for non-conflicting ELF/Mach-O inspection tools
     # (Never shadow Apple's Mach-O /usr/bin/ld or /usr/bin/ar or /usr/bin/strip!)
+    local _cross_flags=()
+    if [[ "$(uname -m)" != "${_arch}" && "${_arch}" == "arm64" ]]; then
+        _cross_flags=(--build=x86_64-apple-darwin24.0.0 --host=aarch64-apple-darwin24.0.0)
+    fi
+
     "$srcdir/binutils-${pkgver}/configure" \
+        "${_cross_flags[@]}" \
         --prefix=/opt/pacman \
         --program-prefix=g \
         --mandir=/opt/pacman/share/man \

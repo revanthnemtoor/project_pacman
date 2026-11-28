@@ -23,7 +23,12 @@ build() {
     export CXXFLAGS="-O2 -arch ${_arch} -isysroot ${_sdk}"
     export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
 
-    /opt/pacman/bin/python3 configure.py --bootstrap --verbose
+    if [[ "$(uname -m)" != "${_arch}" ]] && [[ -x /opt/pacman/bin/ninja ]]; then
+        /opt/pacman/bin/python3 configure.py
+        /opt/pacman/bin/ninja -j"$(sysctl -n hw.ncpu)"
+    else
+        /opt/pacman/bin/python3 configure.py --bootstrap --verbose
+    fi
 }
 
 package() {

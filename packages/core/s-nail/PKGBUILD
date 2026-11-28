@@ -19,9 +19,13 @@ build() {
     export PATH="/opt/pacman/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     export CC="/usr/bin/clang"
 
+    local _cross_opt="no"
+    [[ "$(uname -m)" != "${_arch}" ]] && _cross_opt="yes"
+
     make \
         CC="/usr/bin/clang" \
         OPT_AUTOCC=no \
+        OPT_CROSS_BUILD="${_cross_opt}" \
         OPT_USE_PKGSYS=no \
         C_INCLUDE_PATH="/opt/pacman/include" \
         LD_LIBRARY_PATH="/opt/pacman/lib" \

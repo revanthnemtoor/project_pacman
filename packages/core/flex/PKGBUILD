@@ -21,7 +21,8 @@ build() {
     export CXX="/usr/bin/clang++"
     export CPPFLAGS="-I/opt/pacman/include -isysroot ${_sdk}"
     export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk} -Wno-implicit-function-declaration -Wno-int-conversion"
-    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
+    export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -Wl,-undefined,dynamic_lookup -isysroot ${_sdk}"
+    touch src/scan.c 2>/dev/null || true
 
     ./configure \
         --prefix=/opt/pacman \

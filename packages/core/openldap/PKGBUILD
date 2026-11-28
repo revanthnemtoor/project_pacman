@@ -31,6 +31,7 @@ build() {
         --sysconfdir=/opt/pacman/etc \
         --localstatedir=/opt/pacman/var \
         --mandir=/opt/pacman/share/man \
+        --with-yielding_select=yes \
         --with-tls=openssl \
         --with-cyrus-sasl \
         --disable-slapd \
@@ -40,12 +41,24 @@ build() {
         --disable-static
 
     make depend
-    make -j"$(sysctl -n hw.ncpu)"
+    if [[ "$(uname -m)" != "${_arch}" ]]; then
+        # Pre-generate uctable.h with host compiler when cross-compiling so ./ucgendat does not execute arm64 binary
+        (
+            cd libraries/liblunicode
+            make .links
+            /usr/bin/cc -O2 -I../../include -I. -Iucdata ucdata/ucgendat.c ../../libraries/liblutil/ucstr.c -L/opt/pacman/lib -llber -o ucgendat_host 2>/dev/null || \
+            /usr/bin/cc -O2 -I../../include -I. -Iucdata ucdata/ucgendat.c -L/opt/pacman/lib -llber -o ucgendat_host
+            DYLD_LIBRARY_PATH="/opt/pacman/lib" ./ucgendat_host "$(pwd)/ucdata/UnicodeData.txt" -x "$(pwd)/ucdata/CompositionExclusions.txt"
+            cp -f uctable.h ucdata/uctable.h
+            touch ucdata/uctable.h uctable.h
+        )
+    fi
+    make -j"$(sysctl -n hw.ncpu)" SUBDIRS="include libraries clients"
 }
 
 package() {
     cd "$srcdir/openldap-${pkgver}"
-    make DESTDIR="$pkgdir" install
+    make DESTDIR="$pkgdir" SUBDIRS="include libraries clients" install
     find "$pkgdir/opt/pacman/lib" -name '*.la' -delete 2>/dev/null || true
     install -Dm644 LICENSE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
     find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do

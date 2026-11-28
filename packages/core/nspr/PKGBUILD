@@ -24,7 +24,16 @@ build() {
     export CFLAGS="-O2 -arch ${_arch} -I/opt/pacman/include -isysroot ${_sdk}"
     export LDFLAGS="-arch ${_arch} -L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -isysroot ${_sdk}"
 
+    local _cross_flags=()
+    if [[ "$(uname -m)" != "${_arch}" && "${_arch}" == "arm64" ]]; then
+        _cross_flags=(--build=x86_64-apple-darwin24.0.0 --host=aarch64-apple-darwin24.0.0 --target=aarch64-apple-darwin24.0.0)
+        export HOST_CC="/usr/bin/cc"
+        export HOST_CFLAGS="-O2"
+        export HOST_LDFLAGS=""
+    fi
+
     ./configure \
+        "${_cross_flags[@]}" \
         --prefix=/opt/pacman \
         --libdir=/opt/pacman/lib \
         --includedir=/opt/pacman/include/nspr \
@@ -32,7 +41,7 @@ build() {
         --enable-optimize \
         --disable-debug
 
-    make -j"$(sysctl -n hw.ncpu)"
+    make -j"$(sysctl -n hw.ncpu)" HOST_CC="${HOST_CC:-/usr/bin/cc}" HOST_CFLAGS="-O2"
 }
 
 package() {

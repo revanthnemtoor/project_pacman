@@ -46,6 +46,7 @@ package() {
     cd "$srcdir/openssh-${pkgver}"
     # Use install-nokeys so rootless build does not try to chown or generate host keys in live /opt/pacman
     make DESTDIR="$pkgdir" install-nokeys
+    rm -rf "$pkgdir/var"
     install -Dm644 LICENCE "$pkgdir/opt/pacman/share/licenses/$pkgname/LICENSE"
     find "$pkgdir/opt/pacman" -type f ! -type l | while IFS= read -r f; do
         if /usr/bin/file -b "$f" | grep -q "Mach-O"; then

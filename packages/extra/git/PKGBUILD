@@ -19,11 +19,16 @@ build() {
   export LDFLAGS="-L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib"
   local _jobs
   _jobs="$(sysctl -n hw.ncpu 2>/dev/null || echo 4)"
+  local _uname_m
+  _uname_m="$(uname -m)"
+  [[ "${CARCH:-}" == "darwin_arm64" ]] && _uname_m="arm64"
   cd "${srcdir}/git-${pkgver}"
   make prefix=/opt/pacman \
     CC="${CC:-/usr/bin/clang}" \
-    CFLAGS="-O2 -I/opt/pacman/include" \
-    LDFLAGS="-L/opt/pacman/lib -Wl,-rpath,/opt/pacman/lib -lintl -liconv" \
+    UNAME_M="${_uname_m}" \
+    CURL_CONFIG="${CURL_CONFIG:-/opt/pacman/bin/curl-config}" \
+    CFLAGS="-O2" \
+    LDFLAGS="-Wl,-rpath,/opt/pacman/lib -lintl -liconv" \
     CURLDIR=/opt/pacman \
     OPENSSLDIR=/opt/pacman \
     EXPATDIR=/opt/pacman \

@@ -34,9 +34,9 @@ Every package is 100% Free & Open-Source Software compiled natively to Darwin Ma
 
 | Repository | `darwin_x86_64` Built | `darwin_arm64` Built | Total Signed Archives | Scope |
 | :--- | :---: | :---: | :---: | :--- |
-| **`[core]`** | **112** | **53** | **165** | Complete POSIX/GNU userspace, `base-devel` toolchain, shells, TLS/crypto, networking, Python/Perl/Guile runtimes |
-| **`[extra]`** | **112** | **70** | **182** | Self-hosted CMake/Ninja/Meson/ccache, Neovim/Vim, modern Rust/C CLI suite, codecs/ImageMagick, Qt 6 (16 modules), KDE Frameworks 6, Gwenview |
-| **Total** | **224** | **123** | **347** | 100% open-source, PGP-signed (`CEC5B78775CA4628`), SHA-256 indexed |
+| **`[core]`** | **112** | **94** | **206** | Complete POSIX/GNU userspace, `base-devel` toolchain, shells, TLS/crypto, networking, Python/Perl/Guile runtimes |
+| **`[extra]`** | **112** | **99** | **211** | Self-hosted CMake/Ninja/Meson/ccache, Neovim/Vim, modern Rust/C CLI suite, codecs/ImageMagick, Qt 6 (16 modules), KDE Frameworks 6, Gwenview |
+| **Total** | **224** | **193** | **417** | 100% open-source, PGP-signed (`CEC5B78775CA4628`), SHA-256 indexed |
 
 ---
 
@@ -57,7 +57,7 @@ Every package is 100% Free & Open-Source Software compiled natively to Darwin Ma
 | Architecture | Platform String | macOS Target | Status |
 | :--- | :--- | :--- | :--- |
 | **Intel x86_64** | `darwin_x86_64` | macOS 12+ (64-bit Intel Macs) | **224 packages** (`112 core` + `112 extra`) |
-| **Apple Silicon** | `darwin_arm64` | macOS 12+ (M1 / M2 / M3 / M4) | **123 packages** (`53 core` + `70 extra`) |
+| **Apple Silicon** | `darwin_arm64` | macOS 15+ (M1 / M2 / M3 / M4) | **193 packages** (`94 core` + `99 extra`) |
 
 ---
 
