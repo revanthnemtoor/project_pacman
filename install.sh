@@ -169,6 +169,10 @@ fi
 
 mkdir -p \
     "$PACMAN_PREFIX/bin" \
+    "$PACMAN_PREFIX/sbin" \
+    "$PACMAN_PREFIX/include" \
+    "$PACMAN_PREFIX/lib/pkgconfig" \
+    "$PACMAN_PREFIX/share/pkgconfig" \
     "$PACMAN_PREFIX/etc/pacman.d/gnupg" \
     "$PACMAN_PREFIX/etc/pacman.d/hooks" \
     "$PACMAN_PREFIX/var/lib/pacman" \
